@@ -68,6 +68,17 @@
       return;
     }
 
+    // Auto-update admin portal whenever central database changes
+    if (db && !db._adminSubscribed && typeof db.subscribe === 'function') {
+      db._adminSubscribed = true;
+      db.subscribe(() => {
+        const hash = (typeof window !== 'undefined' && window.location.hash) || '';
+        if (hash.startsWith('#/admin')) {
+          render(containerId);
+        }
+      });
+    }
+
     if (!db.isAuthenticated()) {
       container.innerHTML = renderLoginScreen();
       attachLoginEvents();
@@ -3244,7 +3255,7 @@
               📤 Restore from JSON Backup
               <input type="file" accept=".json" onchange="SFAdmin.importDatabaseBackup(event)" style="display: none;">
             </label>
-            <button class="sf-btn-outline delete-btn" onclick="SFAdmin.resetDatabaseToFactory()">⚠️ Reset to Factory Demo Data</button>
+            <button class="sf-btn-outline delete-btn" onclick="SFAdmin.resetDatabaseToFactory()">🧹 Purge All Mock Data & Reset Clean Database</button>
           </div>
         </div>
       </div>
@@ -3295,9 +3306,12 @@
 
   function resetDatabaseToFactory() {
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
-    if (confirm('Are you sure you want to reset all data back to the master demo dataset? Custom drapes and orders will be reset.')) {
-      db.resetToDemoData();
-      alert('Database reset to master demo dataset.');
+    if (confirm('Permanently wipe all legacy cache and reset to a clean, empty production database?')) {
+      db.resetToEmptyState();
+      try {
+        localStorage.clear();
+      } catch (e) {}
+      alert('Database successfully reset to clean production state (zero mock data).');
       render();
     }
   }

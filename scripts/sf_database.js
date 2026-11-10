@@ -11,10 +11,10 @@
   }
 }(typeof self !== 'undefined' ? self : this, function () {
 
-  const STORAGE_KEY = 'sf_central_retail_db_v1';
+  const STORAGE_KEY = 'sf_central_retail_db_live_v2026';
 
-  // Master Demo Dataset (Available for explicit developer testing / seed resets)
-  const DEMO_SEED = {
+  // Production Clean Master Schema (Zero Mock / Dummy Fallback Data)
+  const CLEAN_SEED = {
     settings: {
       store_name: 'Shanmuka Fashions',
       tagline: 'Sarees & More — Elegance Woven Through Generations',
@@ -33,13 +33,13 @@
       standard_shipping_charge: 350,
       invoice_prefix: 'SF-INV-2026-',
       pos_prefix: 'POS-2026-',
-      receipt_header: 'SHANMUKA FASHIONS\nFlagship Saree Atelier, Jubilee Hills, Hyderabad\nGSTIN: 36AAECS9843K1ZN • WhatsApp: +91 95421 56929',
-      receipt_footer: 'Silk Mark Certified Pure Handloom Sarees.\nExchanges accepted within 7 days with price tag and original invoice.\nThank you for choosing Shanmuka Fashions!',
+      receipt_header: 'SHANMUKA FASHIONS\\nFlagship Saree Atelier, Jubilee Hills, Hyderabad\\nGSTIN: 36AAECS9843K1ZN • WhatsApp: +91 95421 56929',
+      receipt_footer: 'Silk Mark Certified Pure Handloom Sarees.\\nExchanges accepted within 7 days with price tag and original invoice.\\nThank you for choosing Shanmuka Fashions!',
       low_stock_threshold: 2
     },
     auth: {
       username: 'admin',
-      password_hash: 'admin123', // Demo password
+      password_hash: 'admin123',
       session_token: null,
       session_expiry: null,
       owner_name: 'Bhanu Prakash Reddy'
@@ -58,886 +58,6 @@
       phone_display: '+91 95421 56929',
       showroom_address: 'Road No. 36, Jubilee Hills, Hyderabad, Telangana 500033'
     },
-    products: [
-      {
-        id: 1,
-        sku: 'SF-KNC-001',
-        barcode: 'SF26010001',
-        name: 'Royal Kanchipuram Pure Silk Saree',
-        category: 'Kanchipuram',
-        collection: 'Heirloom Temple Collection',
-        fabric: 'Pure Silk',
-        color: 'Burgundy & Antique Gold',
-        material: 'Pure Mulberry Silk (Silk Mark Certified)',
-        weave: 'Traditional Korvai Handloom',
-        pattern: 'Temple Border with Mayil & Floral Jaal',
-        occasion: 'Bridal & Wedding',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Unstitched Pure Silk)',
-        purchase_cost: 3800,
-        price: 6499,
-        old: 7999,
-        stock_qty: 8,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Bestseller',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/kanchipuram-loom.jpg',
-        images: ['assets/kanchipuram-loom.jpg'],
-        video: '',
-        rating: 4.9,
-        reviewsCount: 38,
-        desc: 'An exquisite handloom Kanchipuram pure silk saree in royal burgundy adorned with heavy gold zari temple borders and an opulent brocade pallu. Ideal for weddings and sacred festivities.'
-      },
-      {
-        id: 2,
-        sku: 'SF-BNR-002',
-        barcode: 'SF26020002',
-        name: 'Banarasi Heritage Meenakari Weave',
-        category: 'Banarasi',
-        collection: 'Royal Kadwa Edit',
-        fabric: 'Katan Silk',
-        color: 'Deep Plum & Zari',
-        material: '100% Katan Silk with Fine Resham',
-        weave: 'Traditional Banarasi Kadwa Handloom',
-        pattern: 'Intricate Meenakari Floral Jaal',
-        occasion: 'Bridal & Wedding',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Katan Silk Matching)',
-        purchase_cost: 4900,
-        price: 8499,
-        old: 10499,
-        stock_qty: 5,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Bestseller',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/golden-silk-saree-clean.jpg',
-        images: ['assets/golden-silk-saree-clean.jpg'],
-        video: '',
-        rating: 4.8,
-        reviewsCount: 29,
-        desc: 'Handcrafted in Varanasi by 4th-generation master weavers. Featuring authentic Kadwa bootis woven with pure gold zari and fine multi-colored silk threads.'
-      },
-      {
-        id: 3,
-        sku: 'SF-ORG-003',
-        barcode: 'SF26030003',
-        name: 'Floral Organza Tissue Saree',
-        category: 'Organza',
-        collection: 'Celebration Pastels',
-        fabric: 'Organza',
-        color: 'Champagne Gold',
-        material: 'Fine Sheer Silk Organza with Tissue Sheen',
-        weave: 'Powerloom Hand-Finished Drape',
-        pattern: 'Hand-Painted Botanical Florals with Cutwork Zari',
-        occasion: 'Party Wear',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Raw Silk Contrast Blouse)',
-        purchase_cost: 2400,
-        price: 4299,
-        old: 5499,
-        stock_qty: 6,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'New Arrival',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/raw-silk-yarns.jpg',
-        images: ['assets/raw-silk-yarns.jpg'],
-        video: '',
-        rating: 4.7,
-        reviewsCount: 16,
-        desc: 'Lightweight, translucent organza silk saree drenched in champagne brilliance. Scalloped hand-embroidered cutwork border suited for evening receptions and sangeet.'
-      },
-      {
-        id: 4,
-        sku: 'SF-SLK-004',
-        barcode: 'SF26040004',
-        name: 'Festive Peacock Zari Silk Saree',
-        category: 'Silk',
-        collection: 'Temple Heritage',
-        fabric: 'Pure Silk',
-        color: 'Emerald & Gold',
-        material: 'Pure Mulberry Silk',
-        weave: 'Dharmavaram Traditional Handloom',
-        pattern: 'Peacock & Paisley Motifs',
-        occasion: 'Festive Celebration',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Brocade Blouse)',
-        purchase_cost: 3200,
-        price: 5499,
-        old: 6799,
-        stock_qty: 4,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Trending',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/handloom-weaving.jpg',
-        images: ['assets/handloom-weaving.jpg'],
-        video: '',
-        rating: 4.9,
-        reviewsCount: 22,
-        desc: 'Rich emerald green pure silk saree embellished with auspicious Mayil (peacock) bootas and contrasting gold zari border woven in Dharmavaram.'
-      },
-      {
-        id: 5,
-        sku: 'SF-COT-005',
-        barcode: 'SF26050005',
-        name: 'Everyday Handloom Cotton Grace',
-        category: 'Cotton',
-        collection: 'Summer Looms',
-        fabric: 'Handloom Cotton',
-        color: 'Natural Sand & Maroon',
-        material: '100% Combed Organic Cotton',
-        weave: 'Mangalagiri Pit Loom Weave',
-        pattern: 'Nizam Zari Border',
-        occasion: 'Everyday Grace',
-        saree_length: '6.2 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Striped Cotton)',
-        purchase_cost: 1100,
-        price: 2199,
-        old: 2799,
-        stock_qty: 12,
-        low_stock_threshold: 3,
-        stock: 'In Stock',
-        badge: 'Essential',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/handloom-weaving.jpg',
-        images: ['assets/handloom-weaving.jpg'],
-        video: '',
-        rating: 4.6,
-        reviewsCount: 14,
-        desc: 'Breathable, feather-soft Mangalagiri handloom cotton with signature Nizam golden temple border. Comfortable all-day elegance for boutique and office wear.'
-      },
-      {
-        id: 6,
-        sku: 'SF-KNC-006',
-        barcode: 'SF26060006',
-        name: 'Bridal Kanchipuram Gold Brocade',
-        category: 'Kanchipuram',
-        collection: 'Royal Muhurtham',
-        fabric: 'Pure Silk',
-        color: 'Crimson Red & Tested Zari',
-        material: 'Pure Mulberry Silk with Tested Zari',
-        weave: 'Heavy 3-Ply Interlocking Korvai',
-        pattern: 'Annapakshi & Floral Jaal Brocade',
-        occasion: 'Bridal & Wedding',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Heavy Gold Brocade)',
-        purchase_cost: 7200,
-        price: 11999,
-        old: 14999,
-        stock_qty: 3,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Heirloom',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/kanchipuram-loom.jpg',
-        images: ['assets/kanchipuram-loom.jpg'],
-        video: '',
-        rating: 5.0,
-        reviewsCount: 45,
-        desc: 'The pinnacle of South Indian bridal heritage. 3-ply pure silk handwoven with authentic gold zari depicting mythological Annapakshi motifs for sacred wedding rituals.'
-      },
-      {
-        id: 7,
-        sku: 'SF-BNR-007',
-        barcode: 'SF26010007',
-        name: 'Banarasi Celebration Silk Saree',
-        category: 'Banarasi',
-        collection: 'Royal Kadwa Edit',
-        fabric: 'Katan Silk',
-        color: 'Rani Pink & Gold',
-        material: 'Katan Silk with Pure Silver & Gold Dipped Zari',
-        weave: 'Banarasi Jangla Weave',
-        pattern: 'All-Over Jangla Floral Scroll',
-        occasion: 'Bridal & Wedding',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Plain Silk with Zari Border)',
-        purchase_cost: 4400,
-        price: 7799,
-        old: 9499,
-        stock_qty: 4,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'New Arrival',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/golden-silk-saree-clean.jpg',
-        images: ['assets/golden-silk-saree-clean.jpg'],
-        video: '',
-        rating: 4.8,
-        reviewsCount: 19,
-        desc: 'Vibrant Rani pink Katan silk saree woven in the historic Jangla technique, producing a lush tapestry of gold floral creepers across the entire body.'
-      },
-      {
-        id: 8,
-        sku: 'SF-COT-008',
-        barcode: 'SF26020008',
-        name: 'Soft Indigo Handloom Cotton',
-        category: 'Cotton',
-        collection: 'Summer Looms',
-        fabric: 'Handloom Cotton',
-        color: 'Indigo Blue',
-        material: '100% Natural Dye Handloom Cotton',
-        weave: 'Bengal Jamdani Handloom',
-        pattern: 'Geometric Jamdani Booti',
-        occasion: 'Everyday Grace',
-        saree_length: '6.2 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Indigo Solid)',
-        purchase_cost: 950,
-        price: 1899,
-        old: 2399,
-        stock_qty: 7,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Handcrafted',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/handloom-weaving.jpg',
-        images: ['assets/handloom-weaving.jpg'],
-        video: '',
-        rating: 4.7,
-        reviewsCount: 11,
-        desc: 'Natural indigo dyed handloom cotton with traditional Jamdani motifs hand-inserted on the pit loom. Lightweight and airy for year-round warmth.'
-      },
-      {
-        id: 9,
-        sku: 'SF-ORG-009',
-        barcode: 'SF26030009',
-        name: 'Shimmer Champagne Organza Tissue',
-        category: 'Organza',
-        collection: 'Celebration Pastels',
-        fabric: 'Organza',
-        color: 'Muted Gold & Rose',
-        material: 'Silk Tissue Organza',
-        weave: 'Tissue Metallic Weave',
-        pattern: 'Subtle Metallic Sheen with Pearl Border',
-        occasion: 'Party Wear',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Silk Tissue)',
-        purchase_cost: 2900,
-        price: 4999,
-        old: 6299,
-        stock_qty: 3,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Trending',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/raw-silk-yarns.jpg',
-        images: ['assets/raw-silk-yarns.jpg'],
-        video: '',
-        rating: 4.8,
-        reviewsCount: 15,
-        desc: 'Subtle liquid gold metallic finish woven directly into silk organza yarns. Features a scalloped pearl and sequin embroidered border.'
-      },
-      {
-        id: 10,
-        sku: 'SF-SLK-010',
-        barcode: 'SF26040010',
-        name: 'Traditional Royal Temple Silk',
-        category: 'Silk',
-        collection: 'Temple Heritage',
-        fabric: 'Pure Silk',
-        color: 'Mustard Gold & Maroon',
-        material: 'Pure Mulberry Silk',
-        weave: 'Dharmavaram Heavy Handloom',
-        pattern: 'Rudraksha & Temple Spire Borders',
-        occasion: 'Festive Celebration',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Contrasting Maroon)',
-        purchase_cost: 3600,
-        price: 5999,
-        old: 7499,
-        stock_qty: 2,
-        low_stock_threshold: 2,
-        stock: 'Low Stock',
-        badge: 'Limited',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/kanchipuram-loom.jpg',
-        images: ['assets/kanchipuram-loom.jpg'],
-        video: '',
-        rating: 4.9,
-        reviewsCount: 27,
-        desc: 'Sacred mustard yellow body with auspicious rudraksha motifs paired with a contrast maroon pallu packed with antique gold zari brocade.'
-      },
-      {
-        id: 11,
-        sku: 'SF-BNR-011',
-        barcode: 'SF26050011',
-        name: 'Regal Banarasi Brocade Bridal Edit',
-        category: 'Banarasi',
-        collection: 'Royal Kadwa Edit',
-        fabric: 'Katan Silk',
-        color: 'Vermilion & Antique Zari',
-        material: 'Pure Katan Silk with Real Zari Polish',
-        weave: 'Kadwa Brocade Handloom',
-        pattern: 'Shikargah Wildlife & Royal Court Motifs',
-        occasion: 'Bridal & Wedding',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Heavy Brocade)',
-        purchase_cost: 5800,
-        price: 9999,
-        old: 12499,
-        stock_qty: 1,
-        low_stock_threshold: 2,
-        stock: 'Low Stock',
-        badge: 'Masterpiece',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/golden-silk-saree-clean.jpg',
-        images: ['assets/golden-silk-saree-clean.jpg'],
-        video: '',
-        rating: 5.0,
-        reviewsCount: 31,
-        desc: 'Exquisite Banarasi Shikargah masterpiece depicting royal hunting motifs and flora handwoven with antique-finished gold zari.'
-      },
-      {
-        id: 12,
-        sku: 'SF-COT-012',
-        barcode: 'SF26060012',
-        name: 'Pure Chanderi Cotton Silk Drape',
-        category: 'Cotton',
-        collection: 'Summer Looms',
-        fabric: 'Handloom Cotton',
-        color: 'Pistachio Green & Gold',
-        material: 'Chanderi Silk Cotton Blend',
-        weave: 'Authentic Chanderi Pit Loom',
-        pattern: 'Ashrafi (Coin) Booti & Zari Border',
-        occasion: 'Festive Celebration',
-        saree_length: '6.2 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Chanderi Plain)',
-        purchase_cost: 1600,
-        price: 2899,
-        old: 3599,
-        stock_qty: 6,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Handcrafted',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/handloom-weaving.jpg',
-        images: ['assets/handloom-weaving.jpg'],
-        video: '',
-        rating: 4.7,
-        reviewsCount: 18,
-        desc: 'Lightweight gossamer Chanderi weave blending fine silk and cotton threads. Accented with traditional gold Ashrafi coin motifs.'
-      },
-      {
-        id: 13,
-        sku: 'SF-DSG-013',
-        barcode: 'SF26010013',
-        name: 'Royal Atelier Cutwork Designer Saree',
-        category: 'Designer',
-        collection: 'Couture Drape',
-        fabric: 'Pure Silk',
-        color: 'Midnight Wine & Champagne Gold',
-        material: 'Tussar Georgette Silk',
-        weave: 'Artisan Zardozi Hand Embroidery',
-        pattern: 'Intricate Floral Cutwork with Pearl Beading',
-        occasion: 'Party Wear',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Designer Embroidered Blouse)',
-        purchase_cost: 6500,
-        price: 12499,
-        old: 15999,
-        stock_qty: 2,
-        low_stock_threshold: 2,
-        stock: 'Low Stock',
-        badge: 'Couture',
-        status: 'Published',
-        is_featured: true,
-        img: 'assets/hero-model.jpg',
-        images: ['assets/hero-model.jpg'],
-        video: '',
-        rating: 4.9,
-        reviewsCount: 14,
-        desc: 'Contemporary bridal reception glamour. Rich midnight wine pure silk with hand-cut scalloped borders embellished with micro-pearls and zardozi.'
-      },
-      {
-        id: 14,
-        sku: 'SF-DSG-014',
-        barcode: 'SF26020014',
-        name: 'Sapphire Tapestry Designer Saree',
-        category: 'Designer',
-        collection: 'Couture Drape',
-        fabric: 'Pure Silk',
-        color: 'Sapphire & Silver Zari',
-        material: 'Crepe Silk Handloom',
-        weave: 'Contemporary Jacquard Tapestry',
-        pattern: 'Geometric Chevron & Lotus Borders',
-        occasion: 'Party Wear',
-        saree_length: '6.3 Metres (incl. 0.8m Blouse)',
-        blouse_piece: 'Included (Silver Zari Brocade)',
-        purchase_cost: 5200,
-        price: 8999,
-        old: 11299,
-        stock_qty: 4,
-        low_stock_threshold: 2,
-        stock: 'In Stock',
-        badge: 'Trending',
-        status: 'Published',
-        is_featured: false,
-        img: 'assets/raw-silk-yarns.jpg',
-        images: ['assets/raw-silk-yarns.jpg'],
-        video: '',
-        rating: 4.8,
-        reviewsCount: 10,
-        desc: 'Modern drape designed for sophisticated evening celebrations. Fluid silk crepe fabric with architectural silver brocade border.'
-      }
-    ],
-    inventory_ledger: [
-      {
-        id: 'LEDG-001',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        product_name: 'Royal Kanchipuram Pure Silk Saree',
-        type: 'STOCK_IN',
-        prev_qty: 0,
-        change_qty: 10,
-        new_qty: 10,
-        reason: 'Opening Master Inventory Received from Kanchipuram Weavers Guild',
-        reference_id: 'PO-2026-001',
-        channel: 'ADMIN',
-        admin_user: 'Bhanu (Owner)',
-        timestamp: '2026-11-01T10:00:00Z'
-      },
-      {
-        id: 'LEDG-002',
-        product_id: 2,
-        sku: 'SF-BNR-002',
-        product_name: 'Banarasi Heritage Meenakari Weave',
-        type: 'STOCK_IN',
-        prev_qty: 0,
-        change_qty: 6,
-        new_qty: 6,
-        reason: 'Opening Master Inventory from Varanasi Kadwa Looms',
-        reference_id: 'PO-2026-002',
-        channel: 'ADMIN',
-        admin_user: 'Bhanu (Owner)',
-        timestamp: '2026-11-01T10:30:00Z'
-      },
-      {
-        id: 'LEDG-003',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        product_name: 'Royal Kanchipuram Pure Silk Saree',
-        type: 'ONLINE_SALE',
-        prev_qty: 10,
-        change_qty: -1,
-        new_qty: 9,
-        reason: 'Online Store Checkout #SF-ORD-1001',
-        reference_id: 'SF-ORD-1001',
-        channel: 'ONLINE',
-        admin_user: 'Storefront Customer',
-        timestamp: '2026-11-06T14:22:00Z'
-      },
-      {
-        id: 'LEDG-004',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        product_name: 'Royal Kanchipuram Pure Silk Saree',
-        type: 'POS_SALE',
-        prev_qty: 9,
-        change_qty: -1,
-        new_qty: 8,
-        reason: 'Showroom Walk-in Sale #POS-2026-101 (Mrs. Lakshmi Rao)',
-        reference_id: 'POS-2026-101',
-        channel: 'POS',
-        admin_user: 'Bhanu (Owner)',
-        timestamp: '2026-11-08T16:45:00Z'
-      },
-      {
-        id: 'LEDG-005',
-        product_id: 2,
-        sku: 'SF-BNR-002',
-        product_name: 'Banarasi Heritage Meenakari Weave',
-        type: 'POS_SALE',
-        prev_qty: 6,
-        change_qty: -1,
-        new_qty: 5,
-        reason: 'Showroom Walk-in Sale #POS-2026-102 (Dr. Radhika Varma)',
-        reference_id: 'POS-2026-102',
-        channel: 'POS',
-        admin_user: 'Bhanu (Owner)',
-        timestamp: '2026-11-09T11:15:00Z'
-      }
-    ],
-    orders: [
-      {
-        id: 'SF-ORD-1001',
-        order_number: 'SF-ORD-1001',
-        channel: 'ONLINE',
-        customer_id: 'CUST-101',
-        customer_name: 'Ananya Ramaswamy',
-        customer_phone: '+91 98401 23456',
-        customer_email: 'ananya.ramaswamy@gmail.com',
-        items: [
-          {
-            product_id: 1,
-            sku: 'SF-KNC-001',
-            name: 'Royal Kanchipuram Pure Silk Saree',
-            price: 6499,
-            purchase_cost: 3800,
-            qty: 1,
-            total: 6499
-          }
-        ],
-        subtotal: 6499,
-        discount: 0,
-        coupon_code: '',
-        tax_rate: 5,
-        tax_amount: 325,
-        shipping_charges: 0,
-        total: 6824,
-        payment_method: 'UPI',
-        payment_status: 'PAID',
-        payment_reference: 'UPI/261106142211/HDFC',
-        order_status: 'DELIVERED',
-        delivery_address: {
-          street: 'Plot 42, Poes Garden',
-          city: 'Chennai',
-          state: 'Tamil Nadu',
-          pincode: '600086'
-        },
-        courier: 'Blue Dart Express',
-        tracking_number: 'BD-84729104',
-        order_notes: 'Bridal trousseau express delivery requested.',
-        created_at: '2026-11-06T14:22:00Z',
-        updated_at: '2026-11-09T18:00:00Z'
-      },
-      {
-        id: 'POS-2026-101',
-        order_number: 'POS-2026-101',
-        channel: 'POS',
-        customer_id: 'CUST-102',
-        customer_name: 'Lakshmi Rao',
-        customer_phone: '+91 94401 98765',
-        customer_email: 'lakshmi.rao@yahoo.com',
-        items: [
-          {
-            product_id: 1,
-            sku: 'SF-KNC-001',
-            name: 'Royal Kanchipuram Pure Silk Saree',
-            price: 6499,
-            purchase_cost: 3800,
-            qty: 1,
-            total: 6499
-          }
-        ],
-        subtotal: 6499,
-        discount: 499, // In-store festive discount
-        coupon_code: 'STORE-SPECIAL',
-        tax_rate: 5,
-        tax_amount: 300,
-        shipping_charges: 0,
-        total: 6300,
-        payment_method: 'CASH',
-        payment_status: 'PAID',
-        payment_reference: 'CASH-REC-101',
-        order_status: 'DELIVERED',
-        delivery_address: {
-          street: 'In-Store Handover',
-          city: 'Hyderabad',
-          state: 'Telangana',
-          pincode: '500033'
-        },
-        courier: 'Direct Handover',
-        tracking_number: 'POS-HANDOVER-101',
-        order_notes: 'Purchased at Jubilee Hills boutique with gift box.',
-        created_at: '2026-11-08T16:45:00Z',
-        updated_at: '2026-11-08T16:45:00Z'
-      },
-      {
-        id: 'POS-2026-102',
-        order_number: 'POS-2026-102',
-        channel: 'POS',
-        customer_id: 'CUST-103',
-        customer_name: 'Dr. Radhika Varma',
-        customer_phone: '+91 97011 44556',
-        customer_email: 'radhika.varma@apollo.org',
-        items: [
-          {
-            product_id: 2,
-            sku: 'SF-BNR-002',
-            name: 'Banarasi Heritage Meenakari Weave',
-            price: 8499,
-            purchase_cost: 4900,
-            qty: 1,
-            total: 8499
-          }
-        ],
-        subtotal: 8499,
-        discount: 0,
-        coupon_code: '',
-        tax_rate: 5,
-        tax_amount: 425,
-        shipping_charges: 0,
-        total: 8924,
-        payment_method: 'CARD',
-        payment_status: 'PAID',
-        payment_reference: 'POS-HDFC-AUTH-89312',
-        order_status: 'DELIVERED',
-        delivery_address: {
-          street: 'In-Store Handover',
-          city: 'Hyderabad',
-          state: 'Telangana',
-          pincode: '500033'
-        },
-        courier: 'Direct Handover',
-        tracking_number: 'POS-HANDOVER-102',
-        order_notes: 'Card payment swipe approved.',
-        created_at: '2026-11-09T11:15:00Z',
-        updated_at: '2026-11-09T11:15:00Z'
-      },
-      {
-        id: 'SF-ORD-1002',
-        order_number: 'SF-ORD-1002',
-        channel: 'ONLINE',
-        customer_id: 'CUST-104',
-        customer_name: 'Kavitha Sundaram',
-        customer_phone: '+91 98840 55667',
-        customer_email: 'kavitha.s@outlook.com',
-        items: [
-          {
-            product_id: 6,
-            sku: 'SF-KNC-006',
-            name: 'Bridal Kanchipuram Gold Brocade',
-            price: 11999,
-            purchase_cost: 7200,
-            qty: 1,
-            total: 11999
-          }
-        ],
-        subtotal: 11999,
-        discount: 1000,
-        coupon_code: 'FESTIVE10',
-        tax_rate: 5,
-        tax_amount: 550,
-        shipping_charges: 0,
-        total: 11549,
-        payment_method: 'UPI',
-        payment_status: 'PAID',
-        payment_reference: 'UPI/261109153012/ICICI',
-        order_status: 'CONFIRMED',
-        delivery_address: {
-          street: '14, 5th Main, Indiranagar',
-          city: 'Bangalore',
-          state: 'Karnataka',
-          pincode: '560038'
-        },
-        courier: 'DTDC Luxury Cargo',
-        tracking_number: 'DTDC-992145',
-        order_notes: 'Packed in bridal heirloom trunk.',
-        created_at: '2026-11-09T15:30:00Z',
-        updated_at: '2026-11-09T16:00:00Z'
-      }
-    ],
-    customers: [
-      {
-        id: 'CUST-101',
-        name: 'Ananya Ramaswamy',
-        phone: '+91 98401 23456',
-        email: 'ananya.ramaswamy@gmail.com',
-        street: 'Plot 42, Poes Garden',
-        city: 'Chennai',
-        state: 'Tamil Nadu',
-        pincode: '600086',
-        total_orders: 1,
-        total_spent: 6824,
-        notes: 'VIP Bridal patron. Loves traditional korvai temple borders.',
-        created_at: '2026-11-06T14:20:00Z'
-      },
-      {
-        id: 'CUST-102',
-        name: 'Lakshmi Rao',
-        phone: '+91 94401 98765',
-        email: 'lakshmi.rao@yahoo.com',
-        street: 'Banjara Hills, Road 12',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        pincode: '500034',
-        total_orders: 1,
-        total_spent: 6300,
-        notes: 'Frequent boutique walk-in visitor.',
-        created_at: '2026-11-08T16:40:00Z'
-      },
-      {
-        id: 'CUST-103',
-        name: 'Dr. Radhika Varma',
-        phone: '+91 97011 44556',
-        email: 'radhika.varma@apollo.org',
-        street: 'Hitec City, Phase 2',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        pincode: '500081',
-        total_orders: 1,
-        total_spent: 8924,
-        notes: 'Senior consultant. Prefers subtle Kadwa Banarasi silks.',
-        created_at: '2026-11-09T11:10:00Z'
-      },
-      {
-        id: 'CUST-104',
-        name: 'Kavitha Sundaram',
-        phone: '+91 98840 55667',
-        email: 'kavitha.s@outlook.com',
-        street: '14, 5th Main, Indiranagar',
-        city: 'Bangalore',
-        state: 'Karnataka',
-        pincode: '560038',
-        total_orders: 1,
-        total_spent: 11549,
-        notes: 'Collector of heirloom silks. Video consultation patron.',
-        created_at: '2026-11-09T15:25:00Z'
-      }
-    ],
-    suppliers: [
-      {
-        id: 'SUPP-101',
-        name: 'Kanchipuram Silk Weavers Co-operative Society',
-        contact_person: 'Shri K. Sundaram (Master Weaver)',
-        phone: '+91 94432 11223',
-        email: 'kanchi.weavers.guild@gmail.com',
-        city: 'Kanchipuram, Tamil Nadu',
-        gstin: '33AAACK4421M1Z5',
-        materials_supplied: 'Pure Mulberry Silk, Tested Zari Temple Sarees',
-        total_purchased: 76000,
-        balance_due: 0,
-        created_at: '2026-10-15T10:00:00Z'
-      },
-      {
-        id: 'SUPP-102',
-        name: 'Varanasi Kadwa Silk Heritage Looms',
-        contact_person: 'Mohd. Tariq Ansari',
-        phone: '+91 98390 44556',
-        email: 'tariq.kadwa.banaras@gmail.com',
-        city: 'Varanasi, Uttar Pradesh',
-        gstin: '09AABPA7788L1Z9',
-        materials_supplied: 'Pure Katan Silk, Jangla & Meenakari Sarees',
-        total_purchased: 49000,
-        balance_due: 5000,
-        created_at: '2026-10-18T10:00:00Z'
-      },
-      {
-        id: 'SUPP-103',
-        name: 'Dharmavaram Traditional Silk Cluster',
-        contact_person: 'V. Ramachandran',
-        phone: '+91 98480 33221',
-        email: 'dharmavaram.silks.vr@gmail.com',
-        city: 'Dharmavaram, Andhra Pradesh',
-        gstin: '37AAACD9911N1Z2',
-        materials_supplied: 'Peacock & Temple Border Festive Silks',
-        total_purchased: 35000,
-        balance_due: 0,
-        created_at: '2026-10-20T10:00:00Z'
-      },
-      {
-        id: 'SUPP-104',
-        name: 'Chanderi Artisan Handlooms',
-        contact_person: 'Smt. Kamla Bai',
-        phone: '+91 94250 88990',
-        email: 'chanderi.handlooms.kb@gmail.com',
-        city: 'Chanderi, Madhya Pradesh',
-        gstin: '23AAACC3344P1Z3',
-        materials_supplied: 'Silk Cotton & Tissue Drapes',
-        total_purchased: 18000,
-        balance_due: 0,
-        created_at: '2026-10-25T10:00:00Z'
-      }
-    ],
-    purchases: [
-      {
-        id: 'PO-2026-001',
-        po_number: 'PO-2026-001',
-        supplier_id: 'SUPP-101',
-        supplier_name: 'Kanchipuram Silk Weavers Co-operative Society',
-        date: '2026-11-01T10:00:00Z',
-        items: [
-          { product_id: 1, sku: 'SF-KNC-001', name: 'Royal Kanchipuram Pure Silk Saree', unit_cost: 3800, qty: 10, total: 38000 },
-          { product_id: 6, sku: 'SF-KNC-006', name: 'Bridal Kanchipuram Gold Brocade', unit_cost: 7200, qty: 5, total: 36000 }
-        ],
-        total_amount: 74000,
-        amount_paid: 74000,
-        balance: 0,
-        status: 'RECEIVED',
-        payment_status: 'PAID',
-        invoice_ref: 'KNC/INV/26/108',
-        notes: 'Certified Silk Mark lot received in pristine condition.'
-      },
-      {
-        id: 'PO-2026-002',
-        po_number: 'PO-2026-002',
-        supplier_id: 'SUPP-102',
-        supplier_name: 'Varanasi Kadwa Silk Heritage Looms',
-        date: '2026-11-01T10:30:00Z',
-        items: [
-          { product_id: 2, sku: 'SF-BNR-002', name: 'Banarasi Heritage Meenakari Weave', unit_cost: 4900, qty: 6, total: 29400 },
-          { product_id: 7, sku: 'SF-BNR-007', name: 'Banarasi Celebration Silk Saree', unit_cost: 4400, qty: 5, total: 22000 }
-        ],
-        total_amount: 51400,
-        amount_paid: 46400,
-        balance: 5000,
-        status: 'RECEIVED',
-        payment_status: 'PARTIAL',
-        invoice_ref: 'VNS/OCT/452',
-        notes: 'Balance ₹5,000 to be settled on next delivery cycle.'
-      }
-    ],
-    expenses: [
-      {
-        id: 'EXP-2026-001',
-        category: 'Rent',
-        amount: 45000,
-        payment_method: 'BANK_TRANSFER',
-        date: '2026-11-01T09:00:00Z',
-        description: 'Jubilee Hills Boutique Showroom Rent (November 2026)',
-        receipt_ref: 'NEFT-RENT-NOV26'
-      },
-      {
-        id: 'EXP-2026-002',
-        category: 'Packaging',
-        amount: 8500,
-        payment_method: 'UPI',
-        date: '2026-11-03T11:30:00Z',
-        description: 'Luxury embossed rigid saree gift boxes & breathable cotton sleeves (100 units)',
-        receipt_ref: 'UPI-PKG-4421'
-      },
-      {
-        id: 'EXP-2026-003',
-        category: 'Utilities',
-        amount: 6200,
-        payment_method: 'UPI',
-        date: '2026-11-04T15:00:00Z',
-        description: 'TSSPDCL Commercial Showroom Electricity Bill',
-        receipt_ref: 'UPI-ELEC-9932'
-      },
-      {
-        id: 'EXP-2026-004',
-        category: 'Marketing',
-        amount: 12000,
-        payment_method: 'CARD',
-        date: '2026-11-05T12:00:00Z',
-        description: 'Heritage Wedding Campaign Instagram & Google Luxury Reach',
-        receipt_ref: 'CARD-FB-8812'
-      },
-      {
-        id: 'EXP-2026-005',
-        category: 'Shipping',
-        amount: 3400,
-        payment_method: 'UPI',
-        date: '2026-11-07T17:00:00Z',
-        description: 'Blue Dart & DTDC express dispatch logistics account recharge',
-        receipt_ref: 'UPI-COURIER-2104'
-      }
-    ],
     coupons: [
       {
         id: 'COUP-01',
@@ -946,7 +66,7 @@
         value: 10,
         min_order: 5000,
         usage_limit: 100,
-        usage_count: 8,
+        usage_count: 0,
         valid_from: '2026-10-01',
         valid_to: '2026-12-31',
         is_active: true
@@ -958,7 +78,7 @@
         value: 2000,
         min_order: 15000,
         usage_limit: 50,
-        usage_count: 4,
+        usage_count: 0,
         valid_from: '2026-10-01',
         valid_to: '2026-12-31',
         is_active: true
@@ -970,115 +90,10 @@
         value: 5,
         min_order: 3000,
         usage_limit: 500,
-        usage_count: 14,
+        usage_count: 0,
         valid_from: '2026-01-01',
         valid_to: '2026-12-31',
         is_active: true
-      }
-    ],
-    enquiries: [
-      {
-        id: 'ENQ-101',
-        name: 'Meenakshi Iyer',
-        phone: '+91 98410 77889',
-        email: 'meenakshi.iyer@gmail.com',
-        saree_id: 1,
-        message: 'Looking for 3 matching pure silk Kanchipuram sarees for daughters wedding muhurtham. Do you have ready pieces?',
-        source: 'WHATSAPP',
-        status: 'NEW',
-        date: '2026-11-09T18:30:00Z'
-      },
-      {
-        id: 'ENQ-102',
-        name: 'Sunita Reddy',
-        phone: '+91 94401 22334',
-        email: 'sunita.reddy@gmail.com',
-        saree_id: 13,
-        message: 'Can I book a live video call to view the drape and zari work of the Royal Atelier Cutwork saree?',
-        source: 'WEBSITE',
-        status: 'IN_PROGRESS',
-        date: '2026-11-10T09:15:00Z'
-      }
-    ],
-    reviews: [
-      {
-        id: 'REV-101',
-        product_id: 1,
-        customer_name: 'Ananya Ramaswamy',
-        rating: 5,
-        review: 'The Kanchipuram bridal saree I received was breathtaking. Pure mulberry silk and the subtle brilliance of the tested zari exceeded every expectation.',
-        status: 'Approved',
-        date: '2026-11-09'
-      },
-      {
-        id: 'REV-102',
-        product_id: 2,
-        customer_name: 'Dr. Radhika Varma',
-        rating: 5,
-        review: 'Their video concierge helped me examine the exact pallu weave before purchasing. Highly recommended authentic boutique.',
-        status: 'Approved',
-        date: '2026-11-09'
-      }
-    ],
-    audit_logs: [
-      {
-        id: 'AUDIT-001',
-        timestamp: '2026-11-01T10:00:00Z',
-        action: 'SYSTEM_INIT',
-        entity: 'DATABASE',
-        entity_id: 'ALL',
-        details: 'Initial central retail database created with verified stock and suppliers.',
-        user: 'System'
-      }
-    ],
-    barcode_print_history: [
-      {
-        id: 'PRT-2026-001',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        barcode: 'SF26010001',
-        product_name: 'Royal Kanchipuram Pure Silk Saree',
-        price: 6499,
-        quantity: 8,
-        sticker_dimensions: '50x30mm',
-        is_reprint: false,
-        reason: 'Initial Catalogue Intake',
-        admin_user: 'Bhanu (Owner)',
-        created_at: '2026-11-08T11:00:00Z'
-      },
-      {
-        id: 'PRT-2026-002',
-        product_id: 2,
-        sku: 'SF-BNR-002',
-        barcode: 'SF26020002',
-        product_name: 'Banarasi Heritage Meenakari Weave',
-        price: 8499,
-        quantity: 5,
-        sticker_dimensions: '50x30mm',
-        is_reprint: false,
-        reason: 'Initial Catalogue Intake',
-        admin_user: 'Bhanu (Owner)',
-        created_at: '2026-11-08T11:30:00Z'
-      }
-    ],
-    inventory_units: [
-      {
-        id: 'UNIT-SF26010001-01',
-        unit_barcode: 'SF26010001-01',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        serial_number: 1,
-        status: 'AVAILABLE',
-        received_at: '2026-11-08T11:00:00Z'
-      },
-      {
-        id: 'UNIT-SF26010001-02',
-        unit_barcode: 'SF26010001-02',
-        product_id: 1,
-        sku: 'SF-KNC-001',
-        serial_number: 2,
-        status: 'AVAILABLE',
-        received_at: '2026-11-08T11:00:00Z'
       }
     ],
     printer_configuration: {
@@ -1096,14 +111,7 @@
       include_category: true,
       font_size: 'normal',
       barcode_height: 28
-    }
-  };
-
-  // Production Clean Empty Schema (No mock / dummy fallback data)
-  const EMPTY_SEED = {
-    settings: JSON.parse(JSON.stringify(DEMO_SEED.settings)),
-    auth: JSON.parse(JSON.stringify(DEMO_SEED.auth)),
-    cms: JSON.parse(JSON.stringify(DEMO_SEED.cms)),
+    },
     products: [],
     inventory_ledger: [],
     orders: [],
@@ -1111,16 +119,16 @@
     suppliers: [],
     purchases: [],
     expenses: [],
-    coupons: JSON.parse(JSON.stringify(DEMO_SEED.coupons || [])),
     enquiries: [],
     reviews: [],
     audit_logs: [],
     barcode_print_history: [],
-    inventory_units: [],
-    barcode_printer_config: JSON.parse(JSON.stringify(DEMO_SEED.barcode_printer_config || {}))
+    inventory_units: []
   };
 
-  const INITIAL_SEED = EMPTY_SEED;
+  const DEMO_SEED = CLEAN_SEED;
+  const EMPTY_SEED = CLEAN_SEED;
+  const INITIAL_SEED = CLEAN_SEED;
 
   class DatabaseEngine {
     constructor() {
@@ -1129,13 +137,98 @@
       this.init();
     }
 
+    _sanitize(state) {
+      if (!state) return;
+      const mockNames = [
+        'Royal Kanchipuram Pure Silk Saree',
+        'Banarasi Heritage Meenakari Weave',
+        'Floral Organza Tissue Saree',
+        'Festive Peacock Zari Silk Saree',
+        'Everyday Handloom Cotton Grace',
+        'Bridal Kanchipuram Gold Brocade',
+        'Banarasi Celebration Silk Saree',
+        'Tissue Kanchipuram Regal Gold',
+        'Heritage Patola Silk Saree',
+        'Chanderi Zari Floral Saree',
+        'Vintage Temple Border Silk',
+        'Lilac Sheer Organza Saree',
+        'Royal Velvet Zardozi Saree',
+        'Sapphire Tapestry Designer Saree'
+      ];
+      if (Array.isArray(state.products)) {
+        state.products = state.products.filter(p => {
+          if (!p) return false;
+          if (mockNames.includes(p.name)) return false;
+          if (typeof p.sku === 'string' && /^SF-(KNC|BNR|ORG|SLK|COT|TIS|PAT|CHN|VEL|DSG)-0[0-1][0-9]$/.test(p.sku)) return false;
+          return true;
+        });
+      }
+      if (Array.isArray(state.orders)) {
+        state.orders = state.orders.filter(o => {
+          if (!o) return false;
+          const num = String(o.order_number || o.id || '');
+          if (num.startsWith('SF-849') || num === 'POS-2026-001' || num === 'SF-ORD-2026-001') return false;
+          if (['Dr. Madhavi Varma', 'Kavita Reddy', 'Pooja Sharma', 'Ananya Iyer'].includes(o.customer_name)) return false;
+          return true;
+        });
+      }
+      if (Array.isArray(state.customers)) {
+        state.customers = state.customers.filter(c => {
+          if (!c) return false;
+          return !['Pooja Sharma', 'Ananya Iyer', 'Deepa Rao', 'Kavya Reddy', 'Sneha Patel'].includes(c.name);
+        });
+      }
+      if (Array.isArray(state.suppliers)) {
+        state.suppliers = state.suppliers.filter(s => {
+          if (!s) return false;
+          return !['Kanchipuram Master Weavers Co-op', 'Varanasi Heritage Zari Works', 'Bangalore Silk Filature Mills', 'Salem Dobby Looms'].includes(s.name);
+        });
+      }
+      if (Array.isArray(state.expenses)) {
+        state.expenses = state.expenses.filter(e => {
+          if (!e) return false;
+          return !['Showroom Rent', 'Weavers Guild Advance', 'Electricity & Utilities', 'Luxury Packaging Boxes', 'Security & Maintenance'].some(desc => (e.description || '').includes(desc));
+        });
+      }
+      if (Array.isArray(state.enquiries)) {
+        state.enquiries = state.enquiries.filter(eq => {
+          if (!eq) return false;
+          return !['Pooja Sharma', 'Meera Reddy', 'Meenakshi Iyer', 'Sunita Reddy'].includes(eq.name);
+        });
+      }
+      if (Array.isArray(state.inventory_ledger)) {
+        state.inventory_ledger = state.inventory_ledger.filter(l => {
+          if (!l) return false;
+          if (mockNames.includes(l.product_name)) return false;
+          if (typeof l.sku === 'string' && /^SF-(KNC|BNR|ORG|SLK|COT|TIS|PAT|CHN|VEL|DSG)-0[0-1][0-9]$/.test(l.sku)) return false;
+          return true;
+        });
+      }
+    }
+
     init() {
+      // 1. Purge legacy mock data cache from previous sessions
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const legacyKeys = [
+            'sf_central_retail_db_production',
+            'sf_central_retail_db_v1',
+            'sf_central_retail_db_v2',
+            'sf_products_tw_v3',
+            'sf_orders_tw',
+            'sf_enquiries_tw'
+          ];
+          legacyKeys.forEach(k => localStorage.removeItem(k));
+        }
+      } catch (e) {}
+
+      // 2. Load production state or initialize clean empty schema
       try {
         if (typeof localStorage !== 'undefined') {
           const stored = localStorage.getItem(STORAGE_KEY);
           if (stored) {
             this.state = JSON.parse(stored);
-            // Ensure essential keys exist
+            this._sanitize(this.state);
             if (!this.state.products || !this.state.inventory_ledger) {
               this.state = JSON.parse(JSON.stringify(INITIAL_SEED));
               this.commit();
@@ -1148,8 +241,15 @@
           this.state = JSON.parse(JSON.stringify(INITIAL_SEED));
         }
       } catch (e) {
-        console.warn('Database initialization fallback to in-memory seed:', e);
+        console.warn('Database initialization fallback to clean schema:', e);
         this.state = JSON.parse(JSON.stringify(INITIAL_SEED));
+      }
+
+      // 3. Asynchronously synchronize with Cloud Supabase in browser environment
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          this.syncWithCloud().catch(() => {});
+        }, 10);
       }
     }
 
@@ -2426,26 +1526,27 @@
       if (!sb || typeof sb.fetchProducts !== 'function') return false;
 
       try {
-        const cloudProds = await sb.fetchProducts({ publishedOnly: false });
-        if (Array.isArray(cloudProds)) {
-          this.state.products = cloudProds.map(p => ({
-            ...p,
-            id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
-            price: Number(p.price) || 0,
-            old: Number(p.old_price || p.old) || 0,
-            purchase_cost: Number(p.purchase_cost) || 0,
-            stock_qty: Number(p.stock_qty) || 0,
-            desc: p.description || p.desc || '',
-            images: Array.isArray(p.images) ? p.images : (p.img ? [p.img] : [])
-          }));
-        }
+        const rawProds = await sb.fetchProducts({ publishedOnly: false });
+        const cloudProds = Array.isArray(rawProds) ? rawProds : (rawProds && Array.isArray(rawProds.data) ? rawProds.data : []);
+        
+        this.state.products = cloudProds.map(p => ({
+          ...p,
+          id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
+          price: Number(p.price) || 0,
+          old: Number(p.old_price || p.old) || 0,
+          purchase_cost: Number(p.purchase_cost) || 0,
+          stock_qty: Number(p.stock_qty) || 0,
+          desc: p.description || p.desc || '',
+          images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
+        }));
 
-        const cloudOrders = await sb.fetchOrders();
-        if (Array.isArray(cloudOrders)) {
-          this.state.orders = cloudOrders;
-        }
+        const rawOrders = await sb.fetchOrders();
+        const cloudOrders = Array.isArray(rawOrders) ? rawOrders : (rawOrders && Array.isArray(rawOrders.data) ? rawOrders.data : []);
+        this.state.orders = cloudOrders;
 
+        this._sanitize(this.state);
         this.commit();
+        this.notifyListeners();
         return true;
       } catch (e) {
         console.warn('SFDatabase cloud sync exception:', e);

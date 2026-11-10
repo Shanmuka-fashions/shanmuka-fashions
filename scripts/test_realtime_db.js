@@ -193,3 +193,4 @@ runRealtimeDbTests().catch(err => {
   console.error('\n❌ Real-time database test failure:', err);
   process.exit(1);
 });
+

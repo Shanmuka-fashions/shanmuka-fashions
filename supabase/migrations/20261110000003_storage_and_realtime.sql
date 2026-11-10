@@ -72,3 +72,4 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE inventory_ledger;
   END IF;
 END $$;
+

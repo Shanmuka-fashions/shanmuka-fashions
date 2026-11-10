@@ -138,6 +138,13 @@ async function runTests() {
 
   // Test 10: Customer Real Order History Filtering
   console.log('▶ Test 10: Real Customer Order History Isolation...');
+  const testProd = SFDatabase.saveProduct({
+    name: 'Auth Test Pure Silk Drape',
+    category: 'Silk',
+    price: 6499,
+    stock_qty: 5,
+    status: 'Published'
+  });
   // Place an online order with Ananya's email
   const sale = SFDatabase.processSaleTransaction({
     channel: 'ONLINE',
@@ -148,7 +155,7 @@ async function runTests() {
     payment_method: 'UPI',
     payment_status: 'Completed',
     delivery_address: addresses[0],
-    items: [{ product_id: '1', qty: 1, unit_price: 6499 }]
+    items: [{ product_id: testProd.id, qty: 1, unit_price: 6499 }]
   });
   assert.ok(sale && sale.order_number);
 

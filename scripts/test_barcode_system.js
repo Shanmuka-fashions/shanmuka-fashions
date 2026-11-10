@@ -140,6 +140,14 @@ async function runBarcodeTests() {
 
   // Test 11: Bulk printing produces the correct label count
   console.log('▶ Test 11: Bulk Label Generation Count...');
+  while (SFDatabase.getProducts().length < 3) {
+    SFDatabase.saveProduct({
+      name: 'Bulk Print Test Saree #' + (SFDatabase.getProducts().length + 1),
+      category: 'Silk',
+      price: 8500,
+      stock_qty: 3
+    });
+  }
   const allProds = SFDatabase.getProducts().slice(0, 3);
   let expectedCount = 0;
   allProds.forEach(p => { expectedCount += p.stock_qty; });

@@ -176,7 +176,12 @@
     // ── 2. REAL-TIME DATABASE: PRODUCTS CRUD ──
     fetchProducts: async function (options = {}) {
       const sb = this.getClient();
-      if (!sb) return { data: [], error: 'Supabase client not initialized' };
+      if (!sb) {
+        const empty = [];
+        empty.data = empty;
+        empty.error = 'Supabase client not initialized';
+        return empty;
+      }
 
       try {
         let query = sb.from('products').select('*');
@@ -184,7 +189,7 @@
         if (options.status) {
           query = query.eq('status', options.status);
         } else if (options.publishedOnly) {
-          query = query.eq('status', 'published');
+          query = query.ilike('status', 'published');
         }
 
         if (options.category && options.category !== 'ALL') {
@@ -199,12 +204,21 @@
 
         const { data, error } = await query;
         if (error) {
-          console.error('Error fetching products from database:', error.message);
-          return { data: [], error: error.message };
+          console.warn('Database product fetch note:', error.message);
+          const empty = [];
+          empty.data = empty;
+          empty.error = error.message;
+          return empty;
         }
-        return { data: data || [], error: null };
+        const resList = data || [];
+        resList.data = resList;
+        resList.error = null;
+        return resList;
       } catch (e) {
-        return { data: [], error: e.message };
+        const empty = [];
+        empty.data = empty;
+        empty.error = e.message;
+        return empty;
       }
     },
 
@@ -281,13 +295,29 @@
     // ── 3. REAL-TIME DATABASE: ORDERS CRUD ──
     fetchOrders: async function () {
       const sb = this.getClient();
-      if (!sb) return { data: [], error: 'Supabase disconnected' };
+      if (!sb) {
+        const empty = [];
+        empty.data = empty;
+        empty.error = 'Supabase disconnected';
+        return empty;
+      }
       try {
         const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
-        if (error) return { data: [], error: error.message };
-        return { data: data || [], error: null };
+        if (error) {
+          const empty = [];
+          empty.data = empty;
+          empty.error = error.message;
+          return empty;
+        }
+        const resList = data || [];
+        resList.data = resList;
+        resList.error = null;
+        return resList;
       } catch (e) {
-        return { data: [], error: e.message };
+        const empty = [];
+        empty.data = empty;
+        empty.error = e.message;
+        return empty;
       }
     },
 
