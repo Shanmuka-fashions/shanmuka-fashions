@@ -13,8 +13,8 @@
 
   const STORAGE_KEY = 'sf_central_retail_db_v1';
 
-  // Master Initial Seed Data
-  const INITIAL_SEED = {
+  // Master Demo Dataset (Available for explicit developer testing / seed resets)
+  const DEMO_SEED = {
     settings: {
       store_name: 'Shanmuka Fashions',
       tagline: 'Sarees & More — Elegance Woven Through Generations',
@@ -1099,6 +1099,29 @@
     }
   };
 
+  // Production Clean Empty Schema (No mock / dummy fallback data)
+  const EMPTY_SEED = {
+    settings: JSON.parse(JSON.stringify(DEMO_SEED.settings)),
+    auth: JSON.parse(JSON.stringify(DEMO_SEED.auth)),
+    cms: JSON.parse(JSON.stringify(DEMO_SEED.cms)),
+    products: [],
+    inventory_ledger: [],
+    orders: [],
+    customers: [],
+    suppliers: [],
+    purchases: [],
+    expenses: [],
+    coupons: JSON.parse(JSON.stringify(DEMO_SEED.coupons || [])),
+    enquiries: [],
+    reviews: [],
+    audit_logs: [],
+    barcode_print_history: [],
+    inventory_units: [],
+    barcode_printer_config: JSON.parse(JSON.stringify(DEMO_SEED.barcode_printer_config || {}))
+  };
+
+  const INITIAL_SEED = EMPTY_SEED;
+
   class DatabaseEngine {
     constructor() {
       this.state = null;
@@ -1277,6 +1300,10 @@
 
         this.logAudit('PRODUCT_UPDATE', 'PRODUCT', id, `Updated product "${updated.name}" (${updated.sku})`, adminUser);
         this.commit();
+        const sbUpdate = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+        if (sbUpdate && typeof sbUpdate.saveProductToCloud === 'function') {
+          sbUpdate.saveProductToCloud(updated).catch(e => console.warn('Supabase product cloud sync:', e));
+        }
         return updated;
       } else {
         // Create new Saree
@@ -1361,6 +1388,10 @@
 
         this.logAudit('PRODUCT_CREATE', 'PRODUCT', newId, `Created saree "${newProd.name}" (${sku}) with stock ${stockQty}`, adminUser);
         this.commit();
+        const sbCreate = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+        if (sbCreate && typeof sbCreate.saveProductToCloud === 'function') {
+          sbCreate.saveProductToCloud(newProd).catch(e => console.warn('Supabase product cloud sync:', e));
+        }
         return newProd;
       }
     }
@@ -1386,6 +1417,10 @@
       p.status = p.status === 'Archived' ? 'Published' : 'Archived';
       this.logAudit('PRODUCT_STATUS', 'PRODUCT', id, `Changed status of "${p.name}" to ${p.status}`, adminUser);
       this.commit();
+      const sbArch = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sbArch && typeof sbArch.archiveProductInCloud === 'function') {
+        sbArch.archiveProductInCloud(id).catch(e => console.warn('Supabase product cloud sync:', e));
+      }
       return p;
     }
 
@@ -1396,6 +1431,10 @@
       this.state.products = this.state.products.filter(x => x.id !== numId);
       this.logAudit('PRODUCT_DELETE', 'PRODUCT', numId, `Deleted product "${p.name}" (${p.sku})`, adminUser);
       this.commit();
+      const sbDel = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sbDel && typeof sbDel.deleteProductFromCloud === 'function') {
+        sbDel.deleteProductFromCloud(numId).catch(e => console.warn('Supabase product cloud sync:', e));
+      }
       return true;
     }
 
@@ -1797,6 +1836,10 @@
       );
 
       this.commit();
+      const sbOrder = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sbOrder && typeof sbOrder.pushOrderToCloud === 'function') {
+        sbOrder.pushOrderToCloud(newOrder).catch(e => console.warn('Supabase order cloud sync:', e));
+      }
       return newOrder;
     }
 
@@ -2364,10 +2407,50 @@
     }
 
     resetToDemoData(adminUser = 'Bhanu (Owner)') {
-      this.state = JSON.parse(JSON.stringify(INITIAL_SEED));
+      this.state = JSON.parse(JSON.stringify(DEMO_SEED));
       this.logAudit('DATABASE_RESET', 'DATABASE', 'ALL', 'Reset database to master demo dataset', adminUser);
       this.commit();
       return true;
+    }
+
+    resetToEmptyState(adminUser = 'Bhanu (Owner)') {
+      this.state = JSON.parse(JSON.stringify(EMPTY_SEED));
+      this.logAudit('DATABASE_RESET', 'DATABASE', 'ALL', 'Reset database to clean production empty state', adminUser);
+      this.commit();
+      return true;
+    }
+
+    // Synchronize local cache with central Supabase Cloud database
+    async syncWithCloud() {
+      const sb = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (!sb || typeof sb.fetchProducts !== 'function') return false;
+
+      try {
+        const cloudProds = await sb.fetchProducts({ publishedOnly: false });
+        if (Array.isArray(cloudProds)) {
+          this.state.products = cloudProds.map(p => ({
+            ...p,
+            id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
+            price: Number(p.price) || 0,
+            old: Number(p.old_price || p.old) || 0,
+            purchase_cost: Number(p.purchase_cost) || 0,
+            stock_qty: Number(p.stock_qty) || 0,
+            desc: p.description || p.desc || '',
+            images: Array.isArray(p.images) ? p.images : (p.img ? [p.img] : [])
+          }));
+        }
+
+        const cloudOrders = await sb.fetchOrders();
+        if (Array.isArray(cloudOrders)) {
+          this.state.orders = cloudOrders;
+        }
+
+        this.commit();
+        return true;
+      } catch (e) {
+        console.warn('SFDatabase cloud sync exception:', e);
+        return false;
+      }
     }
   }
 

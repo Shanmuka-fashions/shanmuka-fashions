@@ -124,3 +124,4 @@ CREATE POLICY "Public read unit status for Silk Mark authenticity"
     ON inventory_units FOR SELECT
     TO anon
     USING (status = 'SOLD');
+

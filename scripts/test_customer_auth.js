@@ -13,6 +13,9 @@ console.log('SHANMUKA FASHIONS: CUSTOMER AUTHENTICATION AUTOMATED TESTS');
 console.log('═══════════════════════════════════════════════════════════════\n');
 
 async function runTests() {
+  // Ensure demo catalog exists for order history tests
+  SFDatabase.resetToDemoData('Customer Auth Test Runner');
+
   // Test 1: Real-Time Input Validations
   console.log('▶ Test 1: Real-Time Input Validations (Email, Mobile, Password Strength)...');
   assert.strictEqual(SFCustomerAuth.validation.isValidEmail('sravani@gmail.com'), true);

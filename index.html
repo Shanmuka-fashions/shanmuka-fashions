@@ -3839,350 +3839,111 @@
       freeShippingThreshold: 5000
     };
 
-    // ── Complete Catalogue Data (14 Handcrafted Sarees across All 6 Weave Collections) ──
-    const DEFAULT_PRODUCTS = [
-      {
-        id: 1,
-        name: 'Royal Kanchipuram Pure Silk Saree',
-        category: 'Kanchipuram',
-        fabric: 'Pure Silk',
-        color: 'Burgundy',
-        price: 6499,
-        old: 7999,
-        badge: 'Bestseller',
-        img: 'assets/kanchipuram-loom.jpg',
-        occasion: 'Bridal & Wedding',
-        pattern: 'Temple Border',
-        type: 'Traditional Handloom',
-        rating: 4.9,
-        reviewsCount: 38,
-        desc: 'An exquisite handloom Kanchipuram pure silk saree in royal burgundy adorned with heavy gold zari temple borders and an opulent brocade pallu. Ideal for weddings and sacred festivities.'
-      },
-      {
-        id: 2,
-        name: 'Banarasi Heritage Meenakari Weave',
-        category: 'Banarasi',
-        fabric: 'Katan Silk',
-        color: 'Emerald Green',
-        price: 5299,
-        old: 6499,
-        badge: 'New Arrival',
-        img: 'assets/golden-silk-saree-clean.jpg',
-        occasion: 'Festive Celebration',
-        pattern: 'Floral Jaal',
-        type: 'Traditional Handloom',
-        rating: 4.8,
-        reviewsCount: 26,
-        desc: 'A magnificent emerald green Banarasi silk saree enriched with delicate gold zari floral jaal and kadwa weave motifs. Inspired by royal Indian court textiles.'
-      },
-      {
-        id: 3,
-        name: 'Floral Organza Tissue Saree',
-        category: 'Organza',
-        fabric: 'Organza',
-        color: 'Pastel Pink',
-        price: 2899,
-        old: 3499,
-        badge: 'Trending',
-        img: 'assets/raw-silk-yarns.jpg',
-        occasion: 'Party Wear',
-        pattern: 'Floral Jaal',
-        type: 'Contemporary Festive',
-        rating: 4.7,
-        reviewsCount: 19,
-        desc: 'Ethereal and translucent, this floral pastel organza saree features hand-painted floral motifs outlined in shimmering gold zari borders for daytime celebrations and cocktail soirées.'
-      },
-      {
-        id: 4,
-        name: 'Festive Peacock Zari Silk Saree',
-        category: 'Silk',
-        fabric: 'Pure Silk',
-        color: 'Magenta Pink',
-        price: 4199,
-        old: 4999,
-        badge: 'Featured',
-        img: 'assets/raw-silk-yarns.jpg',
-        occasion: 'Festive Celebration',
-        pattern: 'Peacock Zari',
-        type: 'Traditional Handloom',
-        rating: 4.9,
-        reviewsCount: 31,
-        desc: 'A luminous magenta pink pure silk saree featuring auspicious peacock motifs handwoven into a regal golden zari pallu. A timeless festive statement.'
-      },
-      {
-        id: 5,
-        name: 'Everyday Handloom Cotton Grace',
-        category: 'Cotton',
-        fabric: 'Handloom Cotton',
-        color: 'Indigo Blue',
-        price: 1499,
-        old: 1899,
-        badge: 'Everyday Grace',
-        img: 'assets/handloom-weaving.jpg',
-        occasion: 'Everyday Grace',
-        pattern: 'Woven Butta',
-        type: 'Traditional Handloom',
-        rating: 4.6,
-        reviewsCount: 44,
-        desc: 'Breathable, lightweight, and effortlessly poised. Spun from pure natural cotton threads with subtle tribal border motifs for refined all-day comfort.'
-      },
-      {
-        id: 6,
-        name: 'Bridal Kanchipuram Gold Brocade',
-        category: 'Kanchipuram',
-        fabric: 'Pure Silk',
-        color: 'Burgundy',
-        price: 8999,
-        old: 10999,
-        badge: 'Bestseller',
-        img: 'assets/kanchipuram-loom.jpg',
-        occasion: 'Bridal & Wedding',
-        pattern: 'Zari Brocade',
-        type: 'Traditional Handloom',
-        rating: 5.0,
-        reviewsCount: 52,
-        desc: 'A true heirloom bridal masterwork. Handwoven with pure mulberry silk and dense certified golden zari brocade across the entire body and sweeping pallu.'
-      },
-      {
-        id: 7,
-        name: 'Banarasi Celebration Silk Saree',
-        category: 'Banarasi',
-        fabric: 'Katan Silk',
-        color: 'Emerald Green',
-        price: 5799,
-        old: 6999,
-        badge: 'Popular',
-        img: 'assets/golden-silk-saree-clean.jpg',
-        occasion: 'Festive Celebration',
-        pattern: 'Floral Jaal',
-        type: 'Traditional Handloom',
-        rating: 4.8,
-        reviewsCount: 22,
-        desc: 'Woven with high-twist katan silk yarns and shimmering gold brocade borders. Drapes gracefully with a rich, soft sheen under celebratory lights.'
-      },
-      {
-        id: 8,
-        name: 'Soft Indigo Handloom Cotton',
-        category: 'Cotton',
-        fabric: 'Handloom Cotton',
-        color: 'Indigo Blue',
-        price: 1799,
-        old: 2199,
-        badge: 'Comfort Pick',
-        img: 'assets/handloom-weaving.jpg',
-        occasion: 'Everyday Grace',
-        pattern: 'Woven Butta',
-        type: 'Traditional Handloom',
-        rating: 4.7,
-        reviewsCount: 29,
-        desc: 'A finely woven cotton saree highlighting indigo blue depth with contrast gold zari selvedge. Perfect for office elegance and cultural gatherings.'
-      },
-      {
-        id: 9,
-        name: 'Shimmer Champagne Organza Tissue',
-        category: 'Organza',
-        fabric: 'Organza',
-        color: 'Champagne Gold',
-        price: 3499,
-        old: 4199,
-        badge: 'New Arrival',
-        img: 'assets/golden-silk-saree-clean.jpg',
-        occasion: 'Party Wear',
-        pattern: 'Zari Brocade',
-        type: 'Contemporary Festive',
-        rating: 4.9,
-        reviewsCount: 15,
-        desc: 'Draped in golden sunlight, this champagne organza saree glistens with metallic tissue warp and delicate scalloped embroidery.'
-      },
-      {
-        id: 10,
-        name: 'Traditional Royal Temple Silk',
-        category: 'Silk',
-        fabric: 'Pure Silk',
-        color: 'Burgundy',
-        price: 4899,
-        old: 5999,
-        badge: 'Festive Edit',
-        img: 'assets/kanchipuram-loom.jpg',
-        occasion: 'Bridal & Wedding',
-        pattern: 'Temple Border',
-        type: 'Traditional Handloom',
-        rating: 4.9,
-        reviewsCount: 34,
-        desc: 'Rich deep wine silk saree highlighting three-tier gold zari temple spires and traditional mango butti motifs. Comes with contrast unstitched blouse piece.'
-      },
-      {
-        id: 11,
-        name: 'Regal Banarasi Brocade Bridal Edit',
-        category: 'Banarasi',
-        fabric: 'Katan Silk',
-        color: 'Champagne Gold',
-        price: 7499,
-        old: 8999,
-        badge: 'Bestseller',
-        img: 'assets/golden-silk-saree-clean.jpg',
-        occasion: 'Bridal & Wedding',
-        pattern: 'Zari Brocade',
-        type: 'Traditional Handloom',
-        rating: 5.0,
-        reviewsCount: 41,
-        desc: 'An opulent bridal Banarasi drape featuring antique gold zari work and rich selvedge detailing that echoes timeless Banaras royal heritage.'
-      },
-      {
-        id: 12,
-        name: 'Pure Chanderi Cotton Silk Drape',
-        category: 'Cotton',
-        fabric: 'Handloom Cotton',
-        color: 'Indigo Blue',
-        price: 2199,
-        old: 2699,
-        badge: 'Artisan Pick',
-        img: 'assets/handloom-weaving.jpg',
-        occasion: 'Everyday Grace',
-        pattern: 'Woven Butta',
-        type: 'Traditional Handloom',
-        rating: 4.8,
-        reviewsCount: 18,
-        desc: 'An artisan-crafted cotton silk blend saree combining the breathability of fine cotton with the delicate sheen of handloom silk.'
-      },
-      {
-        id: 13,
-        name: 'Royal Atelier Cutwork Designer Saree',
-        category: 'Designer',
-        fabric: 'Pure Silk',
-        color: 'Burgundy',
-        price: 9499,
-        old: 11999,
-        badge: 'Haute Edit',
-        img: 'assets/hero-model.jpg',
-        occasion: 'Party Wear',
-        pattern: 'Zari Brocade',
-        type: 'Designer Couture',
-        rating: 5.0,
-        reviewsCount: 28,
-        desc: 'Bespoke royal designer saree featuring intricate antique gold bullion embroidery, scallop-cut borders, and rich silk brocade pallu crafted for red-carpet and grand reception soirées.'
-      },
-      {
-        id: 14,
-        name: 'Midnight Navy Tapestry Designer Saree',
-        category: 'Designer',
-        fabric: 'Katan Silk',
-        color: 'Midnight Navy',
-        price: 8299,
-        old: 9999,
-        badge: 'Exclusive',
-        img: 'assets/hero-model.jpg',
-        occasion: 'Bridal & Wedding',
-        pattern: 'Floral Jaal',
-        type: 'Designer Couture',
-        rating: 4.9,
-        reviewsCount: 33,
-        desc: 'An opulent midnight navy silk saree featuring antique champagne gold zari florals and contemporary selvedge detailing, designed for the modern royal bride.'
-      }
-    ];
+    // ── Real-Time Database Connection (Zero Mock Data) ──
+    let products = [];
+    let isProductsLoading = false;
+    let productsFetchError = null;
 
-    // Active products array (persisted to localStorage)
-    let products = [...DEFAULT_PRODUCTS];
-
+    // Load active published products from Central Database Engine
     function loadProducts() {
-      try {
-        const saved = localStorage.getItem('sf_products_tw_v3');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            products = parsed;
-          }
-        }
-      } catch (e) { }
+      if (typeof SFDatabase !== 'undefined') {
+        const dbProds = SFDatabase.getProducts().filter(p => p.status === 'Published' || p.status === 'published');
+        products = dbProds || [];
+      } else {
+        products = [];
+      }
     }
 
     function saveProducts() {
-      try {
-        localStorage.setItem('sf_products_tw_v3', JSON.stringify(products));
-      } catch (e) { }
+      if (typeof SFDatabase !== 'undefined') {
+        SFDatabase.commit();
+      }
     }
 
+    // Retrieve real patron orders from database (no mock fallback arrays)
     function getOrders() {
-      try {
-        const o = localStorage.getItem('sf_orders_tw');
-        if (o) {
-          const parsed = JSON.parse(o);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-        const sample = [
-          {
-            id: 'SF-849201',
-            date: '08 Nov 2026',
-            customer: { name: 'Priya Ramanathan', phone: '+91 98401 23456', city: 'Chennai' },
-            items: [{ id: 1, name: 'Royal Kanchipuram Pure Silk Saree', price: 6499, qty: 1 }, { id: 2, name: 'Banarasi Heritage Meenakari Weave', price: 5299, qty: 1 }],
-            total: 11798,
-            payment: 'Instant Online UPI',
-            status: 'Confirmed'
-          },
-          {
-            id: 'SF-849182',
-            date: '07 Nov 2026',
-            customer: { name: 'Ananya Reddy', phone: '+91 99890 54321', city: 'Hyderabad' },
-            items: [{ id: 4, name: 'Traditional Kanjeevaram Bridal Silk', price: 7899, qty: 1 }],
-            total: 7899,
-            payment: 'WhatsApp Confirmation',
-            status: 'Shipped'
-          },
-          {
-            id: 'SF-849045',
-            date: '05 Nov 2026',
-            customer: { name: 'Deepika Sharma', phone: '+91 98801 87654', city: 'Bengaluru' },
-            items: [{ id: 3, name: 'Floral Organza Tissue Saree', price: 2899, qty: 1 }],
-            total: 2899,
-            payment: 'Cash on Delivery',
-            status: 'Delivered'
-          }
-        ];
-        saveOrders(sample);
-        return sample;
-      } catch (e) { return []; }
+      if (typeof SFDatabase !== 'undefined') {
+        return SFDatabase.getOrders() || [];
+      }
+      return [];
     }
 
     function saveOrders(orders) {
-      try {
-        localStorage.setItem('sf_orders_tw', JSON.stringify(orders));
-      } catch (e) { }
+      if (typeof SFDatabase !== 'undefined') {
+        SFDatabase.state.orders = orders || [];
+        SFDatabase.commit();
+      }
     }
 
+    // Retrieve real VIP enquiries from database (no mock fallback arrays)
     function getEnquiries() {
-      try {
-        const eq = localStorage.getItem('sf_enquiries_tw');
-        if (eq) {
-          const parsed = JSON.parse(eq);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-        const sample = [
-          {
-            id: 'ENQ-101',
-            date: '08 Nov 2026',
-            name: 'Sunita Verma',
-            phone: '+91 98450 12345',
-            message: 'Looking for a royal magenta bridal Kanchipuram silk saree with pure gold zari for November reception.',
-            status: 'New'
-          },
-          {
-            id: 'ENQ-102',
-            date: '07 Nov 2026',
-            name: 'Radhika Menon',
-            phone: '+91 97112 67890',
-            message: 'Do you offer express insured delivery to Singapore for 3 festive silk drapes?',
-            status: 'In Progress'
-          }
-        ];
-        saveEnquiries(sample);
-        return sample;
-      } catch (e) { return []; }
+      if (typeof SFDatabase !== 'undefined') {
+        return SFDatabase.getEnquiries() || [];
+      }
+      return [];
     }
 
     function saveEnquiries(eqs) {
+      if (typeof SFDatabase !== 'undefined') {
+        SFDatabase.state.enquiries = eqs || [];
+        SFDatabase.commit();
+      }
+    }
+
+    // Cloud Database Fetch with Loading & Error States
+    async function syncStorefrontWithDatabase(notifyUI = true) {
+      isProductsLoading = true;
+      productsFetchError = null;
+
       try {
-        localStorage.setItem('sf_enquiries_tw', JSON.stringify(eqs));
-      } catch (e) { }
+        const sb = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+        if (sb && typeof sb.fetchProducts === 'function') {
+          const cloudProds = await sb.fetchProducts({ publishedOnly: true });
+          if (Array.isArray(cloudProds)) {
+            products = cloudProds.map(p => ({
+              ...p,
+              id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
+              price: Number(p.price) || 0,
+              old: Number(p.old_price || p.old) || 0,
+              desc: p.description || p.desc || '',
+              images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
+            }));
+
+            // Sync into SFDatabase
+            if (typeof SFDatabase !== 'undefined') {
+              SFDatabase.state.products = products;
+              SFDatabase.commit();
+            }
+          }
+        } else {
+          loadProducts();
+        }
+      } catch (err) {
+        console.warn('Storefront database synchronization notice:', err);
+        productsFetchError = 'Unable to connect to central atelier database. Please verify internet connection.';
+        loadProducts(); // Fallback to local memory cache if offline
+      } finally {
+        isProductsLoading = false;
+        if (notifyUI) {
+          const hash = window.location.hash || '#/';
+          if (!hash.startsWith('#/admin') && !hash.startsWith('#/login') && !hash.startsWith('#/register') && !hash.startsWith('#/forgot-password') && !hash.startsWith('#/account')) {
+            navigate();
+          }
+        }
+      }
+    }
+
+    function renderLoadingSkeletonsHTML(count = 4) {
+      return Array(count).fill(0).map(() => `
+        <article class="product-card skeleton-card" style="opacity: 0.6; pointer-events: none;">
+          <div class="card-media" style="background: #EFE9E0; aspect-ratio: 3/4; animation: sfShimmer 1.5s infinite linear;"></div>
+          <div class="card-details" style="padding: 14px 0;">
+            <div style="height: 12px; width: 60%; background: #EFE9E0; margin-bottom: 8px;"></div>
+            <div style="height: 16px; width: 85%; background: #EFE9E0; margin-bottom: 12px;"></div>
+            <div style="height: 14px; width: 40%; background: #EFE9E0;"></div>
+          </div>
+        </article>
+      `).join('');
     }
     let state = {
       cart: {},
@@ -4837,13 +4598,40 @@ function renderHomeView() {
 
     // ── Shared Product Cards HTML Generator ──
     function renderProductCardsHTML(list) {
+      if (isProductsLoading) {
+        return renderLoadingSkeletonsHTML(4);
+      }
+
+      if (productsFetchError && (!list || !list.length)) {
+        return `
+          <div class="storefront-empty-state" style="grid-column: 1 / -1; padding: 48px 20px; text-align: center; background: #FFF8F6; border: 1px solid #FFDCD4; border-radius: 4px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">⚠️</div>
+            <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #B71C1C; margin-bottom: 6px;">Atelier Connection Notice</h3>
+            <p style="color: #5D4037; font-size: 13.5px; margin-bottom: 16px;">${productsFetchError}</p>
+            <button onclick="syncStorefrontWithDatabase(true)" class="btn-primary" style="padding: 8px 20px; font-size: 13px;">Retry Connection &rarr;</button>
+          </div>
+        `;
+      }
+
+      if (!list || !list.length) {
+        return `
+          <div class="storefront-empty-state" style="grid-column: 1 / -1; padding: 56px 20px; text-align: center; background: #FAF7F2; border: 1px solid #E8DFD5; border-radius: 4px; margin: 12px 0;">
+            <div style="font-size: 36px; margin-bottom: 10px; opacity: 0.85;">🥻</div>
+            <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; color: #3B2B25; margin-bottom: 8px; font-weight: 500;">Curating the Atelier Collection</h3>
+            <p style="color: #6B5E57; font-size: 14px; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.6;">Our master weavers are handcrafting our latest collection. Connect with our styling concierge for bespoke bridal orders or custom weaves.</p>
+            <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20am%20inquiring%20about%20handloom%20saree%20availability." target="_blank" rel="noopener noreferrer" class="btn-primary" style="display: inline-block; padding: 10px 22px; font-size: 13px;">Connect via WhatsApp Concierge &rarr;</a>
+          </div>
+        `;
+      }
+
       return list.map(p => {
         const inWishlist = state.wishlist.includes(p.id);
+        const cardImg = p.img || (Array.isArray(p.images) && p.images.length ? p.images[0] : 'assets/kanchipuram-loom.jpg');
         return `
       <article class="product-card" data-id="${p.id}">
         <div class="card-media">
-          <img src="${p.img}" alt="${p.name}" loading="lazy">
-          <span class="card-badge">${p.badge}</span>
+          <img src="${cardImg}" alt="${p.name}" loading="lazy" onerror="this.src='assets/kanchipuram-loom.jpg'">
+          ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
           <button class="card-wishlist-btn ${inWishlist ? 'active' : ''}" data-wishlist-id="${p.id}" aria-label="Save to Wishlist">
             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           </button>
@@ -4853,11 +4641,11 @@ function renderHomeView() {
           </div>
         </div>
         <div class="card-details">
-          <span class="card-category">${p.category} &bull; ${p.fabric}</span>
+          <span class="card-category">${p.category || 'Handloom'} ${p.fabric ? `&bull; ${p.fabric}` : ''}</span>
           <h3 class="card-title" onclick="window.location.hash='#/product/${p.id}'">${p.name}</h3>
           <div class="card-price-row">
             <span class="current-price">${money(p.price)}</span>
-            <del class="original-price">${money(p.old)}</del>
+            ${p.old && p.old > p.price ? `<del class="original-price">${money(p.old)}</del>` : ''}
           </div>
           <button class="card-cta-btn" onclick="window.location.hash='#/product/${p.id}'">View Saree &rarr;</button>
         </div>
@@ -4897,13 +4685,30 @@ function renderHomeView() {
 
     // ── VIEW 3: Dedicated Product Detail Page (PDP) ──
     function renderPDPView(id) {
-      const p = products.find(x => x.id === id) || products[0];
+      const p = products.find(x => x.id === id || String(x.id) === String(id) || x.sku === String(id));
+      const app = $('appRoot');
+
+      if (!p) {
+        app.innerHTML = `
+          <div class="storefront-empty-state" style="padding: 90px 24px; text-align: center; max-width: 600px; margin: 40px auto; background: #FAF7F2; border: 1px solid #E8DFD5; border-radius: 4px;">
+            <div style="font-size: 40px; margin-bottom: 12px; opacity: 0.85;">🥻</div>
+            <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; color: #3B2B25; margin-bottom: 10px;">Handcrafted Drape Not Available</h2>
+            <p style="color: #6B5E57; font-size: 14.5px; line-height: 1.6; margin-bottom: 22px;">This specific saree may have been reserved by a patron or archived from the public catalogue. Explore our active weave collections or connect directly with our styling concierge.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <a href="#/catalogue" class="btn-primary" style="padding: 10px 24px; font-size: 13px;">Explore Saree Catalogue &rarr;</a>
+              <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20am%20inquiring%20about%20a%20specific%20saree%20availability." target="_blank" rel="noopener noreferrer" class="btn-secondary" style="padding: 10px 24px; font-size: 13px; border: 1px solid #3B2B25; color: #3B2B25;">WhatsApp Concierge</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
       state.pdpProduct = p;
       state.pdpQty = 1;
       const inWishlist = state.wishlist.includes(p.id);
-      const discount = Math.round(((p.old - p.price) / p.old) * 100);
+      const discount = (p.old && p.old > p.price) ? Math.round(((p.old - p.price) / p.old) * 100) : 0;
+      const galleryImages = (p.images && Array.isArray(p.images) && p.images.length > 0) ? p.images : [p.img || 'assets/kanchipuram-loom.jpg'];
 
-      const app = $('appRoot');
       app.innerHTML = `
     <div class="pdp-page">
       <!-- Breadcrumbs -->
@@ -4912,54 +4717,49 @@ function renderHomeView() {
         <span>/</span>
         <a href="#/catalogue">Sarees</a>
         <span>/</span>
-        <a href="#/catalogue?category=${p.category}">${p.category}</a>
+        <a href="#/catalogue?category=${p.category || 'Silk'}">${p.category || 'Handloom'}</a>
         <span>/</span>
         <span>${p.name}</span>
       </nav>
 
       <!-- Main PDP 2-Column Showcase -->
       <div class="pdp-grid">
-        <!-- Left Image Gallery with interactive Zoom Magnifier -->
+        <!-- Left Image Gallery with dynamic multi-image strip -->
         <div class="pdp-gallery">
           <div class="pdp-thumbnails">
-            <div class="pdp-thumb active" onclick="changePdpImage('${p.img}', this)">
-              <img src="${p.img}" alt="${p.name} Angle 1">
-            </div>
-            <div class="pdp-thumb" onclick="changePdpImage('assets/hero-model.jpg', this)">
-              <img src="assets/hero-model.jpg" alt="Model Drape Angle">
-            </div>
-            <div class="pdp-thumb" onclick="changePdpImage('${p.img}', this)">
-              <img src="${p.img}" alt="Zari Close-up">
-            </div>
+            ${galleryImages.map((imgUrl, i) => `
+              <div class="pdp-thumb ${i === 0 ? 'active' : ''}" onclick="changePdpImage('${imgUrl}', this)">
+                <img src="${imgUrl}" alt="${p.name} Photograph ${i + 1}" onerror="this.src='assets/kanchipuram-loom.jpg'">
+              </div>
+            `).join('')}
           </div>
           <div class="pdp-main-image" id="pdpMainImageWrap">
-            <img src="${p.img}" id="pdpMainImg" alt="${p.name}">
+            <img src="${galleryImages[0]}" id="pdpMainImg" alt="${p.name}" onerror="this.src='assets/kanchipuram-loom.jpg'">
           </div>
         </div>
 
         <!-- Right Saree Information -->
         <div class="pdp-info">
-          <span class="pdp-category-eyebrow">${p.category} Collection • Handcrafted In India</span>
+          <span class="pdp-category-eyebrow">${p.category || 'Handloom'} Collection • Handcrafted In India</span>
           <h1 class="pdp-title">${p.name}</h1>
           <div class="pdp-price-box">
             <span class="pdp-current-price">${money(p.price)}</span>
-            <del class="pdp-old-price">${money(p.old)}</del>
-            
+            ${p.old && p.old > p.price ? `<del class="pdp-old-price">${money(p.old)}</del>` : ''}
           </div>
           <div class="pdp-tax-note">Inclusive of all taxes &bull; Free express delivery across India</div>
 
-          <p class="pdp-desc">${p.desc}</p>
+          <p class="pdp-desc">${p.desc || 'Authentic pure handloom saree crafted by master weavers.'}</p>
 
           <!-- Saree Specifications Table -->
           <table class="pdp-specs-table">
             <tbody>
-              <tr><td>Fabric & Material</td><td>${p.fabric} with Certified Zari</td></tr>
-              <tr><td>Saree Length</td><td>5.5 Meters + 0.8m Blouse Piece Included</td></tr>
-              <tr><td>Weave Technique</td><td>${p.type}</td></tr>
-              <tr><td>Motif / Pattern</td><td>${p.pattern}</td></tr>
-              <tr><td>Recommended Occasion</td><td>${p.occasion}</td></tr>
+              <tr><td>Fabric & Material</td><td>${p.material || p.fabric || 'Pure Silk'} with Certified Zari</td></tr>
+              <tr><td>Saree Length</td><td>${p.saree_length || '5.5 Meters + 0.8m Blouse Piece Included'}</td></tr>
+              <tr><td>Weave Technique</td><td>${p.weave || p.type || 'Traditional Handloom'}</td></tr>
+              <tr><td>Motif / Pattern</td><td>${p.pattern || 'Heritage Zari Work'}</td></tr>
+              <tr><td>Recommended Occasion</td><td>${p.occasion || 'Bridal & Festive'}</td></tr>
               <tr><td>Care Instructions</td><td>Dry Clean Only (Wrap in pure cotton/muslin)</td></tr>
-              <tr><td>Availability</td><td><b style="color: #1b7a3a;">In Stock — Ready to Dispatch in 24h</b></td></tr>
+              <tr><td>Availability</td><td><b style="color: #1b7a3a;">${p.stock_qty > 0 ? 'In Stock — Ready to Dispatch' : 'Made to Order — Master Loom'}</b></td></tr>
             </tbody>
           </table>
 
@@ -5758,6 +5558,21 @@ updateCartUI();
 updateWishlistUI();
 updateHeaderAuthUI();
 navigate();
+
+// Asynchronously sync with Supabase Cloud Central Database
+if (typeof syncStorefrontWithDatabase === 'function') {
+  syncStorefrontWithDatabase(true);
+}
+
+// Subscribe to Postgres Real-Time stream for instant cross-device updates
+if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.onRealtimeChange === 'function') {
+  SFSupabase.onRealtimeChange((table, payload) => {
+    console.log('⚡ Realtime notification received on storefront:', table, payload);
+    if (table === 'products') {
+      syncStorefrontWithDatabase(true);
+    }
+  });
+}
 </script>
 </body>
 

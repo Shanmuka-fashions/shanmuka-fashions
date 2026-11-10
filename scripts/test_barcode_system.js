@@ -12,6 +12,9 @@ console.log('SHANMUKA FASHIONS: BARCODE & THERMAL PRINTING AUTOMATED TESTS');
 console.log('═══════════════════════════════════════════════════════════════\n');
 
 async function runBarcodeTests() {
+  // Reset to clean demo state for deterministic testing
+  SFDatabase.resetToDemoData('Barcode Test Runner');
+
   // Test 1: New product receives a unique SKU automatically
   console.log('▶ Test 1: Automatic Unique SKU Generation...');
   const nextSku = SFDatabase.generateNextSku('Kanchipuram');
@@ -206,3 +209,4 @@ runBarcodeTests().catch(err => {
   console.error('\n❌ Barcode test failure:', err);
   process.exit(1);
 });
+

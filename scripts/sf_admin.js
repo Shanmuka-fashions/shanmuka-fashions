@@ -406,7 +406,14 @@
                 </tr>
               </thead>
               <tbody>
-                ${orders.slice(0, 6).map(o => `
+                ${!orders.length ? `
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 36px 16px; color: var(--secondary-text);">
+                      <div style="font-size: 24px; margin-bottom: 6px;">🛍️</div>
+                      No sales transactions recorded yet. New showroom POS sales and online customer orders will appear here immediately.
+                    </td>
+                  </tr>
+                ` : orders.slice(0, 6).map(o => `
                   <tr>
                     <td><b>${o.order_number}</b></td>
                     <td>
@@ -926,7 +933,22 @@
 
   function renderProductsTableRows(list) {
     if (!list.length) {
-      return '<tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--secondary-text);">No sarees match your filter criteria.</td></tr>';
+      return `
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 48px 16px; color: var(--secondary-text);">
+            <div style="font-size: 32px; margin-bottom: 8px;">🥻</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 16px; color: #3B2B25; font-weight: 500; margin-bottom: 4px;">
+              No Sarees Found
+            </div>
+            <div style="font-size: 12.5px; color: #7A695E; margin-bottom: 12px;">
+              No handcrafted drapes currently in this view. Add a new saree to begin inventory management.
+            </div>
+            <button type="button" class="sf-btn-primary" style="font-size: 12px; padding: 6px 14px;" onclick="SFAdmin.openAddProductModal()">
+              + Add New Saree
+            </button>
+          </td>
+        </tr>
+      `;
     }
     return list.map(p => {
       const isOut = (p.stock_qty || 0) <= 0;
@@ -1012,6 +1034,162 @@
     if (tbody) tbody.innerHTML = renderProductsTableRows(prods);
   }
 
+  // ── Multi-Image Gallery State & Handlers ──
+  let modalProductImages = [];
+
+  function renderModalProductImagesHTML() {
+    if (!modalProductImages || !modalProductImages.length) {
+      return `
+        <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--secondary-text); font-size: 13px; background: #FFF; border: 1px dashed #D8C3A5; border-radius: 4px;">
+          No photographs uploaded yet. Drag & drop files above or click to browse.
+        </div>
+      `;
+    }
+
+    return modalProductImages.map((url, idx) => {
+      const isCover = idx === 0;
+      return `
+        <div class="sf-image-preview-card ${isCover ? 'is-cover' : ''}" data-idx="${idx}">
+          <div class="sf-image-thumb-wrap">
+            <img src="${url}" alt="Saree Image ${idx + 1}" onerror="this.src='assets/kanchipuram-loom.jpg'">
+            ${isCover ? '<span class="sf-image-cover-badge">★ Cover</span>' : ''}
+          </div>
+          <div class="sf-image-card-actions">
+            ${!isCover ? `
+              <button type="button" class="sf-img-action-btn" onclick="SFAdmin.setCoverImage(${idx})" title="Set as primary cover">★ Cover</button>
+            ` : '<span style="font-size:10px; color:#A77950; font-weight:700; padding:2px 4px;">Primary</span>'}
+            <div style="display:flex; gap:2px;">
+              <button type="button" class="sf-img-action-btn" onclick="SFAdmin.moveProductImage(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Move left">←</button>
+              <button type="button" class="sf-img-action-btn" onclick="SFAdmin.moveProductImage(${idx}, 1)" ${idx === modalProductImages.length - 1 ? 'disabled' : ''} title="Move right">→</button>
+              <button type="button" class="sf-img-action-btn sf-img-action-del" onclick="SFAdmin.removeProductImage(${idx})" title="Remove photograph">✕</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateModalProductImagesUI() {
+    const grid = document.getElementById('modalProductImagesGrid');
+    if (grid) grid.innerHTML = renderModalProductImagesHTML();
+  }
+
+  function setCoverImage(idx) {
+    if (idx > 0 && idx < modalProductImages.length) {
+      const [item] = modalProductImages.splice(idx, 1);
+      modalProductImages.unshift(item);
+      updateModalProductImagesUI();
+    }
+  }
+
+  function moveProductImage(idx, dir) {
+    const targetIdx = idx + dir;
+    if (targetIdx >= 0 && targetIdx < modalProductImages.length) {
+      const temp = modalProductImages[idx];
+      modalProductImages[idx] = modalProductImages[targetIdx];
+      modalProductImages[targetIdx] = temp;
+      updateModalProductImagesUI();
+    }
+  }
+
+  function removeProductImage(idx) {
+    if (idx >= 0 && idx < modalProductImages.length) {
+      modalProductImages.splice(idx, 1);
+      updateModalProductImagesUI();
+    }
+  }
+
+  function handleAddImageUrl() {
+    const input = document.getElementById('fDirectImageUrl');
+    if (!input) return;
+    const url = input.value.trim();
+    if (!url) return;
+    modalProductImages.push(url);
+    input.value = '';
+    updateModalProductImagesUI();
+  }
+
+  async function handleFileInputChange(fileList) {
+    if (!fileList || !fileList.length) return;
+    const pBar = document.getElementById('modalImageProgressBar');
+    const pFill = document.getElementById('modalImageProgressFill');
+    const alertBox = document.getElementById('modalImageUploadAlert');
+    if (alertBox) { alertBox.style.display = 'none'; alertBox.textContent = ''; }
+
+    const files = Array.from(fileList);
+    const sb = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+
+    if (pBar) pBar.style.display = 'block';
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Format validation
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowed.includes(file.type.toLowerCase())) {
+        if (alertBox) {
+          alertBox.textContent = `Unsupported format for "${file.name}". Please upload JPG, PNG, or WebP.`;
+          alertBox.style.display = 'block';
+        }
+        continue;
+      }
+
+      // Max size validation (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        if (alertBox) {
+          alertBox.textContent = `File "${file.name}" exceeds 5MB size limit. Please upload an optimized image.`;
+          alertBox.style.display = 'block';
+        }
+        continue;
+      }
+
+      if (pFill) pFill.style.width = Math.round(((i + 0.3) / files.length) * 100) + '%';
+
+      try {
+        if (sb && typeof sb.uploadProductImage === 'function') {
+          const res = await sb.uploadProductImage(file, (pct) => {
+            if (pFill) {
+              const overall = Math.round(((i + (pct / 100)) / files.length) * 100);
+              pFill.style.width = overall + '%';
+            }
+          });
+          if (res && res.success && res.publicUrl) {
+            modalProductImages.push(res.publicUrl);
+          } else {
+            const dataUrl = await readFileAsDataURL(file);
+            modalProductImages.push(dataUrl);
+          }
+        } else {
+          const dataUrl = await readFileAsDataURL(file);
+          modalProductImages.push(dataUrl);
+        }
+      } catch (err) {
+        console.warn('Image upload fallback:', err);
+        const dataUrl = await readFileAsDataURL(file);
+        modalProductImages.push(dataUrl);
+      }
+    }
+
+    if (pFill) pFill.style.width = '100%';
+    setTimeout(() => {
+      if (pBar) pBar.style.display = 'none';
+      if (pFill) pFill.style.width = '0%';
+    }, 400);
+
+    updateModalProductImagesUI();
+    const fileInput = document.getElementById('fProdFileInput');
+    if (fileInput) fileInput.value = '';
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => resolve('assets/kanchipuram-loom.jpg');
+      reader.readAsDataURL(file);
+    });
+  }
+
   function openAddProductModal() {
     openProductFormModal(null);
   }
@@ -1028,6 +1206,19 @@
     const container = document.getElementById('sfModalContainer');
     if (!container) return;
 
+    // Initialize multi-image gallery state
+    if (prod) {
+      if (Array.isArray(prod.images) && prod.images.length > 0) {
+        modalProductImages = [...prod.images];
+      } else if (prod.img) {
+        modalProductImages = [prod.img];
+      } else {
+        modalProductImages = [];
+      }
+    } else {
+      modalProductImages = [];
+    }
+
     const initialCategory = prod ? prod.category : 'Kanchipuram';
     const autoSku = prod ? prod.sku : db.generateNextSku(initialCategory);
     const autoBarcode = prod ? (prod.barcode || '') : db.generateNextBarcode(initialCategory);
@@ -1039,7 +1230,7 @@
             <div>
               <h3>${isEdit ? `Edit Saree: ${prod.name}` : '+ Add Handcrafted Saree to Catalogue'}</h3>
               <p style="margin: 0; font-size: 11.5px; color: var(--secondary-text);">
-                Automatic Code 128 barcode generation and unique SKU assignment.
+                Automatic Code 128 barcode generation, unique SKU assignment, and central image storage.
               </p>
             </div>
             <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
@@ -1168,13 +1359,52 @@
 
             <div class="sf-form-grid-2">
               <div class="sf-form-group">
-                <label>Primary Image Asset Path</label>
-                <input type="text" id="fProdImg" value="${prod ? prod.img : 'assets/kanchipuram-loom.jpg'}" placeholder="assets/kanchipuram-loom.jpg">
+                <label>Promotional Badge</label>
+                <input type="text" id="fProdBadge" value="${prod ? (prod.badge || '') : 'New Arrival'}" placeholder="e.g. Bestseller, Heirloom">
               </div>
 
               <div class="sf-form-group">
-                <label>Promotional Badge</label>
-                <input type="text" id="fProdBadge" value="${prod ? (prod.badge || '') : 'New Arrival'}" placeholder="e.g. Bestseller, Heirloom">
+                <label>Material & Zari Certification</label>
+                <input type="text" id="fProdMaterial" value="${prod ? (prod.material || '') : 'Pure Mulberry Silk (Silk Mark Certified)'}" placeholder="e.g. Silk Mark Certified">
+              </div>
+            </div>
+
+            <!-- Saree Multi-Image Uploader Section -->
+            <div class="sf-image-uploader-section">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #3B2B25;">
+                  Product Photographs (Multi-Image Gallery & Storage) *
+                </label>
+                <small style="font-size: 11px; color: var(--secondary-text);">First photograph is primary cover</small>
+              </div>
+
+              <!-- Drag & Drop Zone -->
+              <div class="sf-image-dropzone" id="modalImageDropzone"
+                   onclick="document.getElementById('fProdFileInput').click()"
+                   ondragover="event.preventDefault(); this.classList.add('dragover');"
+                   ondragleave="this.classList.remove('dragover');"
+                   ondrop="event.preventDefault(); this.classList.remove('dragover'); SFAdmin.handleFileInputChange(event.dataTransfer.files);">
+                <span class="sf-image-dropzone-icon">📷</span>
+                <div class="sf-image-dropzone-text">Click to browse or drag & drop high-resolution saree photographs</div>
+                <div class="sf-image-dropzone-sub">Supported formats: JPG, PNG, WebP • Max 5MB per file • Direct central cloud storage integration</div>
+                <input type="file" id="fProdFileInput" multiple accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="SFAdmin.handleFileInputChange(this.files)">
+              </div>
+
+              <!-- Upload Progress & Error -->
+              <div class="sf-upload-progress-bar" id="modalImageProgressBar">
+                <div class="sf-upload-progress-fill" id="modalImageProgressFill"></div>
+              </div>
+              <div class="sf-upload-alert" id="modalImageUploadAlert"></div>
+
+              <!-- Direct URL Addition -->
+              <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <input type="text" id="fDirectImageUrl" placeholder="Or enter image URL / asset path..." style="font-size: 12px; padding: 6px 10px;">
+                <button type="button" class="sf-btn-outline" style="white-space: nowrap; font-size: 12px; padding: 6px 12px;" onclick="SFAdmin.handleAddImageUrl()">+ Add URL</button>
+              </div>
+
+              <!-- Live Image Gallery Grid -->
+              <div class="sf-image-gallery-grid" id="modalProductImagesGrid">
+                ${renderModalProductImagesHTML()}
               </div>
             </div>
 
@@ -1196,6 +1426,9 @@
   function handleSaveProduct(existingId) {
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
 
+    const primaryImg = modalProductImages.length > 0 ? modalProductImages[0] : 'assets/kanchipuram-loom.jpg';
+    const allImages = modalProductImages.length > 0 ? modalProductImages : [primaryImg];
+
     const data = {
       id: existingId,
       name: document.getElementById('fProdName').value,
@@ -1212,7 +1445,9 @@
       fabric: document.getElementById('fProdFabric').value,
       color: document.getElementById('fProdColor').value,
       occasion: document.getElementById('fProdOccasion').value,
-      img: document.getElementById('fProdImg').value,
+      material: document.getElementById('fProdMaterial') ? document.getElementById('fProdMaterial').value : 'Pure Mulberry Silk',
+      img: primaryImg,
+      images: allImages,
       badge: document.getElementById('fProdBadge').value,
       desc: document.getElementById('fProdDesc').value
     };
@@ -1355,6 +1590,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -1491,6 +1741,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -1553,13 +1818,40 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
 
   function renderOrdersTableRows(list) {
     if (!list.length) {
-      return '<tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--secondary-text);">No customer orders found.</td></tr>';
+      return `
+        <tr>
+          <td colspan="9" style="text-align: center; padding: 48px 16px; color: var(--secondary-text);">
+            <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 16px; color: #3B2B25; font-weight: 500; margin-bottom: 4px;">
+              No Customer Orders Yet
+            </div>
+            <div style="font-size: 12.5px; color: #7A695E;">
+              Transactions from your online boutique and showroom POS register will appear here in real time.
+            </div>
+          </td>
+        </tr>
+      `;
     }
     return list.map(o => `
       <tr>
@@ -1718,6 +2010,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -1782,6 +2089,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -1940,6 +2262,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -2183,6 +2520,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -2447,6 +2799,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -2722,6 +3089,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -3648,6 +4030,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -3740,6 +4137,11 @@
     openAddProductModal,
     openEditProductModal,
     handleSaveProduct,
+    handleFileInputChange,
+    setCoverImage,
+    moveProductImage,
+    removeProductImage,
+    handleAddImageUrl,
     handleDuplicateProduct,
     handleDeleteProduct,
     exportProductsCSV,
