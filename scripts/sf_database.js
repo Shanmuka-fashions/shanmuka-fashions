@@ -62,7 +62,7 @@
       {
         id: 1,
         sku: 'SF-KNC-001',
-        barcode: '8901001001',
+        barcode: 'SF26010001',
         name: 'Royal Kanchipuram Pure Silk Saree',
         category: 'Kanchipuram',
         collection: 'Heirloom Temple Collection',
@@ -93,7 +93,7 @@
       {
         id: 2,
         sku: 'SF-BNR-002',
-        barcode: '8901001002',
+        barcode: 'SF26020002',
         name: 'Banarasi Heritage Meenakari Weave',
         category: 'Banarasi',
         collection: 'Royal Kadwa Edit',
@@ -124,7 +124,7 @@
       {
         id: 3,
         sku: 'SF-ORG-003',
-        barcode: '8901001003',
+        barcode: 'SF26030003',
         name: 'Floral Organza Tissue Saree',
         category: 'Organza',
         collection: 'Celebration Pastels',
@@ -155,7 +155,7 @@
       {
         id: 4,
         sku: 'SF-SLK-004',
-        barcode: '8901001004',
+        barcode: 'SF26040004',
         name: 'Festive Peacock Zari Silk Saree',
         category: 'Silk',
         collection: 'Temple Heritage',
@@ -186,7 +186,7 @@
       {
         id: 5,
         sku: 'SF-COT-005',
-        barcode: '8901001005',
+        barcode: 'SF26050005',
         name: 'Everyday Handloom Cotton Grace',
         category: 'Cotton',
         collection: 'Summer Looms',
@@ -217,7 +217,7 @@
       {
         id: 6,
         sku: 'SF-KNC-006',
-        barcode: '8901001006',
+        barcode: 'SF26060006',
         name: 'Bridal Kanchipuram Gold Brocade',
         category: 'Kanchipuram',
         collection: 'Royal Muhurtham',
@@ -248,7 +248,7 @@
       {
         id: 7,
         sku: 'SF-BNR-007',
-        barcode: '8901001007',
+        barcode: 'SF26010007',
         name: 'Banarasi Celebration Silk Saree',
         category: 'Banarasi',
         collection: 'Royal Kadwa Edit',
@@ -279,7 +279,7 @@
       {
         id: 8,
         sku: 'SF-COT-008',
-        barcode: '8901001008',
+        barcode: 'SF26020008',
         name: 'Soft Indigo Handloom Cotton',
         category: 'Cotton',
         collection: 'Summer Looms',
@@ -310,7 +310,7 @@
       {
         id: 9,
         sku: 'SF-ORG-009',
-        barcode: '8901001009',
+        barcode: 'SF26030009',
         name: 'Shimmer Champagne Organza Tissue',
         category: 'Organza',
         collection: 'Celebration Pastels',
@@ -341,7 +341,7 @@
       {
         id: 10,
         sku: 'SF-SLK-010',
-        barcode: '8901001010',
+        barcode: 'SF26040010',
         name: 'Traditional Royal Temple Silk',
         category: 'Silk',
         collection: 'Temple Heritage',
@@ -372,7 +372,7 @@
       {
         id: 11,
         sku: 'SF-BNR-011',
-        barcode: '8901001011',
+        barcode: 'SF26050011',
         name: 'Regal Banarasi Brocade Bridal Edit',
         category: 'Banarasi',
         collection: 'Royal Kadwa Edit',
@@ -403,7 +403,7 @@
       {
         id: 12,
         sku: 'SF-COT-012',
-        barcode: '8901001012',
+        barcode: 'SF26060012',
         name: 'Pure Chanderi Cotton Silk Drape',
         category: 'Cotton',
         collection: 'Summer Looms',
@@ -434,7 +434,7 @@
       {
         id: 13,
         sku: 'SF-DSG-013',
-        barcode: '8901001013',
+        barcode: 'SF26010013',
         name: 'Royal Atelier Cutwork Designer Saree',
         category: 'Designer',
         collection: 'Couture Drape',
@@ -465,7 +465,7 @@
       {
         id: 14,
         sku: 'SF-DSG-014',
-        barcode: '8901001014',
+        barcode: 'SF26020014',
         name: 'Sapphire Tapestry Designer Saree',
         category: 'Designer',
         collection: 'Couture Drape',
@@ -1030,7 +1030,73 @@
         details: 'Initial central retail database created with verified stock and suppliers.',
         user: 'System'
       }
-    ]
+    ],
+    barcode_print_history: [
+      {
+        id: 'PRT-2026-001',
+        product_id: 1,
+        sku: 'SF-KNC-001',
+        barcode: 'SF26010001',
+        product_name: 'Royal Kanchipuram Pure Silk Saree',
+        price: 6499,
+        quantity: 8,
+        sticker_dimensions: '50x30mm',
+        is_reprint: false,
+        reason: 'Initial Catalogue Intake',
+        admin_user: 'Bhanu (Owner)',
+        created_at: '2026-11-08T11:00:00Z'
+      },
+      {
+        id: 'PRT-2026-002',
+        product_id: 2,
+        sku: 'SF-BNR-002',
+        barcode: 'SF26020002',
+        product_name: 'Banarasi Heritage Meenakari Weave',
+        price: 8499,
+        quantity: 5,
+        sticker_dimensions: '50x30mm',
+        is_reprint: false,
+        reason: 'Initial Catalogue Intake',
+        admin_user: 'Bhanu (Owner)',
+        created_at: '2026-11-08T11:30:00Z'
+      }
+    ],
+    inventory_units: [
+      {
+        id: 'UNIT-SF26010001-01',
+        unit_barcode: 'SF26010001-01',
+        product_id: 1,
+        sku: 'SF-KNC-001',
+        serial_number: 1,
+        status: 'AVAILABLE',
+        received_at: '2026-11-08T11:00:00Z'
+      },
+      {
+        id: 'UNIT-SF26010001-02',
+        unit_barcode: 'SF26010001-02',
+        product_id: 1,
+        sku: 'SF-KNC-001',
+        serial_number: 2,
+        status: 'AVAILABLE',
+        received_at: '2026-11-08T11:00:00Z'
+      }
+    ],
+    printer_configuration: {
+      printer_name: 'Shanmuka Thermal Label Printer (TSC / Zebra / Xprinter)',
+      connection_type: 'BROWSER_DIRECT',
+      printer_language: 'BROWSER_PDF',
+      sticker_width: 50,
+      sticker_height: 30,
+      label_gap: 3,
+      print_darkness: 10,
+      print_speed: 3,
+      include_branding: true,
+      include_price: true,
+      include_sku: true,
+      include_category: true,
+      font_size: 'normal',
+      barcode_height: 28
+    }
   };
 
   class DatabaseEngine {
@@ -1114,11 +1180,28 @@
     getProductBySkuOrBarcode(code) {
       if (!code) return null;
       const clean = String(code).trim().toLowerCase();
-      return this.getProducts().find(p =>
+      // 1. Direct SKU, Barcode, or ID match
+      const directMatch = this.getProducts().find(p =>
         (p.sku && p.sku.toLowerCase() === clean) ||
         (p.barcode && p.barcode.toLowerCase() === clean) ||
         (p.id && String(p.id) === clean)
       );
+      if (directMatch) return directMatch;
+
+      // 2. Serialized Individual Unit Barcode match (e.g. SF26010001-01)
+      if (this.state.inventory_units && Array.isArray(this.state.inventory_units)) {
+        const unit = this.state.inventory_units.find(u => u.unit_barcode && u.unit_barcode.toLowerCase() === clean);
+        if (unit) {
+          const parent = this.getProduct(unit.product_id);
+          if (parent) {
+            return {
+              ...parent,
+              scanned_unit: unit
+            };
+          }
+        }
+      }
+      return null;
     }
 
     saveProduct(prodData, adminUser = 'Bhanu (Owner)') {
@@ -1135,18 +1218,42 @@
         const existing = products[idx];
         const oldStock = existing.stock_qty;
         const newStock = parseInt(prodData.stock_qty !== undefined ? prodData.stock_qty : existing.stock_qty, 10);
+        const newPrice = parseInt(prodData.price, 10);
+        const isPriceChanged = existing.price !== newPrice;
+
+        // Barcode permanence: preserve existing barcode unless explicitly edited with uniqueness check
+        let barcode = existing.barcode;
+        if (prodData.barcode && prodData.barcode.trim() !== existing.barcode) {
+          const bcVal = this.validateBarcodeUniqueness(prodData.barcode, id);
+          if (!bcVal.valid) throw new Error(bcVal.message);
+          barcode = prodData.barcode.trim();
+        }
+
+        // SKU uniqueness validation
+        let sku = existing.sku;
+        if (prodData.sku && prodData.sku.trim().toUpperCase() !== existing.sku) {
+          const skuVal = this.validateSkuUniqueness(prodData.sku, id);
+          if (!skuVal.valid) throw new Error(skuVal.message);
+          sku = prodData.sku.trim().toUpperCase();
+        }
 
         // Update product
         const updated = {
           ...existing,
           ...prodData,
           id,
-          price: parseInt(prodData.price, 10),
+          sku,
+          barcode,
+          barcode_type: existing.barcode_type || 'CODE128',
+          tracking_mode: prodData.tracking_mode || existing.tracking_mode || 'PRODUCT',
+          barcode_status: 'VERIFIED',
+          price: newPrice,
           old: prodData.old ? parseInt(prodData.old, 10) : existing.old,
-          purchase_cost: prodData.purchase_cost ? parseInt(prodData.purchase_cost, 10) : (existing.purchase_cost || Math.round(prodData.price * 0.58)),
+          purchase_cost: prodData.purchase_cost ? parseInt(prodData.purchase_cost, 10) : (existing.purchase_cost || Math.round(newPrice * 0.58)),
           stock_qty: newStock,
           low_stock_threshold: prodData.low_stock_threshold ? parseInt(prodData.low_stock_threshold, 10) : 2,
-          stock: newStock <= 0 ? 'Sold Out' : (newStock <= 2 ? 'Low Stock' : 'In Stock')
+          stock: newStock <= 0 ? 'Sold Out' : (newStock <= 2 ? 'Low Stock' : 'In Stock'),
+          price_outdated: isPriceChanged && existing.last_printed_price && existing.last_printed_price !== newPrice
         };
         products[idx] = updated;
 
@@ -1174,8 +1281,24 @@
       } else {
         // Create new Saree
         const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-        const sku = prodData.sku ? prodData.sku.trim().toUpperCase() : `SF-${(prodData.category || 'SLK').substr(0, 3).toUpperCase()}-${String(newId).padStart(3, '0')}`;
-        const barcode = prodData.barcode ? prodData.barcode.trim() : `890100${String(newId).padStart(4, '0')}`;
+        const category = prodData.category || 'Silk';
+
+        // 1. Auto-generate or validate SKU
+        let sku = prodData.sku ? prodData.sku.trim().toUpperCase() : this.generateNextSku(category);
+        const skuCheck = this.validateSkuUniqueness(sku);
+        if (!skuCheck.valid) {
+          if (prodData.sku) throw new Error(skuCheck.message);
+          sku = this.generateNextSku(category);
+        }
+
+        // 2. Auto-generate or validate Barcode (Code 128 Internal Standard)
+        let barcode = prodData.barcode ? prodData.barcode.trim() : this.generateNextBarcode(category);
+        const barcodeCheck = this.validateBarcodeUniqueness(barcode);
+        if (!barcodeCheck.valid) {
+          if (prodData.barcode) throw new Error(barcodeCheck.message);
+          barcode = this.generateNextBarcode(category);
+        }
+
         const stockQty = parseInt(prodData.stock_qty || 0, 10);
         const price = parseInt(prodData.price, 10);
         const purchaseCost = parseInt(prodData.purchase_cost || Math.round(price * 0.58), 10);
@@ -1184,6 +1307,12 @@
           id: newId,
           sku,
           barcode,
+          barcode_type: 'CODE128',
+          tracking_mode: prodData.tracking_mode || 'PRODUCT',
+          barcode_status: 'VERIFIED',
+          last_printed_price: null,
+          last_printed_at: null,
+          price_outdated: false,
           name: prodData.name.trim(),
           category: prodData.category || 'Silk',
           collection: prodData.collection || 'Heirloom Edits',
@@ -1268,6 +1397,171 @@
       this.logAudit('PRODUCT_DELETE', 'PRODUCT', numId, `Deleted product "${p.name}" (${p.sku})`, adminUser);
       this.commit();
       return true;
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BARCODE & THERMAL LABEL PRINTING SUITE
+    // ═══════════════════════════════════════════════════════════════════════════
+    generateNextSku(category = 'Silk') {
+      const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : (typeof require !== 'undefined' ? require('./sf_barcode') : null);
+      const existingSkus = this.getProducts().map(p => p.sku).filter(Boolean);
+      const nextId = (this.getProducts().length || 0) + 1;
+      return bc ? bc.generateUniqueSKU(category, nextId, existingSkus) : `SF-SLK-${String(nextId).padStart(3, '0')}`;
+    }
+
+    generateNextBarcode(category = 'Silk') {
+      const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : (typeof require !== 'undefined' ? require('./sf_barcode') : null);
+      const existingBarcodes = this.getProducts().map(p => p.barcode).filter(Boolean);
+      const nextId = (this.getProducts().length || 0) + 1;
+      return bc ? bc.generateUniqueBarcode(category, nextId, existingBarcodes) : `SF2601${String(nextId).padStart(4, '0')}`;
+    }
+
+    validateSkuUniqueness(sku, excludeProductId = null) {
+      if (!sku) return { valid: false, message: 'SKU is required.' };
+      const clean = String(sku).trim().toUpperCase();
+      const existing = this.getProducts().find(p => p.sku && p.sku.toUpperCase() === clean && p.id !== parseInt(excludeProductId, 10));
+      if (existing) {
+        return { valid: false, message: `SKU "${clean}" is already assigned to "${existing.name}". Each saree SKU must be unique.` };
+      }
+      return { valid: true };
+    }
+
+    validateBarcodeUniqueness(barcode, excludeProductId = null) {
+      if (!barcode) return { valid: false, message: 'Barcode is required.' };
+      const clean = String(barcode).trim().toUpperCase();
+      const existing = this.getProducts().find(p => p.barcode && p.barcode.toUpperCase() === clean && p.id !== parseInt(excludeProductId, 10));
+      if (existing) {
+        return { valid: false, message: `Barcode "${clean}" is already registered to "${existing.name}". Duplicate barcodes are strictly rejected.` };
+      }
+      return { valid: true };
+    }
+
+    getBarcodePrintHistory() {
+      if (!this.state.barcode_print_history) this.state.barcode_print_history = [];
+      return this.state.barcode_print_history;
+    }
+
+    recordPrintHistory({ productId, sku, barcode, productName, price, quantity = 1, dimensions = '50x30mm', isReprint = false, reason = 'Inventory Tagging', adminUser = 'Bhanu (Owner)' }) {
+      if (!this.state.barcode_print_history) this.state.barcode_print_history = [];
+      const prod = this.getProduct(productId);
+      if (prod) {
+        prod.last_printed_price = price !== undefined ? price : prod.price;
+        prod.last_printed_at = new Date().toISOString();
+        prod.price_outdated = false;
+      }
+
+      const record = {
+        id: 'PRT-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        product_id: productId,
+        sku: sku || prod?.sku,
+        barcode: barcode || prod?.barcode,
+        product_name: productName || prod?.name,
+        price: price !== undefined ? price : prod?.price,
+        quantity: parseInt(quantity, 10) || 1,
+        sticker_dimensions: dimensions,
+        is_reprint: !!isReprint,
+        reason: reason,
+        admin_user: adminUser,
+        created_at: new Date().toISOString()
+      };
+
+      this.state.barcode_print_history.unshift(record);
+      this.logAudit(
+        isReprint ? 'BARCODE_REPRINT' : 'BARCODE_PRINT',
+        'BARCODE',
+        record.barcode,
+        `Printed ${record.quantity} thermal label(s) [${record.sticker_dimensions}] for ${record.product_name} (${record.sku})`,
+        adminUser
+      );
+      this.commit();
+      return record;
+    }
+
+    getPrinterConfig() {
+      if (!this.state.printer_configuration) {
+        this.state.printer_configuration = {
+          printer_name: 'Shanmuka Thermal Label Printer (TSC / Zebra / Xprinter)',
+          connection_type: 'BROWSER_DIRECT',
+          printer_language: 'BROWSER_PDF',
+          sticker_width: 50,
+          sticker_height: 30,
+          label_gap: 3,
+          print_darkness: 10,
+          print_speed: 3,
+          include_branding: true,
+          include_price: true,
+          include_sku: true,
+          include_category: true,
+          font_size: 'normal',
+          barcode_height: 28
+        };
+      }
+      return this.state.printer_configuration;
+    }
+
+    savePrinterConfig(updates, adminUser = 'Bhanu (Owner)') {
+      this.state.printer_configuration = {
+        ...this.getPrinterConfig(),
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      this.logAudit('PRINTER_CONFIG_UPDATE', 'SETTINGS', 'PRINTER', 'Updated thermal barcode printer configuration', adminUser);
+      this.commit();
+      return this.state.printer_configuration;
+    }
+
+    getInventoryUnits(productId = null) {
+      if (!this.state.inventory_units) this.state.inventory_units = [];
+      if (!productId) return this.state.inventory_units;
+      return this.state.inventory_units.filter(u => u.product_id === parseInt(productId, 10) || String(u.product_id) === String(productId));
+    }
+
+    generateInventoryUnits(productId, count = 1, adminUser = 'Bhanu (Owner)') {
+      if (!this.state.inventory_units) this.state.inventory_units = [];
+      const prod = this.getProduct(productId);
+      if (!prod) throw new Error('Product not found for unit generation');
+
+      const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : (typeof require !== 'undefined' ? require('./sf_barcode') : null);
+      const existingUnits = this.getInventoryUnits(productId);
+      let nextSerial = existingUnits.length ? Math.max(...existingUnits.map(u => u.serial_number || 0)) + 1 : 1;
+
+      const createdUnits = [];
+      for (let i = 0; i < count; i++) {
+        const serialNo = nextSerial + i;
+        const unitBarcode = bc ? bc.generateUnitBarcode(prod.barcode, serialNo) : `${prod.barcode}-${String(serialNo).padStart(2, '0')}`;
+        const unit = {
+          id: 'UNIT-' + unitBarcode,
+          unit_barcode: unitBarcode,
+          product_id: prod.id,
+          sku: prod.sku,
+          serial_number: serialNo,
+          status: 'AVAILABLE',
+          received_at: new Date().toISOString(),
+          sold_at: null,
+          sold_order_id: null
+        };
+        this.state.inventory_units.push(unit);
+        createdUnits.push(unit);
+      }
+
+      this.logAudit('UNIT_BARCODES_GENERATED', 'INVENTORY', prod.sku, `Generated ${count} serialized unit barcode(s) for "${prod.name}"`, adminUser);
+      this.commit();
+      return createdUnits;
+    }
+
+    markUnitSold(unitBarcode, orderId, adminUser = 'System') {
+      if (!this.state.inventory_units) return null;
+      const unit = this.state.inventory_units.find(u => u.unit_barcode === unitBarcode);
+      if (!unit) return null;
+      if (unit.status === 'SOLD') {
+        throw new Error(`Saree unit ${unitBarcode} is already marked as SOLD in order ${unit.sold_order_id}. Physical drape cannot be sold twice.`);
+      }
+      unit.status = 'SOLD';
+      unit.sold_at = new Date().toISOString();
+      unit.sold_order_id = orderId;
+      this.commit();
+      return unit;
     }
 
     // ── INVENTORY LEDGER & STOCK MOVEMENTS ──

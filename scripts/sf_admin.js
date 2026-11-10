@@ -19,6 +19,28 @@
   let posCashTendered = 0;
   let selectedReportFilter = 'all';
 
+  // ── BARCODE & THERMAL PRINTING STATE ──
+  const selectedProductIds = new Set();
+  let activeDesignerTarget = null;
+  let activeDesignerConfig = {
+    width: 50,
+    height: 30,
+    gap: 3,
+    includeBranding: true,
+    includePrice: true,
+    includeMRP: true,
+    includeSKU: true,
+    includeCategory: true,
+    barcodeHeight: 28,
+    fontSize: 'normal',
+    zoom: 1.5,
+    qtyMode: 'one',
+    customQty: 1,
+    isReprint: false,
+    reason: 'Inventory Tagging'
+  };
+  let lastPOSScanInfo = null;
+
   function formatMoney(amount) {
     return '₹' + (amount || 0).toLocaleString('en-IN');
   }
@@ -459,6 +481,7 @@
             <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Designer', this)">Designer</button>
           </div>
 
+          <div id="posScanFeedbackWrap"></div>
           <div class="pos-products-grid" id="posProductsGrid">
             ${renderPOSProductsGrid(products)}
           </div>
@@ -630,6 +653,48 @@
     if (grid) grid.innerHTML = renderPOSProductsGrid(prods);
   }
 
+
+  // Audio Synthesis for Hardware Barcode Scanners (Web Audio API)
+  function playScanSound(type = 'success') {
+    try {
+      if (typeof window === 'undefined') return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'success') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } else {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch (e) {}
+  }
+
+  function renderPOSFeedback() {
+    const el = document.getElementById('posScanFeedbackWrap');
+    if (!el || !lastPOSScanInfo) return;
+    if (lastPOSScanInfo.error) {
+      el.innerHTML = `<div class="pos-scanned-error"><span>⚠️ ${lastPOSScanInfo.message}</span><button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer;">✕</button></div>`;
+    } else {
+      el.innerHTML = `<div class="pos-scanned-feedback"><span>✅ ${lastPOSScanInfo.message}</span><small style="color: #2E7D32;">Available: ${lastPOSScanInfo.stock} pcs</small></div>`;
+    }
+  }
+
   function handlePOSBarcodeKeyDown(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -637,11 +702,30 @@
       if (!val) return;
       const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
       const prod = db.getProductBySkuOrBarcode(val);
+
       if (prod) {
+        if ((prod.stock_qty || 0) <= 0) {
+          playScanSound('error');
+          lastPOSScanInfo = { error: true, message: `"${prod.name}" (${prod.sku}) is SOLD OUT (0 in stock).` };
+          renderPOSFeedback();
+          e.target.select();
+          return;
+        }
+
+        playScanSound('success');
         addPOStoCart(prod.id);
+        lastPOSScanInfo = {
+          success: true,
+          message: `Scanned: ${prod.name} (${prod.sku}) — ₹${Number(prod.price).toLocaleString('en-IN')}`,
+          stock: prod.stock_qty
+        };
+        renderPOSFeedback();
         e.target.value = '';
       } else {
-        alert(`No saree found matching barcode/SKU "${val}".`);
+        playScanSound('error');
+        lastPOSScanInfo = { error: true, message: `No saree found matching barcode/SKU "${val}".` };
+        renderPOSFeedback();
+        e.target.select();
       }
     }
   }
@@ -768,7 +852,9 @@
             <h1>Saree Product Catalogue</h1>
             <p>Master handloom repository with real-time central inventory, purchase costs, and SKUs.</p>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="sf-btn-outline" onclick="SFAdmin.openBulkBarcodeModal()">🏷️ Bulk Print Stickers</button>
+            <button class="sf-btn-outline" onclick="SFAdmin.openPrintHistoryModal()">📜 Print History</button>
             <button class="sf-btn-outline" onclick="SFAdmin.exportProductsCSV()">Export CSV</button>
             <button class="sf-btn-primary" onclick="SFAdmin.openAddProductModal()">+ Add New Saree</button>
           </div>
@@ -798,6 +884,9 @@
             <table class="sf-table" id="sfProductsTable">
               <thead>
                 <tr>
+                  <th style="width: 36px; text-align: center;">
+                    <input type="checkbox" id="sfSelectAllProds" onchange="SFAdmin.toggleSelectAllProducts(this)" title="Select all sarees for bulk printing">
+                  </th>
                   <th style="width: 50px;">Image</th>
                   <th>SKU / Barcode</th>
                   <th>Saree Name & Details</th>
@@ -816,6 +905,21 @@
             </table>
           </div>
         </div>
+
+        <!-- Sticky Bulk Selection Actions Bar -->
+        ${selectedProductIds.size > 0 ? `
+          <div class="sf-bulk-actions-bar">
+            <div>
+              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
+              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
+                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+              </button>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -828,13 +932,20 @@
       const isOut = (p.stock_qty || 0) <= 0;
       const isLow = (p.stock_qty || 0) <= (p.low_stock_threshold || 2) && !isOut;
       return `
-        <tr>
+        <tr data-product-id="${p.id}">
+          <td style="text-align: center;">
+            <input type="checkbox" class="sf-prod-chk" value="${p.id}" ${selectedProductIds.has(p.id) ? 'checked' : ''} onchange="SFAdmin.handleProductSelectionChange(${p.id}, this.checked)">
+          </td>
           <td>
             <img src="${p.img}" alt="${p.name}" class="sf-table-thumb" loading="lazy">
           </td>
           <td>
             <b>${p.sku}</b>
-            <small style="display: block; color: var(--secondary-text);">${p.barcode || '—'}</small>
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <span style="font-family: monospace; font-size: 11px; color: var(--secondary-text);">${p.barcode || '—'}</span>
+              <button class="sf-btn-icon" style="padding: 1px 4px; font-size: 10px;" title="Print Sticker" onclick="SFAdmin.openBarcodePrinterModal(${p.id})">🏷️</button>
+            </div>
+            ${p.price_outdated ? `<span class="sf-badge-price-outdated" title="Price has been modified. Printed label may show older price.">⚠️ Price Changed</span>` : ''}
           </td>
           <td>
             <strong style="color: var(--espresso-brown);">${p.name}</strong>
@@ -856,6 +967,7 @@
             <span class="sf-badge badge-status-${p.status.toLowerCase()}">${p.status}</span>
           </td>
           <td style="text-align: right; white-space: nowrap;">
+            <button class="sf-btn-icon" title="Print Barcode Sticker" onclick="SFAdmin.openBarcodePrinterModal(${p.id})">🏷️</button>
             <button class="sf-btn-icon" title="Edit Saree" onclick="SFAdmin.openEditProductModal(${p.id})">✏️</button>
             <button class="sf-btn-icon" title="Duplicate Drape" onclick="SFAdmin.handleDuplicateProduct(${p.id})">📋</button>
             <button class="sf-btn-icon" title="Stock History" onclick="SFAdmin.openProductStockHistoryModal(${p.id})">📦</button>
@@ -912,39 +1024,77 @@
 
   function openProductFormModal(prod = null) {
     const isEdit = !!prod;
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
     const container = document.getElementById('sfModalContainer');
     if (!container) return;
+
+    const initialCategory = prod ? prod.category : 'Kanchipuram';
+    const autoSku = prod ? prod.sku : db.generateNextSku(initialCategory);
+    const autoBarcode = prod ? (prod.barcode || '') : db.generateNextBarcode(initialCategory);
 
     container.innerHTML = `
       <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
         <div class="sf-modal-card sf-modal-lg">
           <div class="sf-modal-header">
-            <h3>${isEdit ? `Edit Saree: ${prod.name}` : '+ Add Handcrafted Saree to Catalogue'}</h3>
+            <div>
+              <h3>${isEdit ? `Edit Saree: ${prod.name}` : '+ Add Handcrafted Saree to Catalogue'}</h3>
+              <p style="margin: 0; font-size: 11.5px; color: var(--secondary-text);">
+                Automatic Code 128 barcode generation and unique SKU assignment.
+              </p>
+            </div>
             <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
           </div>
 
           <form id="sfProductForm" onsubmit="event.preventDefault(); SFAdmin.handleSaveProduct(${isEdit ? prod.id : 'null'});">
+            <!-- Live Barcode Banner -->
+            <div style="background: #FDFBF7; border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--secondary-text); font-weight: 700;">
+                  Code 128 Barcode Preview
+                </div>
+                <div id="modalBarcodePreviewBox" style="margin-top: 4px;"></div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                ${isEdit ? `
+                  <button type="button" class="sf-btn-outline" onclick="SFAdmin.openBarcodePrinterModal(${prod.id})" style="font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                    🏷️ Print Barcode Stickers
+                  </button>
+                ` : `
+                  <span class="sf-badge badge-status-published" style="font-size: 11px;">Status: Auto-Generated Code 128</span>
+                `}
+              </div>
+            </div>
+
             <div class="sf-form-grid-3">
               <div class="sf-form-group col-span-2">
                 <label>Saree Title / Product Name *</label>
-                <input type="text" id="fProdName" required value="${prod ? prod.name : ''}" placeholder="e.g. Royal Kanchipuram Pure Silk Saree">
+                <input type="text" id="fProdName" required value="${prod ? prod.name : ''}" placeholder="e.g. Royal Kanchipuram Pure Silk Saree" oninput="SFAdmin.updateModalBarcodePreview()">
               </div>
 
               <div class="sf-form-group">
                 <label>Unique SKU *</label>
-                <input type="text" id="fProdSku" required value="${prod ? prod.sku : ''}" placeholder="e.g. SF-KNC-015">
+                <div style="display: flex; gap: 4px;">
+                  <input type="text" id="fProdSku" required value="${autoSku}" placeholder="e.g. SF-KAN-015" oninput="SFAdmin.updateModalBarcodePreview()">
+                  ${!isEdit ? `<button type="button" class="sf-btn-outline" style="padding: 4px 8px;" title="Regenerate SKU" onclick="SFAdmin.refreshModalSku()">⚡</button>` : ''}
+                </div>
               </div>
             </div>
 
             <div class="sf-form-grid-3">
               <div class="sf-form-group">
-                <label>Barcode / GTIN</label>
-                <input type="text" id="fProdBarcode" value="${prod ? (prod.barcode || '') : ''}" placeholder="e.g. 8901001015">
+                <label>Barcode (Code 128) *</label>
+                <div style="display: flex; gap: 4px;">
+                  <input type="text" id="fProdBarcode" required value="${autoBarcode}" placeholder="e.g. SF26010015" oninput="SFAdmin.updateModalBarcodePreview()">
+                  ${!isEdit ? `<button type="button" class="sf-btn-outline" style="padding: 4px 8px;" title="Regenerate Barcode" onclick="SFAdmin.refreshModalBarcode()">⚡</button>` : ''}
+                </div>
+                <small style="font-size: 11px; color: var(--secondary-text);">
+                  ${isEdit ? 'Permanent barcode retained across price updates' : 'Unique internal inventory identifier'}
+                </small>
               </div>
 
               <div class="sf-form-group">
                 <label>Weave Category *</label>
-                <select id="fProdCategory" required>
+                <select id="fProdCategory" required onchange="SFAdmin.handleModalCategoryChange(this.value, ${isEdit})">
                   ${['Kanchipuram', 'Banarasi', 'Organza', 'Silk', 'Cotton', 'Designer'].map(c => `
                     <option value="${c}" ${prod && prod.category === c ? 'selected' : ''}>${c}</option>
                   `).join('')}
@@ -1255,6 +1405,13 @@
             <div class="sf-form-group">
               <label>Reason / Audit Note *</label>
               <input type="text" id="adjReason" required placeholder="e.g. Received 5 pcs from Kanchipuram loom or damaged zari edge">
+            </div>
+
+            <div class="sf-form-group" style="margin-top: 8px; background: #FDFBF7; padding: 10px; border: 1px solid var(--border); border-radius: 4px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; font-size: 13px; margin: 0;">
+                <input type="checkbox" id="adjPrintLabels" checked>
+                <span>🏷️ <b>Print thermal barcode stickers</b> for newly received units</span>
+              </label>
             </div>
 
             <div class="sf-modal-actions">
@@ -2591,6 +2748,87 @@
         </div>
 
         <div class="sf-card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3>Thermal Barcode Label Printer Configuration</h3>
+              <p style="color: var(--secondary-text); font-size: 12px; margin: 2px 0 0 0;">
+                Configure hardware connection, label roll dimensions, and printer command languages (TSC, Zebra, Xprinter, TVS).
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="sf-btn-outline" onclick="SFAdmin.runPrinterCalibrationTest()">🧪 Calibration Test Print</button>
+              <button class="sf-btn-primary" onclick="SFAdmin.savePrinterSettings()">Save Printer Profile</button>
+            </div>
+          </div>
+
+          ${(() => {
+            const pConf = db.getPrinterConfig();
+            return `
+              <div class="sf-form-grid-3" style="margin-top: 16px;">
+                <div class="sf-form-group">
+                  <label>Printer Name / Model</label>
+                  <input type="text" id="pConfName" value="${pConf.printer_name || 'Thermal Label Printer'}" placeholder="e.g. TSC TE244 / Zebra ZD220">
+                </div>
+
+                <div class="sf-form-group">
+                  <label>Connection Interface</label>
+                  <select id="pConfConn">
+                    <option value="BROWSER_DIRECT" ${pConf.connection_type === 'BROWSER_DIRECT' ? 'selected' : ''}>Browser Direct (Standard OS Thermal Driver)</option>
+                    <option value="WEB_USB" ${pConf.connection_type === 'WEB_USB' ? 'selected' : ''}>WebUSB (Direct Raw Device Access)</option>
+                    <option value="WEB_SERIAL" ${pConf.connection_type === 'WEB_SERIAL' ? 'selected' : ''}>Web Serial / COM Port</option>
+                    <option value="NETWORK" ${pConf.connection_type === 'NETWORK' ? 'selected' : ''}>Network IP / JetDirect / QZ Tray</option>
+                  </select>
+                </div>
+
+                <div class="sf-form-group">
+                  <label>Printer Command Language</label>
+                  <select id="pConfLang">
+                    <option value="BROWSER_PDF" ${pConf.printer_language === 'BROWSER_PDF' ? 'selected' : ''}>Browser Print (100% Scale Millimeter CSS)</option>
+                    <option value="TSPL" ${pConf.printer_language === 'TSPL' ? 'selected' : ''}>TSPL-II (TSC, Xprinter, TVS, Godex)</option>
+                    <option value="ZPL" ${pConf.printer_language === 'ZPL' ? 'selected' : ''}>ZPL-II (Zebra Technologies)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="sf-form-grid-3">
+                <div class="sf-form-group">
+                  <label>Default Label Width (mm)</label>
+                  <input type="number" id="pConfWidth" value="${pConf.sticker_width || 50}" min="20" max="110">
+                </div>
+
+                <div class="sf-form-group">
+                  <label>Default Label Height (mm)</label>
+                  <input type="number" id="pConfHeight" value="${pConf.sticker_height || 30}" min="15" max="150">
+                </div>
+
+                <div class="sf-form-group">
+                  <label>Label Gap / Sensor Notch (mm)</label>
+                  <input type="number" id="pConfGap" value="${pConf.label_gap || 3}" min="0" max="10">
+                </div>
+              </div>
+
+              <div class="sf-form-grid-2">
+                <div class="sf-form-group">
+                  <label>Thermal Darkness / Heat (1-15)</label>
+                  <input type="range" id="pConfDarkness" value="${pConf.print_darkness || 10}" min="1" max="15" oninput="document.getElementById('darknessVal').textContent = this.value">
+                  <small style="color: var(--secondary-text);">Current Darkness: <b id="darknessVal">${pConf.print_darkness || 10}</b> (higher = darker barcodes)</small>
+                </div>
+
+                <div class="sf-form-group">
+                  <label>Print Speed</label>
+                  <select id="pConfSpeed">
+                    <option value="2" ${pConf.print_speed === 2 ? 'selected' : ''}>2.0 ips (Highest Precision for Silk Tags)</option>
+                    <option value="3" ${pConf.print_speed === 3 ? 'selected' : ''}>3.0 ips (Recommended Balanced)</option>
+                    <option value="4" ${pConf.print_speed === 4 ? 'selected' : ''}>4.0 ips (High Volume Fast)</option>
+                    <option value="5" ${pConf.print_speed === 5 ? 'selected' : ''}>5.0 ips (Draft Speed)</option>
+                  </select>
+                </div>
+              </div>
+            `;
+          })()}
+        </div>
+
+        <div class="sf-card" style="margin-bottom: 24px;">
           <h3>Commercial Business Profile</h3>
           <div class="sf-form-grid-2" style="margin-top: 12px;">
             <div class="sf-form-group">
@@ -2815,6 +3053,664 @@
     if (container) container.innerHTML = '';
   }
 
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BARCODE STICKER DESIGNER, BULK PRINTING & HARDWARE PROTOCOLS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function updateModalBarcodePreview() {
+    const codeVal = document.getElementById('fProdBarcode')?.value || document.getElementById('fProdSku')?.value;
+    const box = document.getElementById('modalBarcodePreviewBox');
+    if (!box || !codeVal) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : (typeof require !== 'undefined' ? require('./sf_barcode') : null);
+    if (bc) {
+      box.innerHTML = bc.generateBarcodeSVG(codeVal, {
+        barWidth: 1.2,
+        barHeight: 30,
+        showText: true,
+        fontSize: 9,
+        quietZone: 6
+      });
+    }
+  }
+
+  function handleModalCategoryChange(cat, isEdit) {
+    if (isEdit) return; // Keep existing barcode intact on edit
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const skuInput = document.getElementById('fProdSku');
+    const bcInput = document.getElementById('fProdBarcode');
+    if (skuInput) skuInput.value = db.generateNextSku(cat);
+    if (bcInput) bcInput.value = db.generateNextBarcode(cat);
+    updateModalBarcodePreview();
+  }
+
+  function refreshModalSku() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const cat = document.getElementById('fProdCategory')?.value || 'Silk';
+    const skuInput = document.getElementById('fProdSku');
+    if (skuInput) {
+      skuInput.value = db.generateNextSku(cat);
+      updateModalBarcodePreview();
+    }
+  }
+
+  function refreshModalBarcode() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const cat = document.getElementById('fProdCategory')?.value || 'Silk';
+    const bcInput = document.getElementById('fProdBarcode');
+    if (bcInput) {
+      bcInput.value = db.generateNextBarcode(cat);
+      updateModalBarcodePreview();
+    }
+  }
+
+  // ── SELECTION & BULK PRINTING ──
+  function toggleSelectAllProducts(chk) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const prods = db.getProducts();
+    if (chk.checked) {
+      prods.forEach(p => selectedProductIds.add(p.id));
+    } else {
+      selectedProductIds.clear();
+    }
+    render();
+  }
+
+  function handleProductSelectionChange(id, checked) {
+    if (checked) selectedProductIds.add(id);
+    else selectedProductIds.delete(id);
+    render();
+  }
+
+  function clearProductSelection() {
+    selectedProductIds.clear();
+    render();
+  }
+
+  function printSelectedProductLabels() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const selectedProds = db.getProducts().filter(p => selectedProductIds.has(p.id));
+    if (!selectedProds.length) {
+      alert('Please select at least one saree to print stickers.');
+      return;
+    }
+    openBarcodePrinterModal(selectedProds, { reason: 'Batch Selection Labelling' });
+  }
+
+  // ── BARCODE STICKER DESIGNER MODAL ──
+  function openBarcodePrinterModal(target, initialOptions = {}) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    // Resolve target to product or array of products
+    let productsList = [];
+    if (Array.isArray(target)) {
+      productsList = target;
+    } else if (typeof target === 'object' && target !== null && target.name) {
+      productsList = [target];
+    } else {
+      const p = db.getProduct(target);
+      if (p) productsList = [p];
+    }
+
+    if (!productsList.length) {
+      alert('No valid saree selected for barcode sticker printing.');
+      return;
+    }
+
+    activeDesignerTarget = productsList;
+    const isMulti = productsList.length > 1;
+    const primaryProd = productsList[0];
+
+    // Load saved hardware config as base
+    const pConf = db.getPrinterConfig();
+    activeDesignerConfig = {
+      ...activeDesignerConfig,
+      width: pConf.sticker_width || 50,
+      height: pConf.sticker_height || 30,
+      gap: pConf.label_gap || 3,
+      barcodeHeight: pConf.barcode_height || 28,
+      fontSize: pConf.font_size || 'normal',
+      includeBranding: pConf.include_branding !== false,
+      includePrice: pConf.include_price !== false,
+      includeMRP: true,
+      includeSKU: pConf.include_sku !== false,
+      includeCategory: pConf.include_category !== false,
+      qtyMode: initialOptions.defaultQty ? 'custom' : (isMulti ? 'stock' : 'one'),
+      customQty: initialOptions.defaultQty || 1,
+      isReprint: !!initialOptions.isReprint,
+      reason: initialOptions.reason || (initialOptions.isReprint ? 'Price/Tag Replacement' : 'Inventory Labelling')
+    };
+
+    container.innerHTML = `
+      <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
+        <div class="sf-modal-card sf-modal-xl">
+          <div class="sf-modal-header">
+            <div>
+              <h3>${isMulti ? `Batch Thermal Sticker Printing (${productsList.length} Sarees)` : `Barcode Sticker Designer: ${primaryProd.name}`}</h3>
+              <p style="margin: 0; font-size: 12px; color: var(--secondary-text);">
+                ${isMulti ? `Preparing thermal labels for ${productsList.length} selected drapes.` : `SKU: ${primaryProd.sku} • Barcode: ${primaryProd.barcode} • Stock: ${primaryProd.stock_qty} pcs`}
+              </p>
+            </div>
+            <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
+          </div>
+
+          <div class="sf-designer-body">
+            <!-- Left Config Controls -->
+            <div class="sf-designer-controls">
+              <div class="sf-designer-section">
+                <label class="sf-designer-label">Sticker Dimensions Preset</label>
+                <div class="sf-dimension-presets">
+                  <button class="sf-dim-btn ${activeDesignerConfig.width === 50 && activeDesignerConfig.height === 30 ? 'active' : ''}" onclick="SFAdmin.setStickerPreset(50, 30, this)">50 × 30 mm (Standard)</button>
+                  <button class="sf-dim-btn ${activeDesignerConfig.width === 50 && activeDesignerConfig.height === 25 ? 'active' : ''}" onclick="SFAdmin.setStickerPreset(50, 25, this)">50 × 25 mm (Slim)</button>
+                  <button class="sf-dim-btn ${activeDesignerConfig.width === 40 && activeDesignerConfig.height === 30 ? 'active' : ''}" onclick="SFAdmin.setStickerPreset(40, 30, this)">40 × 30 mm (Compact)</button>
+                  <button class="sf-dim-btn" onclick="SFAdmin.setStickerPreset('custom', 0, this)">Custom Size</button>
+                </div>
+
+                <div id="customDimRow" class="sf-form-grid-2" style="display: none; margin-top: 8px;">
+                  <div class="sf-form-group">
+                    <label>Width (mm)</label>
+                    <input type="number" id="lblWidth" value="${activeDesignerConfig.width}" min="20" max="110" oninput="SFAdmin.updateBarcodeStickerPreview()">
+                  </div>
+                  <div class="sf-form-group">
+                    <label>Height (mm)</label>
+                    <input type="number" id="lblHeight" value="${activeDesignerConfig.height}" min="15" max="150" oninput="SFAdmin.updateBarcodeStickerPreview()">
+                  </div>
+                </div>
+              </div>
+
+              <div class="sf-designer-section">
+                <label class="sf-designer-label">Fields Displayed on Label</label>
+                <div class="sf-checkbox-grid">
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncBrand" ${activeDesignerConfig.includeBranding ? 'checked' : ''} onchange="SFAdmin.updateBarcodeStickerPreview()"> Brand Name</label>
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncTitle" checked onchange="SFAdmin.updateBarcodeStickerPreview()"> Saree Title</label>
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncPrice" ${activeDesignerConfig.includePrice ? 'checked' : ''} onchange="SFAdmin.updateBarcodeStickerPreview()"> Selling Price (₹)</label>
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncMRP" ${activeDesignerConfig.includeMRP ? 'checked' : ''} onchange="SFAdmin.updateBarcodeStickerPreview()"> Original MRP</label>
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncSKU" ${activeDesignerConfig.includeSKU ? 'checked' : ''} onchange="SFAdmin.updateBarcodeStickerPreview()"> Unique SKU</label>
+                  <label class="sf-checkbox-item"><input type="checkbox" id="lblIncCategory" ${activeDesignerConfig.includeCategory ? 'checked' : ''} onchange="SFAdmin.updateBarcodeStickerPreview()"> Category & Color</label>
+                </div>
+              </div>
+
+              <div class="sf-designer-section">
+                <label class="sf-designer-label">Typography & Barcode Sizing</label>
+                <div class="sf-form-grid-2">
+                  <div class="sf-form-group">
+                    <label>Font Scale</label>
+                    <select id="lblFontSize" onchange="SFAdmin.updateBarcodeStickerPreview()">
+                      <option value="compact" ${activeDesignerConfig.fontSize === 'compact' ? 'selected' : ''}>Compact (Fine Print)</option>
+                      <option value="normal" ${activeDesignerConfig.fontSize === 'normal' ? 'selected' : ''}>Normal (Standard)</option>
+                      <option value="large" ${activeDesignerConfig.fontSize === 'large' ? 'selected' : ''}>Large (High Legibility)</option>
+                    </select>
+                  </div>
+                  <div class="sf-form-group">
+                    <label>Barcode Height: <span id="lblBcHeightVal">${activeDesignerConfig.barcodeHeight}px</span></label>
+                    <input type="range" id="lblBcHeight" min="18" max="42" value="${activeDesignerConfig.barcodeHeight}" oninput="SFAdmin.updateBarcodeStickerPreview()">
+                  </div>
+                </div>
+              </div>
+
+              <div class="sf-designer-section">
+                <label class="sf-designer-label">Print Quantities</label>
+                <div class="sf-qty-selector">
+                  <label><input type="radio" name="lblQtyMode" value="one" ${activeDesignerConfig.qtyMode === 'one' ? 'checked' : ''} onchange="SFAdmin.handleQtyModeChange(this.value)"> 1 Sticker each</label>
+                  <label><input type="radio" name="lblQtyMode" value="stock" ${activeDesignerConfig.qtyMode === 'stock' ? 'checked' : ''} onchange="SFAdmin.handleQtyModeChange(this.value)"> 1 per Stock Unit</label>
+                  <label><input type="radio" name="lblQtyMode" value="custom" ${activeDesignerConfig.qtyMode === 'custom' ? 'checked' : ''} onchange="SFAdmin.handleQtyModeChange(this.value)"> Custom</label>
+                  <input type="number" id="lblCustomQty" value="${activeDesignerConfig.customQty}" min="1" max="1000" style="width: 70px; ${activeDesignerConfig.qtyMode === 'custom' ? '' : 'display: none;'}" oninput="SFAdmin.updateQtyDisplay()">
+                </div>
+                <div style="font-size: 12px; color: var(--secondary-text); margin-top: 6px;">
+                  Total labels to dispatch: <b id="lblTotalPrintCount" style="color: var(--espresso-brown);">1</b> label(s)
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Live Preview & Print Dispatches -->
+            <div class="sf-designer-preview-pane">
+              <div class="sf-preview-header">
+                <span>True-Scale Preview: <b id="lblPreviewDimText">${activeDesignerConfig.width} × ${activeDesignerConfig.height} mm</b></span>
+                <div class="sf-zoom-controls">
+                  <button class="sf-zoom-btn ${activeDesignerConfig.zoom === 1.0 ? 'active' : ''}" onclick="SFAdmin.setPreviewZoom(1.0)">100%</button>
+                  <button class="sf-zoom-btn ${activeDesignerConfig.zoom === 1.5 ? 'active' : ''}" onclick="SFAdmin.setPreviewZoom(1.5)">150%</button>
+                  <button class="sf-zoom-btn ${activeDesignerConfig.zoom === 2.0 ? 'active' : ''}" onclick="SFAdmin.setPreviewZoom(2.0)">200%</button>
+                </div>
+              </div>
+
+              <!-- Physical Scaled Preview Area -->
+              <div class="sf-preview-canvas-wrap">
+                <div id="sfStickerLivePreview" class="sf-sticker-preview-holder"></div>
+              </div>
+
+              <!-- Print Action Buttons -->
+              <div class="sf-designer-actions">
+                <button class="sf-btn-primary" onclick="SFAdmin.triggerPrintStickers()" style="flex: 2; justify-content: center; font-size: 13.5px; padding: 12px 18px;">
+                  🖨️ Direct Browser Print (100% Thermal)
+                </button>
+                <button class="sf-btn-outline" onclick="SFAdmin.downloadTSPLFile()" title="Download TSPL command file for TSC / Xprinter / TVS" style="flex: 1;">
+                  💾 TSPL
+                </button>
+                <button class="sf-btn-outline" onclick="SFAdmin.downloadZPLFile()" title="Download ZPL command file for Zebra" style="flex: 1;">
+                  💾 ZPL
+                </button>
+                <button class="sf-btn-outline" onclick="SFAdmin.copyPrinterCode()" title="Copy raw command string to clipboard">
+                  📋 Copy Code
+                </button>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11.5px; color: var(--secondary-text);">
+                <span>Printer Engine: <b>Browser 100% Vector Print / ESC-POS / TSPL / ZPL</b></span>
+                <a href="javascript:void(0)" onclick="SFAdmin.triggerTestPrintSample()" style="color: var(--antique-gold); text-decoration: underline; font-weight: 600;">🧪 Print 1 Test Sample</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    updateBarcodeStickerPreview();
+  }
+
+  function setStickerPreset(w, h, btn) {
+    document.querySelectorAll('.sf-dim-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const customRow = document.getElementById('customDimRow');
+
+    if (w === 'custom') {
+      if (customRow) customRow.style.display = 'grid';
+    } else {
+      if (customRow) customRow.style.display = 'none';
+      activeDesignerConfig.width = w;
+      activeDesignerConfig.height = h;
+    }
+    updateBarcodeStickerPreview();
+  }
+
+  function setPreviewZoom(zoom) {
+    activeDesignerConfig.zoom = zoom;
+    document.querySelectorAll('.sf-zoom-btn').forEach(b => b.classList.remove('active'));
+    event?.target?.classList?.add('active');
+    const holder = document.getElementById('sfStickerLivePreview');
+    if (holder) {
+      holder.style.transform = `scale(${zoom})`;
+    }
+  }
+
+  function handleQtyModeChange(val) {
+    activeDesignerConfig.qtyMode = val;
+    const customInput = document.getElementById('lblCustomQty');
+    if (customInput) {
+      customInput.style.display = val === 'custom' ? 'inline-block' : 'none';
+    }
+    updateQtyDisplay();
+  }
+
+  function updateQtyDisplay() {
+    if (!activeDesignerTarget) return;
+    const mode = activeDesignerConfig.qtyMode;
+    let total = 0;
+
+    if (mode === 'one') {
+      total = activeDesignerTarget.length;
+    } else if (mode === 'stock') {
+      total = activeDesignerTarget.reduce((sum, p) => sum + (p.stock_qty || 1), 0);
+    } else {
+      const customVal = parseInt(document.getElementById('lblCustomQty')?.value || 1, 10) || 1;
+      activeDesignerConfig.customQty = customVal;
+      total = customVal * activeDesignerTarget.length;
+    }
+
+    const countEl = document.getElementById('lblTotalPrintCount');
+    if (countEl) countEl.textContent = total;
+  }
+
+  function updateBarcodeStickerPreview() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+
+    // Read current UI controls
+    const w = parseInt(document.getElementById('lblWidth')?.value || activeDesignerConfig.width, 10);
+    const h = parseInt(document.getElementById('lblHeight')?.value || activeDesignerConfig.height, 10);
+    const bcHeight = parseInt(document.getElementById('lblBcHeight')?.value || 28, 10);
+    const fontScale = document.getElementById('lblFontSize')?.value || 'normal';
+
+    activeDesignerConfig.width = w;
+    activeDesignerConfig.height = h;
+    activeDesignerConfig.barcodeHeight = bcHeight;
+    activeDesignerConfig.fontSize = fontScale;
+    activeDesignerConfig.includeBranding = !!document.getElementById('lblIncBrand')?.checked;
+    activeDesignerConfig.includePrice = !!document.getElementById('lblIncPrice')?.checked;
+    activeDesignerConfig.includeMRP = !!document.getElementById('lblIncMRP')?.checked;
+    activeDesignerConfig.includeSKU = !!document.getElementById('lblIncSKU')?.checked;
+    activeDesignerConfig.includeCategory = !!document.getElementById('lblIncCategory')?.checked;
+
+    const dimText = document.getElementById('lblPreviewDimText');
+    if (dimText) dimText.textContent = `${w} × ${h} mm`;
+    const bcValText = document.getElementById('lblBcHeightVal');
+    if (bcValText) bcValText.textContent = `${bcHeight}px`;
+
+    const holder = document.getElementById('sfStickerLivePreview');
+    if (holder) {
+      holder.style.transform = `scale(${activeDesignerConfig.zoom})`;
+      // Preview with first product in target
+      holder.innerHTML = bc.renderStickerHTML(activeDesignerTarget[0], activeDesignerConfig);
+    }
+
+    updateQtyDisplay();
+  }
+
+  function triggerPrintStickers() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+
+    const mode = activeDesignerConfig.qtyMode;
+    const labelItems = [];
+
+    activeDesignerTarget.forEach(prod => {
+      let qty = 1;
+      if (mode === 'stock') qty = Math.max(1, prod.stock_qty || 1);
+      else if (mode === 'custom') qty = activeDesignerConfig.customQty || 1;
+
+      labelItems.push({ product: prod, quantity: qty });
+
+      // Record in print history
+      db.recordPrintHistory({
+        productId: prod.id,
+        sku: prod.sku,
+        barcode: prod.barcode,
+        productName: prod.name,
+        price: prod.price,
+        quantity: qty,
+        dimensions: `${activeDesignerConfig.width}x${activeDesignerConfig.height}mm`,
+        isReprint: activeDesignerConfig.isReprint,
+        reason: activeDesignerConfig.reason,
+        adminUser: 'Bhanu (Owner)'
+      });
+    });
+
+    const totalLabels = labelItems.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Trigger browser print with millimeter @page CSS
+    bc.printStickersBrowser(labelItems, activeDesignerConfig);
+
+    toast(`Dispatched ${totalLabels} barcode sticker(s) to thermal printer queue.`);
+    closeModal();
+    render();
+  }
+
+  function triggerTestPrintSample() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+    const testItem = [{ product: activeDesignerTarget[0], quantity: 1 }];
+    bc.printStickersBrowser(testItem, activeDesignerConfig);
+  }
+
+  function downloadTSPLFile() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+    let tsplContent = '';
+
+    activeDesignerTarget.forEach(p => {
+      let qty = 1;
+      if (activeDesignerConfig.qtyMode === 'stock') qty = Math.max(1, p.stock_qty || 1);
+      else if (activeDesignerConfig.qtyMode === 'custom') qty = activeDesignerConfig.customQty || 1;
+      tsplContent += bc.generateTSPL(p, activeDesignerConfig, qty) + '\n';
+    });
+
+    const blob = new Blob([tsplContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Shanmuka_TSPL_${activeDesignerTarget[0].sku}.prn`;
+    link.click();
+    toast('Downloaded TSPL-II printer file.');
+  }
+
+  function downloadZPLFile() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+    let zplContent = '';
+
+    activeDesignerTarget.forEach(p => {
+      let qty = 1;
+      if (activeDesignerConfig.qtyMode === 'stock') qty = Math.max(1, p.stock_qty || 1);
+      else if (activeDesignerConfig.qtyMode === 'custom') qty = activeDesignerConfig.customQty || 1;
+      zplContent += bc.generateZPL(p, activeDesignerConfig, qty) + '\n';
+    });
+
+    const blob = new Blob([zplContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Shanmuka_ZPL_${activeDesignerTarget[0].sku}.zpl`;
+    link.click();
+    toast('Downloaded ZPL-II Zebra printer file.');
+  }
+
+  function copyPrinterCode() {
+    if (!activeDesignerTarget || !activeDesignerTarget.length) return;
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+    const code = bc.generateTSPL(activeDesignerTarget[0], activeDesignerConfig, 1);
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(code);
+      toast('Copied raw TSPL printer code to clipboard.');
+    } else {
+      alert('Raw TSPL Code:\n\n' + code);
+    }
+  }
+
+  // ── BULK PRINTING MODAL BY CATEGORY / STOCK ──
+  function openBulkBarcodeModal() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
+        <div class="sf-modal-card sf-modal-md">
+          <div class="sf-modal-header">
+            <h3>🏷️ Bulk Barcode Sticker Printing</h3>
+            <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
+          </div>
+
+          <div style="padding: 10px 0;">
+            <p style="color: var(--secondary-text); font-size: 13px; margin-bottom: 16px;">
+              Quickly generate thermal barcode labels in bulk by weave category or central stock status.
+            </p>
+
+            <div class="sf-form-group">
+              <label>Select Weave Category</label>
+              <select id="bulkPrintCat">
+                <option value="ALL">All Weave Collections (${db.getProducts().length} Sarees)</option>
+                <option value="Kanchipuram">Kanchipuram Pure Silk</option>
+                <option value="Banarasi">Banarasi Heritage</option>
+                <option value="Organza">Floral Organza</option>
+                <option value="Silk">Festive Silk</option>
+                <option value="Cotton">Handloom Cotton</option>
+                <option value="Designer">Designer Couture</option>
+              </select>
+            </div>
+
+            <div class="sf-form-group">
+              <label>Filter Target Sarees</label>
+              <select id="bulkPrintFilter">
+                <option value="ALL">All Catalogue Sarees</option>
+                <option value="INSTOCK">Only In-Stock Sarees (stock > 0)</option>
+                <option value="OUTDATED">Sarees with Outdated Printed Prices</option>
+                <option value="NEW">Newly Added Sarees</option>
+              </select>
+            </div>
+
+            <div class="sf-modal-actions" style="margin-top: 24px;">
+              <button type="button" class="sf-btn-outline" onclick="SFAdmin.closeModal()">Cancel</button>
+              <button type="button" class="sf-btn-primary" onclick="SFAdmin.handleExecuteBulkPrint()">
+                Launch Sticker Designer &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function handleExecuteBulkPrint() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const cat = document.getElementById('bulkPrintCat')?.value || 'ALL';
+    const filter = document.getElementById('bulkPrintFilter')?.value || 'ALL';
+
+    let prods = db.getProducts();
+    if (cat !== 'ALL') {
+      prods = prods.filter(p => p.category.toLowerCase() === cat.toLowerCase());
+    }
+
+    if (filter === 'INSTOCK') {
+      prods = prods.filter(p => (p.stock_qty || 0) > 0);
+    } else if (filter === 'OUTDATED') {
+      prods = prods.filter(p => p.price_outdated);
+    }
+
+    if (!prods.length) {
+      alert('No sarees match the selected bulk criteria.');
+      return;
+    }
+
+    openBarcodePrinterModal(prods, { reason: `Bulk Print [${cat} - ${filter}]` });
+  }
+
+  // ── PRINT HISTORY AUDIT MODAL ──
+  function openPrintHistoryModal() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const history = db.getBarcodePrintHistory();
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
+        <div class="sf-modal-card sf-modal-lg">
+          <div class="sf-modal-header">
+            <div>
+              <h3>📜 Barcode Sticker Printing History</h3>
+              <p style="margin: 0; font-size: 11.5px; color: var(--secondary-text);">
+                Complete audit trail of all physical label runs with reprint management.
+              </p>
+            </div>
+            <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
+          </div>
+
+          <div style="max-height: 440px; overflow-y: auto; margin-top: 10px;">
+            <table class="sf-table">
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Saree & SKU</th>
+                  <th>Barcode</th>
+                  <th>Printed Price</th>
+                  <th>Quantity</th>
+                  <th>Size</th>
+                  <th>Reason / Type</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${!history.length ? `
+                  <tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--secondary-text);">No sticker print runs recorded yet.</td></tr>
+                ` : history.map(h => {
+                  const prod = db.getProduct(h.product_id);
+                  const isPriceChanged = prod && prod.price !== h.price;
+                  return `
+                    <tr>
+                      <td><small>${formatDateTime(h.created_at)}</small></td>
+                      <td>
+                        <strong>${h.product_name}</strong>
+                        <small style="display: block; color: var(--secondary-text);">${h.sku}</small>
+                      </td>
+                      <td><code>${h.barcode}</code></td>
+                      <td>
+                        <b>₹${Number(h.price).toLocaleString('en-IN')}</b>
+                        ${isPriceChanged ? `<small style="display: block; color: #E65100; font-weight: 600;">Now: ₹${Number(prod.price).toLocaleString('en-IN')}</small>` : ''}
+                      </td>
+                      <td>${h.quantity} pcs</td>
+                      <td><small>${h.sticker_dimensions}</small></td>
+                      <td>
+                        <span class="sf-badge ${h.is_reprint ? 'badge-status-draft' : 'badge-status-published'}">
+                          ${h.is_reprint ? 'Reprint' : 'Original'}
+                        </span>
+                        <small style="display: block; color: var(--secondary-text);">${h.reason || 'Inventory'}</small>
+                      </td>
+                      <td style="text-align: right;">
+                        <button class="sf-btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="SFAdmin.reprintBarcodeSticker('${h.id}')">
+                          🏷️ Reprint
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function reprintBarcodeSticker(historyId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const history = db.getBarcodePrintHistory();
+    const item = history.find(h => h.id === historyId);
+    if (!item) return;
+
+    openBarcodePrinterModal(item.product_id, {
+      defaultQty: item.quantity,
+      isReprint: true,
+      reason: `Reprint of run ${item.id}`
+    });
+  }
+
+  // ── PRINTER SETTINGS HANDLERS ──
+  function savePrinterSettings() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const updates = {
+      printer_name: document.getElementById('pConfName')?.value || 'Thermal Label Printer',
+      connection_type: document.getElementById('pConfConn')?.value || 'BROWSER_DIRECT',
+      printer_language: document.getElementById('pConfLang')?.value || 'BROWSER_PDF',
+      sticker_width: parseInt(document.getElementById('pConfWidth')?.value || 50, 10),
+      sticker_height: parseInt(document.getElementById('pConfHeight')?.value || 30, 10),
+      label_gap: parseInt(document.getElementById('pConfGap')?.value || 3, 10),
+      print_darkness: parseInt(document.getElementById('pConfDarkness')?.value || 10, 10),
+      print_speed: parseInt(document.getElementById('pConfSpeed')?.value || 3, 10)
+    };
+
+    db.savePrinterConfig(updates);
+    toast('Thermal barcode printer profile successfully saved.');
+    render();
+  }
+
+  function runPrinterCalibrationTest() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const bc = typeof SFBarcode !== 'undefined' ? SFBarcode : require('./sf_barcode');
+    const pConf = db.getPrinterConfig();
+
+    const sampleProduct = {
+      name: 'Calibration Test Saree',
+      sku: 'SF-TEST-001',
+      barcode: 'SF26010001',
+      price: 9999,
+      old: 11999,
+      category: 'Test Weave',
+      color: 'Sample Gold'
+    };
+
+    bc.printStickersBrowser([{ product: sampleProduct, quantity: 1 }], {
+      width: pConf.sticker_width || 50,
+      height: pConf.sticker_height || 30,
+      includeBranding: true,
+      includePrice: true,
+      includeMRP: true,
+      includeSKU: true,
+      includeCategory: true
+    });
+    toast('Sent calibration test label to printer queue.');
+  }
+
   function attachTabEvents(tab, db) {
     // Tab specific keyboard or event attachments
     if (tab === 'pos') {
@@ -2875,7 +3771,32 @@
     importDatabaseBackup,
     resetDatabaseToFactory,
     openInvoicePrintModal,
-    closeModal
+    closeModal,
+    updateModalBarcodePreview,
+    handleModalCategoryChange,
+    refreshModalSku,
+    refreshModalBarcode,
+    toggleSelectAllProducts,
+    handleProductSelectionChange,
+    clearProductSelection,
+    printSelectedProductLabels,
+    openBarcodePrinterModal,
+    setStickerPreset,
+    setPreviewZoom,
+    handleQtyModeChange,
+    updateQtyDisplay,
+    updateBarcodeStickerPreview,
+    triggerPrintStickers,
+    triggerTestPrintSample,
+    downloadTSPLFile,
+    downloadZPLFile,
+    copyPrinterCode,
+    openBulkBarcodeModal,
+    handleExecuteBulkPrint,
+    openPrintHistoryModal,
+    reprintBarcodeSticker,
+    savePrinterSettings,
+    runPrinterCalibrationTest
   };
 }));
 

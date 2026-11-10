@@ -113,3 +113,4 @@ CREATE POLICY "Customers view own orders"
 -- Indexes for fast patron queries
 CREATE INDEX IF NOT EXISTS idx_customer_profiles_email ON customer_profiles(email);
 CREATE INDEX IF NOT EXISTS idx_customer_addresses_user_id ON customer_addresses(user_id);
+

@@ -1089,3 +1089,257 @@
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THERMAL BARCODE LABEL DESIGNER & STICKER PRINTING STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sf-modal-xl {
+  max-width: 1040px !important;
+  width: 95%;
+}
+
+.sf-designer-body {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .sf-designer-body {
+    flex-direction: column;
+  }
+}
+
+.sf-designer-controls {
+  flex: 1.1;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sf-designer-section {
+  border-bottom: 1px solid #F0EAE1;
+  padding-bottom: 14px;
+}
+
+.sf-designer-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sf-designer-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.sf-dimension-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sf-dim-btn {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: #FFF;
+  color: var(--espresso-brown);
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: 500;
+}
+
+.sf-dim-btn:hover {
+  border-color: var(--antique-gold);
+  background: #FDFBF7;
+}
+
+.sf-dim-btn.active {
+  border-color: var(--espresso-brown);
+  background: var(--espresso-brown);
+  color: #F5EBDD;
+  font-weight: 600;
+}
+
+.sf-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sf-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--primary-text);
+  cursor: pointer;
+}
+
+.sf-checkbox-item input {
+  accent-color: var(--espresso-brown);
+}
+
+.sf-qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.sf-qty-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* ── Designer Preview Pane ── */
+.sf-designer-preview-pane {
+  flex: 1.2;
+  background: #FAF7F2;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sf-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+}
+
+.sf-zoom-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.sf-zoom-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: #FFF;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.sf-zoom-btn.active {
+  background: var(--espresso-brown);
+  color: #FFF;
+  border-color: var(--espresso-brown);
+}
+
+.sf-preview-canvas-wrap {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EFEBE4;
+  border: 1px dashed #D5CDC2;
+  border-radius: 4px;
+  padding: 20px;
+  overflow: auto;
+}
+
+.sf-sticker-preview-holder {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  background: #FFFFFF;
+  transition: transform 0.2s ease;
+  transform-origin: center center;
+}
+
+.sf-designer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* ── Outdated Price Warning Badge ── */
+.sf-badge-price-outdated {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFF3E0;
+  color: #E65100;
+  border: 1px solid #FFE0B2;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Bulk Selection Sticky Bar ── */
+.sf-bulk-actions-bar {
+  position: sticky;
+  bottom: 16px;
+  background: var(--espresso-brown);
+  color: #F5EBDD;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 90;
+  margin-top: 14px;
+  animation: sfSlideUp 0.25s ease-out;
+}
+
+@keyframes sfSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── POS Scanned Product Feedback ── */
+.pos-scanned-feedback {
+  background: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  color: #2E7D32;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  animation: sfFadeIn 0.2s ease;
+}
+
+.pos-scanned-error {
+  background: #FFEBEE;
+  border: 1px solid #FFCDD2;
+  color: #C62828;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+@keyframes sfFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -3,7 +3,8 @@ const vm = require('vm');
 
 const html = fs.readFileSync('index.html', 'utf8');
 
-// Read sf_database.js, sf_admin.js, customer auth & views, and main script
+// Read sf_barcode.js, sf_database.js, sf_admin.js, customer auth & views, and main script
+const barcodeScript = fs.readFileSync('scripts/sf_barcode.js', 'utf8');
 const dbScript = fs.readFileSync('scripts/sf_database.js', 'utf8');
 const adminScript = fs.readFileSync('scripts/sf_admin.js', 'utf8');
 const custAuthScript = fs.readFileSync('scripts/sf_customer_auth.js', 'utf8');
@@ -103,6 +104,10 @@ sandbox.global = sandbox;
 vm.createContext(sandbox);
 
 try {
+  // 0. Run Barcode Engine
+  vm.runInContext(barcodeScript, sandbox);
+  console.log('SFBarcode loaded in sandbox:', typeof sandbox.SFBarcode);
+
   // 1. Run Database Engine
   vm.runInContext(dbScript, sandbox);
   console.log('SFDatabase loaded in sandbox:', typeof sandbox.SFDatabase);
