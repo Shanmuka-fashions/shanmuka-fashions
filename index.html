@@ -1,0 +1,5116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F5EBDD">
+<meta name="description" content="Shanmuka Fashions - Sarees & More. Premium Indian ethnic fashion boutique. Kanchipuram, Banarasi, Organza, Pure Silk, Handloom Cotton, and Designer Sarees.">
+<link rel="icon" type="image/png" href="logo.png">
+<title>Shanmuka Fashions | Sarees & More | Luxury Indian Ethnic Couture</title>
+
+<!-- Google Fonts: Exactly two complementary families: Playfair Display (Luxury Editorial Serif) & Plus Jakarta Sans (Clean Modern Sans) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+  /* ── SHANMUKA FASHIONS: HERITAGE ELEGANCE DESIGN SYSTEM ── */
+  --espresso-brown: #3B2B25;     /* Primary Brand Colour */
+  --champagne-ivory: #F5EBDD;    /* Primary Page Background */
+  --antique-bronze: #A77950;     /* Restrained Accent */
+  --muted-sand: #D8C3A5;         /* Supporting Neutral */
+  --pure-white: #FFFFFF;         /* Clean Card Surfaces */
+  --primary-text: #3B2B25;       /* Primary Typography */
+  --secondary-text: #76675D;     /* Secondary Typography */
+
+  /* Direct Semantic Tokens */
+  --primary: #3B2B25;
+  --secondary: #A77950;
+  --background: #F5EBDD;
+  --accent: #A77950;
+  --white: #FFFFFF;
+
+  /* Architectural & Legacy Cascade Aliases */
+  --royal-plum: #3B2B25;
+  --deep-wine: #3B2B25;
+  --midnight-navy: #3B2B25;
+  --deep-navy: #3B2B25;
+  --burgundy: #3B2B25;
+  --charcoal: #3B2B25;
+  --main-text: #3B2B25;
+
+  --warm-ivory: #F5EBDD;
+  --ivory: #F5EBDD;
+  --warm-cream: #F5EBDD;
+  --pearl-white: #FFFFFF;
+
+  --antique-gold: #A77950;
+  --champagne-gold: #A77950;
+  --champagne: #D8C3A5;
+  --muted-champagne: #D8C3A5;
+  --gold-glow: #D8C3A5;
+  --gold-dark: #8C5F3A;
+
+  /* Subtle Heritage Borders & Shadows */
+  --border: #E5D7C5;
+  --border-light: #EFE5D6;
+  --border-bronze: rgba(167, 121, 80, 0.28);
+  --border-gold: rgba(167, 121, 80, 0.28);
+  --muted: #76675D;
+  --shadow-sm: 0 1px 3px rgba(59, 43, 37, 0.05);
+  --shadow-md: 0 4px 14px rgba(59, 43, 37, 0.08);
+  --shadow-lg: 0 12px 28px rgba(59, 43, 37, 0.12);
+  --transition: all 0.25s ease;
+
+  /* Refined Typography Hierarchy */
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--champagne-ivory);
+  color: var(--primary-text);
+  font-family: var(--font-sans);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ── Top Announcement Bar ── */
+.announcement-bar {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  text-align: center;
+  padding: 9px 24px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.25);
+}
+.announcement-bar span,
+.announcement-text {
+  text-align: center;
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.announcement-bar b { color: #FFF; font-weight: 600; }
+.currency-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.currency-select-field {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(181, 138, 69, 0.45);
+  color: var(--champagne-gold);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.currency-select-field option {
+  background: var(--deep-wine);
+  color: var(--ivory);
+}
+
+/* ── Sticky Luxury Header ── */
+.site-header {
+  background: var(--champagne-ivory);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.28);
+  box-shadow: 0 2px 12px rgba(59, 43, 37, 0.05);
+  transition: var(--transition);
+}
+.header-inner {
+  max-width: 1400px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 32px;
+  gap: 28px;
+}
+
+/* ── Brand Logo (Increased size by ~18% with original proportions) ── */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+.header-brand:hover { transform: scale(1.02); }
+.brand-emblem {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--antique-bronze);
+  box-shadow: 0 2px 8px rgba(59, 43, 37, 0.12);
+  background: var(--champagne-ivory);
+}
+.brand-name-block {
+  display: flex;
+  flex-direction: column;
+}
+.brand-name-block strong {
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--espresso-brown);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.brand-name-block small {
+  font-size: 9.5px;
+  letter-spacing: 3.5px;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+/* ── Primary Navigation & Mega Menu (Enhanced Spacing) ── */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  list-style: none;
+}
+.nav-item {
+  position: relative;
+}
+.nav-link {
+  color: var(--espresso-brown);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  padding: 16px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s ease;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--antique-bronze);
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--antique-bronze);
+  transition: width 0.3s ease;
+}
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+.nav-link .caret {
+  font-size: 9px;
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+}
+.nav-item:hover .nav-link .caret { transform: rotate(180deg); }
+
+/* ── Mega Menu Dropdown ── */
+.mega-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: #FFFFFF;
+  border: 1px solid rgba(167, 121, 80, 0.25);
+  box-shadow: 0 16px 40px rgba(59, 43, 37, 0.12);
+  border-radius: 2px;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.2fr;
+  gap: 28px;
+  min-width: 820px;
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+.nav-item:hover .mega-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.mega-col h4 {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--espresso-brown);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.2);
+  padding-bottom: 6px;
+}
+.mega-col ul { list-style: none; }
+.mega-col li { margin-bottom: 10px; }
+.mega-col a {
+  color: var(--secondary-text);
+  font-size: 12.5px;
+  transition: all 0.2s ease;
+  display: block;
+}
+.mega-col a:hover {
+  color: var(--antique-bronze);
+  transform: translateX(3px);
+}
+.mega-card {
+  background: var(--champagne-ivory);
+  border: 1px solid rgba(167, 121, 80, 0.25);
+  border-radius: 2px;
+  overflow: hidden;
+  text-align: center;
+}
+.mega-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+.mega-card-body { padding: 12px; }
+.mega-card h5 {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--champagne-gold);
+  margin-bottom: 4px;
+}
+.mega-card p {
+  font-size: 10.5px;
+  color: var(--warm-cream);
+  margin-bottom: 8px;
+}
+.mega-card span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--champagne-gold);
+  text-decoration: underline;
+}
+
+/* ── Header Utilities ── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.action-btn {
+  color: var(--espresso-brown);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  transition: all 0.25s ease;
+}
+.action-btn:hover {
+  color: var(--antique-bronze);
+  background: rgba(167, 121, 80, 0.1);
+  transform: translateY(-1px);
+}
+.action-btn svg { width: 19px; height: 19px; fill: currentColor; }
+.badge-count {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  background: var(--antique-bronze);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 5px rgba(59, 43, 37, 0.2);
+}
+
+.menu-toggle { display: none; }
+
+/* ── Search Bar Input ── */
+.search-expandable {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-input-field {
+  width: 180px;
+  height: 36px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.4);
+  border-radius: 0;
+  padding: 0 10px 0 28px;
+  color: var(--espresso-brown);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+.search-input-field:focus {
+  width: 220px;
+  border-bottom-color: var(--antique-bronze);
+  box-shadow: none;
+}
+.search-input-field::placeholder { color: var(--secondary-text); }
+.search-icon-inside {
+  position: absolute;
+  left: 12px;
+  width: 13px;
+  height: 13px;
+  fill: var(--antique-bronze);
+  pointer-events: none;
+}
+
+/* ── Premium Editorial Hero Banner (Pearl-White & Warm Ivory with Royal Plum & Antique Gold) ── */
+.hero-editorial-section {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F3EB 55%, #F0E8DC 100%);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+}
+.hero-editorial-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  height: 100%;
+  background: radial-gradient(circle at 65% 45%, rgba(232, 213, 181, 0.35) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-editorial-container {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 48px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+}
+.hero-text-block {
+  max-width: 600px;
+}
+.hero-eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  color: var(--antique-gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-main-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(34px, 3.8vw, 54px);
+  line-height: 1.16;
+  font-weight: 700;
+  color: var(--midnight-navy);
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.hero-tagline-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--antique-gold);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+.hero-narrative {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--charcoal);
+  max-width: 520px;
+  margin-bottom: 32px;
+  opacity: 0.9;
+}
+.hero-button-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.btn-hero-primary {
+  background: var(--royal-plum);
+  color: var(--white);
+  border: 1.5px solid var(--antique-gold);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 15px 32px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(64, 34, 56, 0.35);
+  transition: var(--transition);
+  text-decoration: none;
+}
+.btn-hero-primary:hover {
+  background: var(--deep-wine);
+  color: var(--white);
+  border-color: var(--antique-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(103, 45, 70, 0.45);
+}
+.btn-hero-secondary {
+  border: 1.5px solid var(--antique-gold);
+  color: var(--warm-ivory);
+  background: rgba(248, 243, 235, 0.12);
+  backdrop-filter: blur(4px);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 14.5px 28px;
+  border-radius: 2px;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.btn-hero-secondary:hover {
+  background: var(--antique-gold);
+  color: var(--royal-plum);
+  transform: translateY(-2px);
+}
+.hero-model-visual {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  position: relative;
+  height: 100%;
+  min-height: 520px;
+}
+.hero-model-silhouette {
+  width: auto;
+  max-height: 84vh;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 20px 40px rgba(64, 34, 56, 0.20)) drop-shadow(0 4px 12px rgba(181, 138, 69, 0.15));
+  transition: transform 0.5s ease;
+}
+.hero-floating-badge {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--antique-gold);
+  padding: 8px 16px;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--midnight-navy);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Wedding Promotional Banner ── */
+.wedding-banner-section {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  padding: 90px 32px;
+  border-top: 1px solid rgba(167, 121, 80, 0.25);
+  border-bottom: 1px solid rgba(167, 121, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.wedding-occasions-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.wedding-occasion-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid rgba(216, 195, 165, 0.4);
+  padding-bottom: 2px;
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  color: var(--muted-sand);
+  text-transform: uppercase;
+  background: transparent;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.wedding-occasion-tag:hover {
+  border-bottom-color: var(--champagne-ivory);
+  color: var(--champagne-ivory);
+  background: transparent;
+  transform: translateX(2px);
+}
+.wedding-banner-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 50%, rgba(181, 138, 69, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.wedding-banner-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 48px;
+  position: relative;
+  z-index: 2;
+}
+.wedding-eyebrow {
+  color: var(--antique-gold);
+  font-size: 11.5px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12px;
+}
+.wedding-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3vw, 40px);
+  color: #FFF2D1;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.wedding-subheading {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--champagne);
+  margin-bottom: 16px;
+}
+.wedding-description {
+  color: #E2DBD0;
+  font-size: 15px;
+  line-height: 1.8;
+  max-width: 540px;
+  margin-bottom: 28px;
+}
+.wedding-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.btn-wedding-primary {
+  background: var(--antique-gold);
+  color: var(--deep-navy);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: 2px;
+  border: 1px solid var(--antique-gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+.btn-wedding-primary:hover {
+  background: #C79D56;
+  border-color: #C79D56;
+  transform: translateY(-2px);
+}
+.btn-wedding-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(181, 138, 69, 0.4);
+}
+.btn-wedding-secondary {
+  border: 1px solid var(--antique-gold);
+  color: var(--warm-ivory);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 13px 26px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  transition: var(--transition);
+}
+.btn-wedding-secondary:hover {
+  background: var(--antique-gold);
+  color: var(--deep-navy);
+  transform: translateY(-2px);
+}
+.wedding-media-img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--antique-gold);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── Shop by Occasion Grid ── */
+.occasions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.occasion-card {
+  height: 280px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.occasion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--antique-gold);
+}
+.occasion-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.occasion-card:hover img {
+  transform: scale(1.06);
+}
+.occasion-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(64, 34, 56, 0.94) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  color: var(--white);
+}
+.occasion-tag {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--champagne);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.occasion-overlay h3 {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  color: #FFFFFF;
+  margin-bottom: 6px;
+}
+.occasion-link {
+  font-size: 12px;
+  color: var(--antique-gold);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── Admin Dashboard Styles ── */
+.admin-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 36px 32px 64px;
+}
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.admin-header h1 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--royal-plum);
+  margin-bottom: 4px;
+}
+.admin-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.admin-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.admin-kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+.admin-kpi-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--midnight-navy);
+  font-family: var(--font-serif);
+}
+.admin-kpi-label {
+  font-size: 12.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  overflow-x: auto;
+}
+.admin-tab-btn {
+  padding: 10px 22px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--charcoal);
+  border-radius: 4px;
+  transition: var(--transition);
+  background: var(--warm-ivory);
+  border: 1px solid var(--border);
+}
+.admin-tab-btn.active {
+  background: var(--midnight-navy);
+  color: var(--pearl-white);
+  border-color: var(--midnight-navy);
+}
+.admin-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.admin-table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--warm-ivory);
+  color: var(--midnight-navy);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+.admin-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-instock { background: #E8F5E9; color: #2E7D32; }
+.status-lowstock { background: #FFF3E0; color: #E65100; }
+.status-outofstock { background: #FFEBEE; color: #C62828; }
+.status-pending { background: #FFF8E1; color: #F57F17; }
+.status-confirmed { background: #E1F5FE; color: #0277BD; }
+.status-shipped { background: #EDE7F6; color: #512DA8; }
+.status-delivered { background: #E8F5E9; color: #2E7D32; }
+
+/* ── Primary Buttons ── */
+.btn-primary,
+.btn-hero-primary {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 15px 34px;
+  border-radius: 30px; /* Subtle, understated capsule */
+  border: 1px solid var(--espresso-brown);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(59, 43, 37, 0.15);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn-primary:hover,
+.btn-hero-primary:hover {
+  background: var(--antique-bronze);
+  border-color: var(--antique-bronze);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(167, 121, 80, 0.25);
+}
+
+/* Secondary CTA: Refined text link with subtle underline per design spec */
+.btn-hero-secondary,
+.btn-outline-gold,
+.editorial-text-link,
+.editorial-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--espresso-brown);
+  border-bottom: 1.5px solid var(--antique-bronze) !important;
+  padding-bottom: 4px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition: var(--transition);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn-hero-secondary:hover,
+.btn-outline-gold:hover,
+.editorial-text-link:hover,
+.editorial-link:hover {
+  color: var(--antique-bronze) !important;
+  border-bottom-color: var(--espresso-brown) !important;
+  transform: translateX(3px);
+}
+
+/* ── Trust Ribbon ── */
+.trust-ribbon {
+  background: var(--deep-wine);
+  color: var(--ivory);
+  border-bottom: 1px solid rgba(181, 138, 69, 0.2);
+  padding: 16px 32px;
+}
+.trust-grid {
+  max-width: 1400px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+.trust-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-right: 1px solid rgba(181, 138, 69, 0.15);
+  padding: 4px 16px;
+}
+.trust-card:last-child { border-right: none; }
+.trust-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--champagne-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--champagne-gold);
+  font-size: 19px;
+  background: rgba(181, 138, 69, 0.1);
+  flex-shrink: 0;
+}
+.trust-icon svg { width: 20px; height: 20px; fill: currentColor; }
+.trust-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.trust-info strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  color: var(--champagne-gold);
+  letter-spacing: 0.6px;
+  line-height: 1.25;
+}
+.trust-info span {
+  font-size: 12px;
+  color: #D3BFB1;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ── Section Header ── */
+.section-wrapper {
+  max-width: 1400px;
+  margin: auto;
+  padding: 70px 32px;
+}
+.editorial-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.editorial-header .eyebrow {
+  letter-spacing: 3px;
+  font-size: 11px;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+.editorial-header h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3.2vw, 38px);
+  color: var(--royal-plum);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.editorial-header p {
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 580px;
+  margin: auto;
+}
+
+/* ── Shop By Collection (Visual Cards) ── */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.collection-card {
+  height: 280px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: var(--deep-navy);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.collection-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--antique-gold);
+}
+.collection-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s ease;
+}
+.collection-card:hover img { transform: scale(1.08); }
+.collection-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(64, 34, 56, 0.94) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px;
+  color: var(--white);
+}
+.collection-overlay h3 {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: #FFF;
+  margin-bottom: 4px;
+}
+.collection-overlay small {
+  font-size: 12px;
+  color: var(--champagne);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* ── Saree Catalogue Page (Twamev-style) ── */
+.catalogue-page {
+  max-width: 1400px;
+  margin: auto;
+  padding: 30px 32px 80px;
+}
+.breadcrumbs {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.breadcrumbs a:hover { color: var(--deep-wine); }
+.breadcrumbs span { color: #A8958E; }
+
+.catalogue-top-banner {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+}
+.catalogue-top-banner h1 {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  color: var(--royal-plum);
+  margin-bottom: 6px;
+}
+.catalogue-top-banner p {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.catalogue-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.product-count-label {
+  font-size: 13.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.product-count-label b { color: var(--deep-wine); }
+
+.catalogue-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sort-select {
+  border: 1px solid var(--border);
+  background: white;
+  padding: 8px 16px;
+  border-radius: 2px;
+  font-size: 13px;
+  color: var(--charcoal);
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.sort-select:focus { border-color: var(--deep-wine); }
+
+.mobile-filter-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+/* ── Active Filter Pills Bar ── */
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-pill {
+  background: var(--warm-cream);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--deep-wine);
+  font-weight: 600;
+}
+.filter-pill button {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1;
+}
+.clear-all-filters {
+  font-size: 12px;
+  color: var(--burgundy);
+  text-decoration: underline;
+  font-weight: 600;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+/* ── Catalogue Layout (Sidebar + Grid) ── */
+.catalogue-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+/* ── Left Filter Sidebar (Twamev style) ── */
+.filter-sidebar {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 90px;
+}
+.filter-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.filter-sidebar-header h3 {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--deep-wine);
+}
+
+.filter-group {
+  border-bottom: 1px solid var(--border-light);
+  padding: 14px 0;
+}
+.filter-group:last-child { border-bottom: none; }
+.filter-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--charcoal);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--main-text);
+  cursor: pointer;
+}
+.filter-checkbox-label input[type="checkbox"] {
+  accent-color: var(--burgundy);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+.filter-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Product Grid (Twamev 4-col luxury layout) ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px 28px;
+}
+/* Borderless Editorial Product Showcase */
+.product-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+.product-card:hover {
+  transform: none;
+  box-shadow: none;
+  border: none;
+}
+.card-media {
+  aspect-ratio: 3 / 4;
+  height: auto;
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+.product-card:hover .card-media img {
+  transform: scale(1.035);
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(245, 235, 221, 0.92);
+  backdrop-filter: blur(4px);
+  color: var(--espresso-brown);
+  border: 1px solid rgba(167, 121, 80, 0.3);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  z-index: 2;
+}
+.card-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #7A655C;
+  font-size: 15px;
+  z-index: 2;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.card-wishlist-btn.active {
+  color: #D32F2F;
+  background: white;
+}
+.card-wishlist-btn:hover { transform: scale(1.1); color: #D32F2F; }
+
+.card-quick-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(245, 235, 221, 0.95);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(167, 121, 80, 0.25);
+  padding: 10px 14px;
+  display: flex;
+  gap: 10px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-quick-actions button {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  border-radius: 2px;
+  transition: var(--transition);
+}
+.quick-view-btn {
+  background: transparent;
+  border: 1px solid var(--espresso-brown);
+  color: var(--espresso-brown);
+}
+.quick-view-btn:hover {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+}
+.quick-add-btn {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  border: 1px solid var(--espresso-brown);
+}
+.quick-add-btn:hover {
+  background: var(--antique-bronze);
+  border-color: var(--antique-bronze);
+  color: #FFFFFF;
+}
+.product-card:hover .card-quick-actions { transform: translateY(0); }
+.card-quick-actions button {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px;
+  border-radius: 2px;
+}
+.quick-view-btn {
+  background: transparent;
+  border: 1px solid var(--champagne-gold);
+  color: var(--champagne-gold);
+}
+.quick-view-btn:hover { background: var(--champagne-gold); color: var(--deep-wine); }
+.quick-add-btn {
+  background: var(--champagne-gold);
+  color: var(--deep-wine);
+}
+.quick-add-btn:hover { filter: brightness(1.08); }
+
+.card-details {
+  padding: 14px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.card-category {
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--antique-bronze);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--espresso-brown);
+  margin-bottom: 6px;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.card-title:hover { color: var(--antique-bronze); }
+.card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+.current-price {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: var(--espresso-brown);
+  font-family: var(--font-sans);
+}
+.original-price {
+  font-size: 13px;
+  color: var(--secondary-text);
+  text-decoration: line-through;
+  font-family: var(--font-sans);
+}
+.discount-chip {
+  font-size: 10px;
+  color: var(--antique-bronze);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+/* Subtle text link replaces clunky full-width button */
+.card-cta-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--espresso-brown);
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.3);
+  padding-bottom: 2px;
+  width: auto;
+  align-self: flex-start;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.card-cta-btn:hover {
+  color: var(--antique-bronze);
+  border-bottom-color: var(--antique-bronze);
+  background: none;
+  box-shadow: none;
+  transform: translateX(2px);
+}
+
+/* ── Product Detail View (PDP) ── */
+.pdp-page {
+  max-width: 1300px;
+  margin: auto;
+  padding: 30px 32px 80px;
+}
+.pdp-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  margin-bottom: 60px;
+}
+.pdp-gallery {
+  display: flex;
+  gap: 16px;
+}
+.pdp-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 80px;
+}
+.pdp-thumb {
+  width: 80px;
+  height: 90px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: var(--transition);
+}
+.pdp-thumb.active, .pdp-thumb:hover {
+  border-color: var(--champagne-gold);
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(181, 138, 69, 0.4);
+}
+.pdp-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pdp-main-image {
+  flex: 1;
+  height: 480px;
+  background: var(--deep-wine);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  cursor: crosshair;
+}
+.pdp-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.pdp-main-image:hover img { transform: scale(1.15); }
+
+.pdp-info {
+  display: flex;
+  flex-direction: column;
+}
+.pdp-category-eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.pdp-title {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  color: var(--royal-plum);
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.pdp-price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pdp-current-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--deep-wine);
+}
+.pdp-old-price {
+  font-size: 16px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.pdp-tax-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.pdp-desc {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--main-text);
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Saree Specs Table */
+.pdp-specs-table {
+  width: 100%;
+  margin-bottom: 24px;
+  border-collapse: collapse;
+}
+.pdp-specs-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+.pdp-specs-table td:first-child {
+  font-weight: 600;
+  color: var(--muted);
+  width: 40%;
+}
+.pdp-specs-table td:last-child {
+  color: var(--charcoal);
+  font-weight: 500;
+}
+
+/* Delivery PIN code check */
+.delivery-checker {
+  background: var(--warm-cream);
+  padding: 14px 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.delivery-checker label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--deep-wine);
+  margin-bottom: 8px;
+}
+.checker-form {
+  display: flex;
+  gap: 8px;
+}
+.checker-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 2px;
+  font-size: 13px;
+  outline: none;
+}
+.checker-form button {
+  background: var(--deep-wine);
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 2px;
+}
+.pincode-result {
+  font-size: 12px;
+  margin-top: 8px;
+  font-weight: 600;
+  color: #1b7a3a;
+  display: none;
+}
+
+/* Quantity & CTA Buttons */
+.pdp-actions-wrap {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.qty-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 2px;
+}
+.qty-box button {
+  padding: 12px 16px;
+  font-size: 16px;
+  color: var(--charcoal);
+}
+.qty-box span {
+  padding: 0 10px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.pdp-add-bag-btn {
+  flex: 1;
+  background: var(--deep-wine);
+  color: white;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  padding: 14px;
+  transition: var(--transition);
+}
+.pdp-add-bag-btn:hover { background: var(--burgundy); }
+.pdp-whatsapp-btn {
+  width: 100%;
+  background: #25D366;
+  color: white;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  transition: var(--transition);
+}
+.pdp-whatsapp-btn:hover { background: #20BA5A; }
+.pdp-wishlist-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--charcoal);
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.pdp-wishlist-toggle:hover { border-color: var(--burgundy); color: var(--burgundy); }
+
+/* PDP Tabbed Section */
+.pdp-tabs {
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+  padding-top: 30px;
+}
+.tabs-nav {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.tab-btn {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-bottom: 10px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+.tab-btn.active {
+  color: var(--deep-wine);
+  border-color: var(--champagne-gold);
+}
+.tab-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--main-text);
+}
+
+/* ── Brand Story Section ── */
+.story-section {
+  background: var(--champagne-ivory);
+  border: none;
+  padding: 100px 32px;
+}
+.story-container {
+  max-width: 1300px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  align-items: center;
+  gap: 72px;
+}
+/* Borderless Natural Photography Placement */
+.story-image-frame {
+  position: relative;
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 2px;
+  box-shadow: none;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+.story-image-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.story-image-frame:hover img {
+  transform: scale(1.03);
+}
+.story-content h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3.2vw, 38px);
+  color: var(--royal-plum);
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+.story-content p {
+  color: var(--main-text);
+  font-size: 14.5px;
+  line-height: 1.85;
+  margin-bottom: 16px;
+}
+
+/* ── 10. Patron Reflections / Magazine-Style Editorial Pull Quotes ── */
+.testimonials-section {
+  padding: 96px 32px;
+  background: var(--champagne-ivory);
+  border-top: 1px solid rgba(167, 121, 80, 0.2);
+}
+.testimonials-grid {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+.testimonial-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0 0 0 24px;
+  border-left: 1.5px solid rgba(167, 121, 80, 0.35);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+}
+.testimonial-quote-mark {
+  font-family: var(--font-serif);
+  font-size: 44px;
+  line-height: 0.8;
+  color: var(--antique-bronze);
+  opacity: 0.7;
+  margin-bottom: 12px;
+}
+.testimonial-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18.5px;
+  line-height: 1.65;
+  color: var(--espresso-brown);
+  margin-bottom: 22px;
+  flex: 1;
+}
+.testimonial-author {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.testimonial-author strong {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--espresso-brown);
+}
+.testimonial-author small {
+  color: var(--secondary-text);
+  font-size: 12px;
+  font-family: var(--font-sans);
+}
+
+/* ── 11. Atelier Journal / Private Salon Invitation ── */
+.atelier-journal-section {
+  padding: 88px 32px;
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  text-align: center;
+}
+.atelier-journal-card {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.journal-eyebrow {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--antique-bronze);
+  margin-bottom: 12px;
+}
+.journal-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 500;
+  color: var(--champagne-ivory);
+  margin-bottom: 14px;
+  line-height: 1.25;
+}
+.journal-desc {
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--muted-sand);
+  margin-bottom: 32px;
+}
+.journal-form {
+  display: flex;
+  max-width: 480px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(245, 235, 221, 0.4);
+  padding-bottom: 8px;
+}
+.journal-form input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--champagne-ivory);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 8px 12px 8px 0;
+  outline: none;
+}
+.journal-form input::placeholder {
+  color: rgba(245, 235, 221, 0.5);
+  font-style: italic;
+}
+.journal-submit-btn {
+  background: transparent;
+  border: none;
+  color: var(--champagne-ivory);
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.25s ease;
+  padding: 8px 0 8px 16px;
+  white-space: nowrap;
+}
+.journal-submit-btn:hover {
+  color: var(--antique-bronze);
+}
+
+/* ── Comprehensive Luxury Footer ── */
+.site-footer {
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  padding: 70px 32px 30px;
+  border-top: 1px solid rgba(167, 121, 80, 0.3);
+}
+.footer-inner {
+  max-width: 1400px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.3fr;
+  gap: 48px;
+  margin-bottom: 50px;
+}
+.footer-col h3 {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  color: var(--muted-sand);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.footer-col p {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--champagne-ivory);
+  opacity: 0.92;
+  margin-bottom: 14px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a {
+  font-size: 13.5px;
+  color: var(--champagne-ivory);
+  opacity: 0.88;
+  transition: all 0.2s ease;
+}
+.footer-col a:hover {
+  color: var(--muted-sand);
+  opacity: 1;
+}
+.footer-bottom {
+  max-width: 1400px;
+  margin: auto;
+  border-top: 1px solid rgba(167, 121, 80, 0.25);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted-sand);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── Drawers: Cart & Wishlist ── */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(40, 16, 30, 0.72);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.drawer-backdrop.active { display: block; opacity: 1; }
+
+.side-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(440px, 100%);
+  background: var(--ivory);
+  box-shadow: -10px 0 40px rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.drawer-backdrop.active .side-drawer { transform: translateX(0); }
+
+.drawer-header {
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.drawer-header h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--deep-wine);
+}
+.drawer-close-btn {
+  font-size: 26px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+/* Free Shipping Meter */
+.free-shipping-meter {
+  background: var(--warm-cream);
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--deep-wine);
+  text-align: center;
+}
+.meter-bar {
+  height: 5px;
+  background: #E0D2C0;
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  background: var(--champagne-gold);
+  width: 100%;
+  transition: width 0.3s ease;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+.drawer-item {
+  display: grid;
+  grid-template-columns: 75px 1fr auto;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: center;
+}
+.drawer-item img {
+  width: 75px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+.drawer-item-info strong {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 14px;
+  color: var(--deep-wine);
+  display: block;
+}
+.drawer-item-info small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.drawer-qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.drawer-qty-control button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 50%;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+}
+.drawer-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  background: white;
+}
+.drawer-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--deep-wine);
+  margin-bottom: 16px;
+}
+.drawer-checkout-wa {
+  width: 100%;
+  background: #25D366;
+  color: white;
+  padding: 13px;
+  border-radius: 2px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.drawer-checkout-standard {
+  width: 100%;
+  background: var(--deep-wine);
+  color: white;
+  padding: 13px;
+  border-radius: 2px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Checkout Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(40, 16, 30, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 350;
+  display: none;
+  place-items: center;
+  padding: 24px;
+}
+.modal-overlay.active { display: grid; }
+.modal-box {
+  background: var(--ivory);
+  border: 1px solid var(--champagne-gold);
+  border-radius: 4px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 36px;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--muted);
+}
+.modal-box h2 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--deep-wine);
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+.checkout-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.checkout-form-grid .full-col { grid-column: 1 / -1; }
+.form-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.form-field input, .form-field select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 2px;
+  font-size: 13px;
+  outline: none;
+}
+.form-field input:focus { border-color: var(--deep-wine); }
+
+/* ── Quick View Modal ── */
+.quick-view-card {
+  max-width: 840px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+}
+.quick-view-media {
+  height: 380px;
+  background: var(--deep-wine);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.quick-view-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Floating WhatsApp Button ── */
+.floating-wa-concierge {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--espresso-brown);
+  color: var(--champagne-ivory);
+  border: 1.5px solid var(--antique-bronze);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-radius: 2px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(59, 43, 37, 0.25);
+  z-index: 90;
+  transition: var(--transition);
+}
+.floating-wa-concierge:hover {
+  background: var(--antique-bronze);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(167, 121, 80, 0.35);
+}
+.floating-wa-concierge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5);
+}
+.floating-wa-concierge svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ── Toast Notification ── */
+.toast-notice {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  background: var(--deep-wine);
+  color: var(--ivory);
+  border: 1px solid var(--champagne-gold);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 400;
+}
+.toast-notice.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Mobile Navigation Drawer Base (Strictly Hidden on Desktop) ── */
+.mobile-nav-drawer {
+  display: none;
+}
+
+/* ── Authentic Luxury Campaign Hero Banner with Cinematic 21:9 Video ── */
+.hero-campaign-section {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(167, 121, 80, 0.25);
+  min-height: calc(100vh - 105px);
+  display: flex;
+  align-items: center;
+  background-color: var(--champagne-ivory);
+}
+
+/* Background Cinematic Video (21:9 Aspect Ratio) */
+.hero-video-bg {
+  position: absolute;
+  top: -12%;
+  left: 0;
+  width: 100%;
+  height: 124%;
+  object-fit: cover;
+  object-position: right center; /* keeps the saree model on the right prominently visible */
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Subtle Warm Ivory Gradient Overlay on Left Side only for Text Readability */
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(245, 235, 221, 0.98) 0%,
+    rgba(245, 235, 221, 0.92) 34%,
+    rgba(245, 235, 221, 0.55) 52%,
+    transparent 72%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-campaign-container {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 48px;
+  position: relative;
+  z-index: 3;
+}
+.hero-campaign-container .hero-text-block {
+  max-width: 620px;
+}
+.hero-campaign-container .hero-main-heading {
+  color: var(--warm-ivory);
+}
+.hero-campaign-container .hero-tagline-text {
+  color: var(--antique-gold);
+}
+.hero-campaign-container .hero-narrative {
+  color: var(--muted-champagne);
+}
+/* Hero button group: Primary Capsule + Secondary Underlined Link */
+.hero-campaign-container .hero-button-group {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-top: 8px;
+  margin-bottom: 28px;
+}
+.hero-trust-micro {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--antique-gold);
+  font-weight: 600;
+}
+.hero-model-tag {
+  position: absolute;
+  bottom: 24px;
+  right: 36px;
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(248, 243, 235, 0.9);
+  background: rgba(64, 34, 56, 0.85);
+  padding: 6px 14px;
+  border: 1px solid rgba(181, 138, 69, 0.35);
+  border-radius: 2px;
+  z-index: 3;
+  backdrop-filter: blur(4px);
+}
+
+/* Reduced Motion Fallback */
+
+
+/* ── Typographic Atelier Commitments Strip ── */
+.commitments-bar {
+  background: var(--champagne-ivory);
+  color: var(--primary-text);
+  border-top: 1px solid rgba(167, 121, 80, 0.2);
+  border-bottom: 1px solid rgba(167, 121, 80, 0.2);
+  padding: 40px 32px;
+}
+.commitments-grid {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+.commitment-item {
+  border-left: 1px solid rgba(167, 121, 80, 0.25);
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+}
+.commitment-item:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+.commitment-num {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--antique-bronze);
+  margin-bottom: 4px;
+}
+.commitment-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--espresso-brown);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.commitment-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--secondary-text);
+}
+
+/* ── Asymmetric Editorial Categories ── */
+.curated-collections-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 90px 32px 50px;
+}
+/* Flowing Editorial Composition without Boxy Containers */
+.collection-editorial-spread {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 56px;
+  align-items: center;
+  margin-bottom: 64px;
+}
+.spread-visual {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  aspect-ratio: 16 / 10;
+  cursor: pointer;
+}
+.spread-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.spread-visual:hover img {
+  transform: scale(1.03);
+}
+.spread-content {
+  padding: 20px 0;
+}
+.spread-num {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-style: italic;
+  color: var(--antique-bronze);
+  display: block;
+  margin-bottom: 6px;
+}
+.spread-eyebrow {
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--antique-bronze);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+.spread-title {
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 3.2vw, 44px);
+  font-weight: 500;
+  color: var(--espresso-brown);
+  line-height: 1.18;
+  margin-bottom: 14px;
+}
+.spread-desc {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--secondary-text);
+  margin-bottom: 24px;
+  max-width: 460px;
+}
+
+/* Offset Duo: Banarasi & Designer Sarees */
+.collection-editorial-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 64px;
+}
+.editorial-duo-item {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.editorial-duo-item.offset-down {
+  margin-top: 40px;
+}
+.duo-image-wrap {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-bottom: 18px;
+}
+.duo-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.editorial-duo-item:hover .duo-image-wrap img {
+  transform: scale(1.03);
+}
+.duo-label {
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--antique-bronze);
+  margin-bottom: 4px;
+}
+.duo-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--espresso-brown);
+  margin-bottom: 8px;
+}
+
+/* Trio: Bridal, Cotton, Organza */
+.collection-editorial-trio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+.trio-item {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.trio-image-wrap {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+.trio-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.trio-item:hover .trio-image-wrap img {
+  transform: scale(1.03);
+}
+.trio-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--antique-bronze);
+  margin-bottom: 4px;
+}
+.trio-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--espresso-brown);
+  margin-bottom: 8px;
+}
+
+/* ── Wedding Banner Occasions Row ── */
+.wedding-occasions-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.wedding-occasion-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(181, 138, 69, 0.4);
+  border-radius: 2px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--champagne);
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.04);
+  transition: var(--transition);
+  text-decoration: none;
+}
+.wedding-occasion-tag:hover {
+  border-color: var(--antique-gold);
+  color: var(--pearl-white);
+  background: rgba(181, 138, 69, 0.15);
+}
+
+/* ── Product Card 3:4 Portrait Ratio & SVG Wishlist ── */
+.product-card .card-media {
+  aspect-ratio: 3 / 4;
+  height: auto;
+  position: relative;
+  background: var(--deep-navy);
+  overflow: hidden;
+}
+.card-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+  color: var(--charcoal);
+  z-index: 2;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.card-wishlist-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.card-wishlist-btn.active {
+  background: var(--deep-navy);
+  color: var(--antique-gold);
+}
+.card-wishlist-btn.active svg {
+  fill: var(--antique-gold);
+  stroke: var(--antique-gold);
+}
+
+/* ── Responsive Adaptations ── */
+@media (max-width: 1200px) {
+  .editorial-collections-tier1 { grid-template-columns: 1fr 1fr; }
+  .editorial-collections-tier2 { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .hero-campaign-container { padding: 48px 36px; }
+  .wedding-banner-container { gap: 32px; }
+  .admin-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 992px) {
+  .catalogue-layout { grid-template-columns: 1fr; }
+  .filter-sidebar {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 320;
+    overflow-y: auto;
+    border-radius: 0;
+    max-width: 340px;
+  }
+  .filter-sidebar.open { display: block; }
+  .mobile-filter-btn { display: inline-flex; }
+  .pdp-grid { grid-template-columns: 1fr; gap: 32px; }
+  .story-container { grid-template-columns: 1fr; gap: 36px; }
+  .commitments-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .collection-editorial-spread { grid-template-columns: 1fr; gap: 32px; }
+  .collection-editorial-duo { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .editorial-duo-item.offset-down { margin-top: 0; }
+  .collection-editorial-trio { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .wedding-banner-container { grid-template-columns: 1fr; text-align: center; }
+  .wedding-description { margin: 0 auto 24px; }
+  .wedding-actions { justify-content: center; }
+
+  /* Hero adjustments for Tablet */
+  .hero-campaign-section {
+    min-height: 600px;
+  }
+  .hero-video-bg {
+    top: -8%;
+    height: 116%;
+    object-position: 88% center;
+  }
+  .hero-video-overlay {
+    background: linear-gradient(
+      to right,
+      rgba(245, 235, 221, 0.98) 0%,
+      rgba(245, 235, 221, 0.90) 48%,
+      rgba(245, 235, 221, 0.45) 70%,
+      transparent 90%
+    );
+  }
+  .testimonials-grid { grid-template-columns: repeat(2, 1fr); gap: 36px; }
+  .hero-campaign-container {
+    padding: 48px 32px;
+  }
+  .hero-campaign-container .hero-text-block {
+    max-width: 440px;
+  }
+  .admin-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .header-inner { padding: 10px 16px; }
+  .nav-menu { display: none; }
+  .menu-toggle { display: flex; }
+  .search-expandable { display: none; }
+
+  /* Mobile Slide Navigation */
+  .mobile-nav-drawer {
+    position: fixed;
+    inset: 0;
+    background: var(--champagne-ivory);
+    z-index: 250;
+    display: none;
+    flex-direction: column;
+    padding: 30px 24px;
+    overflow-y: auto;
+  }
+  .mobile-nav-drawer.open { display: flex; }
+  .mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(181, 138, 69, 0.2);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+  .mobile-nav-links a {
+    color: var(--espresso-brown);
+    font-size: 16px;
+    padding: 12px 0;
+    display: block;
+    border-bottom: 1px solid rgba(167, 121, 80, 0.15);
+  }
+  .mobile-nav-links a:hover, .mobile-nav-links a.active {
+    color: var(--antique-bronze);
+  }
+
+  .floating-wa-concierge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 14px;
+    font-size: 11px;
+  }
+  .floating-wa-concierge span { display: none; }
+
+  /* Hero adjustments for Mobile */
+  .hero-campaign-section {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    background-color: var(--warm-ivory);
+  }
+  .hero-video-bg {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-position: 78% center;
+  }
+  .hero-video-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(245, 235, 221, 0.98) 0%,
+      rgba(245, 235, 221, 0.94) 52%,
+      rgba(245, 235, 221, 0.45) 78%,
+      transparent 100%
+    );
+  }
+  .hero-campaign-container {
+    padding: 24px 20px 16px;
+    text-align: left;
+    width: 100%;
+  }
+  .hero-campaign-container .hero-text-block {
+    max-width: 100%;
+  }
+  .hero-main-heading { font-size: clamp(26px, 6.8vw, 34px); line-height: 1.18; margin-bottom: 8px; }
+  .hero-tagline-text { font-size: 18px; margin-bottom: 12px; }
+  .hero-narrative { font-size: 13.5px; line-height: 1.6; margin-bottom: 20px; }
+  .hero-button-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .btn-hero-primary, .btn-hero-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-model-tag { display: none; }
+
+  .commitments-grid { grid-template-columns: 1fr; gap: 18px; }
+  .commitment-item { border-left: none; padding-left: 0; border-top: 1px solid rgba(181, 138, 69, 0.2); padding-top: 14px; }
+  .commitment-item:first-child { border-top: none; padding-top: 0; }
+  .collection-editorial-spread { grid-template-columns: 1fr; }
+  .collection-editorial-duo { grid-template-columns: 1fr; gap: 40px; }
+  .collection-editorial-trio { grid-template-columns: 1fr; gap: 40px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 14px; }
+  .card-media { aspect-ratio: 3 / 4; }
+  .card-title { font-size: 14px; }
+  .current-price { font-size: 15px; }
+
+  .quick-view-card { grid-template-columns: 1fr; }
+  .quick-view-media { height: 220px; }
+  .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+  .admin-kpis { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; gap: 32px; }
+  .journal-form { flex-direction: column; gap: 12px; border-bottom: none; }
+  .journal-form input { border-bottom: 1px solid rgba(245, 235, 221, 0.4); padding: 10px 0; }
+  .journal-submit-btn { align-self: flex-start; padding: 8px 0; border-bottom: 1px solid var(--antique-bronze); }
+}
+
+/* ── Reduced Motion Fallback ── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-bg {
+    display: none !important;
+  }
+  .hero-campaign-section {
+    background-image: linear-gradient(
+      to right,
+      rgba(248, 245, 239, 0.95) 0%,
+      rgba(248, 245, 239, 0.88) 32%,
+      rgba(248, 245, 239, 0.5) 50%,
+      transparent 68%
+    ), url('assets/hero-model.jpg') !important;
+    background-position: right center !important;
+    background-size: cover !important;
+  }
+}
+</style>
+  <link rel="stylesheet" href="scripts/sf_admin.css">
+</head>
+<body>
+
+<!-- ── Minimal Luxury Announcement Bar ── -->
+<div class="announcement-bar">
+  <span class="announcement-text">COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹15,000 &bull; <b>SHANMUKA FASHIONS</b> &bull; WHATSAPP CONCIERGE</span>
+</div>
+
+<!-- ── Luxury Header ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Brand Logo -->
+    <a href="#/" class="header-brand" aria-label="Shanmuka Fashions Home">
+      <img src="logo.png" alt="Shanmuka Fashions Emblem" class="brand-emblem" width="60" height="60">
+      <div class="brand-name-block">
+        <strong>Shanmuka</strong>
+        <small>F A S H I O N S</small>
+      </div>
+    </a>
+
+    <!-- Primary Navigation with Mega Dropdowns -->
+    <nav>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#/" class="nav-link" id="navHome">Home</a>
+        </li>
+
+        <!-- Sarees Mega Menu -->
+        <li class="nav-item">
+          <a href="#/catalogue" class="nav-link" id="navSarees">
+            Sarees <span class="caret">▼</span>
+          </a>
+          <div class="mega-menu">
+            <div class="mega-col">
+              <h4>Shop By Weave</h4>
+              <ul>
+                <li><a href="#/catalogue?category=Kanchipuram">Kanchipuram Silk</a></li>
+                <li><a href="#/catalogue?category=Banarasi">Banarasi Brocade</a></li>
+                <li><a href="#/catalogue?category=Organza">Ethereal Organza</a></li>
+                <li><a href="#/catalogue?category=Silk">Festive Pure Silk</a></li>
+                <li><a href="#/catalogue?category=Cotton">Handloom Cotton</a></li>
+                <li><a href="#/catalogue">View All Sarees →</a></li>
+              </ul>
+            </div>
+            <div class="mega-col">
+              <h4>Shop By Occasion</h4>
+              <ul>
+                <li><a href="#/catalogue?occasion=Bridal">Bridal & Wedding</a></li>
+                <li><a href="#/catalogue?occasion=Festive">Festive Celebrations</a></li>
+                <li><a href="#/catalogue?occasion=Party">Party & Cocktail</a></li>
+                <li><a href="#/catalogue?occasion=Everyday">Everyday Grace</a></li>
+                <li><a href="#/catalogue?occasion=Reception">Reception Glamour</a></li>
+              </ul>
+            </div>
+            <div class="mega-col">
+              <h4>Curated Edits</h4>
+              <ul>
+                <li><a href="#/catalogue?filter=bestseller">Royal Bestsellers</a></li>
+                <li><a href="#/catalogue?filter=new">Fresh 2026 Drops</a></li>
+                <li><a href="#/catalogue?fabric=Silk">Pure Mulberry Silk</a></li>
+                <li><a href="#/catalogue?pattern=Temple">Temple Border Classics</a></li>
+                <li><a href="#/catalogue?color=Burgundy">Signature Wine & Gold</a></li>
+              </ul>
+            </div>
+            <div class="mega-card">
+              <img src="assets/hero-model.jpg" alt="Bridal Saree Campaign">
+              <div class="mega-card-body">
+                <h5>Bridal Edit 2026</h5>
+                <p>Curated heirlooms for the Indian bride.</p>
+                <a href="#/catalogue?occasion=Bridal">Explore Edition →</a>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <!-- Collections Dropdown -->
+        <li class="nav-item">
+          <a href="#/catalogue" class="nav-link" id="navCollections">
+            Collections <span class="caret">▼</span>
+          </a>
+          <div class="mega-menu" style="min-width: 600px;">
+            <div class="mega-col">
+              <h4>Heritage Line</h4>
+              <ul>
+                <li><a href="#/collection/kanchipuram">Kanchipuram Sarees</a></li>
+                <li><a href="#/collection/banarasi">Banarasi Heritage</a></li>
+                <li><a href="#/collection/silk">Festive Silk Sarees</a></li>
+              </ul>
+            </div>
+            <div class="mega-col">
+              <h4>Modern Grace</h4>
+              <ul>
+                <li><a href="#/collection/organza">Organza Sarees</a></li>
+                <li><a href="#/collection/cotton">Cotton Sarees</a></li>
+                <li><a href="#/collection/designer">Designer Sarees</a></li>
+              </ul>
+            </div>
+            <div class="mega-card">
+              <img src="assets/golden-silk-saree-clean.jpg" alt="Banarasi Collection">
+              <div class="mega-card-body">
+                <h5>Heritage Banaras</h5>
+                <p>Pure katan silk with gold meenakari jaal.</p>
+                <a href="#/collection/banarasi">View Sarees →</a>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a href="#/catalogue?filter=new" class="nav-link">New Arrivals</a>
+        </li>
+        <li class="nav-item">
+          <a href="#/catalogue?filter=bestseller" class="nav-link">Best Sellers</a>
+        </li>
+        <li class="nav-item">
+          <a href="#/story" class="nav-link">Our Story</a>
+        </li>
+        <li class="nav-item">
+          <a href="#/contact" class="nav-link">Contact</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Header Utility Actions -->
+    <div class="header-actions">
+      <!-- Search Input -->
+      <div class="search-expandable">
+        <svg class="search-icon-inside" viewBox="0 0 24 24"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+        <input type="text" id="globalSearchInput" class="search-input-field" placeholder="Search sarees, silks..." aria-label="Search sarees">
+      </div>
+
+      <!-- Account Button -->
+      <button class="action-btn" id="accountBtn" aria-label="Account">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </button>
+
+      <!-- Wishlist Button -->
+      <button class="action-btn" id="wishlistBtn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <span class="badge-count" id="wishlistCount">0</span>
+      </button>
+
+      <!-- Cart Button -->
+      <button class="action-btn" id="cartBtn" aria-label="Shopping Bag">
+        <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3H7c0 2.76 2.24 5 5 5s5-2.24 5-5h-2c0 1.66-1.34 3-3 3z"/></svg>
+        <span class="badge-count" id="cartCount">0</span>
+      </button>
+
+      <!-- Mobile Hamburger Button -->
+      <button class="action-btn menu-toggle" id="menuToggleBtn" aria-label="Open Mobile Menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Mobile Navigation Slide Drawer ── -->
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <div class="mobile-nav-header">
+    <strong style="color: var(--champagne-gold); font-family: var(--font-serif); font-size: 18px;">SHANMUKA FASHIONS</strong>
+    <button class="drawer-close-btn" id="closeMobileNav" style="color: var(--ivory);">✕</button>
+  </div>
+  <div class="mobile-nav-links">
+    <a href="#/" onclick="closeMobileMenu()">Home</a>
+    <a href="#/catalogue" onclick="closeMobileMenu()">All Sarees Catalogue</a>
+    <a href="#/catalogue?category=Kanchipuram" onclick="closeMobileMenu()">Kanchipuram Sarees</a>
+    <a href="#/catalogue?category=Banarasi" onclick="closeMobileMenu()">Banarasi Sarees</a>
+    <a href="#/catalogue?category=Organza" onclick="closeMobileMenu()">Organza Sarees</a>
+    <a href="#/catalogue?category=Silk" onclick="closeMobileMenu()">Pure Silk Sarees</a>
+    <a href="#/catalogue?category=Cotton" onclick="closeMobileMenu()">Handloom Cotton</a>
+    <a href="#/catalogue?filter=new" onclick="closeMobileMenu()">New Arrivals 2026</a>
+    <a href="#/catalogue?filter=bestseller" onclick="closeMobileMenu()">Best Sellers</a>
+    <a href="#/story" onclick="closeMobileMenu()">Our Brand Story</a>
+    <a href="#/contact" onclick="closeMobileMenu()">Boutique Store & Contact</a>
+  </div>
+</div>
+
+<!-- ── DYNAMIC PAGE CONTAINER (SPA Views) ── -->
+<main id="appRoot">
+  <!-- Content rendered dynamically via router based on location.hash -->
+</main>
+
+<!-- ── Comprehensive Luxury Footer ── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <img src="logo.png" alt="Shanmuka Emblem" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--antique-gold);">
+        <strong style="color: var(--antique-gold); font-family: var(--font-serif); font-size: 16px; letter-spacing: 1px;">SHANMUKA FASHIONS</strong>
+      </div>
+      <p>A premier luxury destination for traditional Indian handlooms and contemporary celebration drapes. Curating timeless elegance across Kanchipuram, Banarasi, Organza, and pure festive silks.</p>
+      <p style="color: var(--antique-gold); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">Silk Mark Certified &bull; Generational Handloom Heritage</p>
+    </div>
+
+    <div class="footer-col">
+      <h3>Saree Weaves</h3>
+      <ul>
+        <li><a href="#/catalogue?category=Kanchipuram">Kanchipuram Silks</a></li>
+        <li><a href="#/catalogue?category=Banarasi">Banarasi Brocades</a></li>
+        <li><a href="#/catalogue?category=Organza">Floral Organza</a></li>
+        <li><a href="#/catalogue?category=Silk">Festive Silk Sarees</a></li>
+        <li><a href="#/catalogue?category=Cotton">Handloom Cottons</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h3>Occasions & Edits</h3>
+      <ul>
+        <li><a href="#/catalogue?occasion=Bridal">Bridal & Wedding</a></li>
+        <li><a href="#/catalogue?occasion=Festive">Festive Celebrations</a></li>
+        <li><a href="#/catalogue?occasion=Party">Cocktail & Party</a></li>
+        <li><a href="#/catalogue?filter=bestseller">Most Loved Bestsellers</a></li>
+        <li><a href="#/story">Artisan Craft & Story</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h3>Concierge & Boutique</h3>
+      <p>Direct Call: <b>+91 95421 56929</b></p>
+      <p>WhatsApp Concierge: <b>+91 95421 56929</b></p>
+      <p>Salon Hours: 10:00 AM – 9:00 PM (IST)</p>
+      <p>Flagship Showroom: Jubilee Hills, Hyderabad</p>
+      <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions,%20I%20would%20like%20to%20book%20a%20video%20shopping%20consultation." target="_blank" rel="noopener noreferrer" style="color: var(--antique-gold); font-weight: 600; text-decoration: underline;">Book WhatsApp Video Styling &rarr;</a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div>&copy; <span id="currentYear"></span> SHANMUKA FASHIONS. All Rights Reserved. | <a href="#/admin" style="color: var(--antique-gold); text-decoration: underline;">Atelier Admin Portal</a></div>
+    <div>Silk Mark Certified &bull; Insured Worldwide Express Delivery</div>
+  </div>
+</footer>
+
+<!-- ── Drawers: Shopping Bag ── -->
+<div class="drawer-backdrop" id="cartDrawerBackdrop">
+  <aside class="side-drawer" role="dialog" aria-label="Shopping Bag">
+    <div class="drawer-header">
+      <h3>Your Shopping Bag</h3>
+      <button class="drawer-close-btn" id="closeCartDrawer">✕</button>
+    </div>
+    <div class="free-shipping-meter">
+      <span id="shippingMeterText">Add ₹X more to unlock Free Express Delivery</span>
+      <div class="meter-bar"><div class="meter-fill" id="shippingMeterFill"></div></div>
+    </div>
+    <div class="drawer-body" id="cartItemsList">
+      <!-- Items dynamically injected -->
+    </div>
+    <div class="drawer-footer">
+      <div class="drawer-subtotal">
+        <span>Subtotal</span>
+        <span id="cartSubtotalAmount">₹0</span>
+      </div>
+      <button class="drawer-checkout-wa" id="checkoutWaBtn">Order via WhatsApp</button>
+      <button class="drawer-checkout-standard" id="checkoutStandardBtn">Proceed to Checkout →</button>
+    </div>
+  </aside>
+</div>
+
+<!-- ── Drawers: Wishlist ── -->
+<div class="drawer-backdrop" id="wishlistDrawerBackdrop">
+  <aside class="side-drawer" role="dialog" aria-label="Wishlist">
+    <div class="drawer-header">
+      <h3>Your Wishlist (<span id="wishlistHeaderCount">0</span>)</h3>
+      <button class="drawer-close-btn" id="closeWishlistDrawer">✕</button>
+    </div>
+    <div class="drawer-body" id="wishlistItemsList">
+      <!-- Items dynamically injected -->
+    </div>
+  </aside>
+</div>
+
+<!-- ── Quick View Modal ── -->
+<div class="modal-overlay" id="quickViewModal">
+  <div class="modal-box quick-view-card">
+    <button class="modal-close" id="closeQuickView">✕</button>
+    <div class="quick-view-media">
+      <img id="qvImage" src="" alt="Saree Preview">
+    </div>
+    <div class="quick-view-info">
+      <span class="card-category" id="qvCategory"></span>
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; color: var(--deep-wine); margin-bottom: 8px;" id="qvName"></h2>
+      <div class="card-price-row">
+        <span class="current-price" id="qvPrice"></span>
+        <del class="original-price" id="qvOldPrice"></del>
+      </div>
+      <p style="font-size: 13.5px; color: var(--main-text); line-height: 1.6; margin-bottom: 20px;" id="qvDesc"></p>
+      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+        <button class="btn-primary" id="qvAddBag" style="flex: 1; justify-content: center;">Add to Bag</button>
+        <button class="btn-outline-gold" id="qvViewFull" style="color: var(--deep-wine); border-color: var(--deep-wine);">Full Details</button>
+      </div>
+      <button class="pdp-whatsapp-btn" id="qvWaEnquiry">Enquire on WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Standard Checkout Modal ── -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeCheckoutModal">✕</button>
+    <h2>Complete Your Saree Order</h2>
+    <form id="checkoutForm">
+      <div class="checkout-form-grid">
+        <div class="form-field full-col">
+          <label>Full Name *</label>
+          <input type="text" required placeholder="Enter your full name" id="coName">
+        </div>
+        <div class="form-field">
+          <label>Mobile Number (For WhatsApp Updates) *</label>
+          <input type="tel" required placeholder="+91 95421 56929" id="coPhone">
+        </div>
+        <div class="form-field">
+          <label>Email Address</label>
+          <input type="email" placeholder="name@domain.com" id="coEmail">
+        </div>
+        <div class="form-field full-col">
+          <label>Delivery Address *</label>
+          <input type="text" required placeholder="House / Flat / Street address" id="coAddress">
+        </div>
+        <div class="form-field">
+          <label>City *</label>
+          <input type="text" required placeholder="e.g. Hyderabad, Bengaluru" id="coCity">
+        </div>
+        <div class="form-field">
+          <label>PIN Code *</label>
+          <input type="text" required placeholder="e.g. 500001" id="coPin">
+        </div>
+        <div class="form-field full-col">
+          <label>Preferred Payment Mode</label>
+          <select id="coPayment">
+            <option value="Online UPI / Cards">Instant Online UPI / Credit / Debit Cards</option>
+            <option value="WhatsApp Confirmation">Confirm Order via WhatsApp Concierge</option>
+            <option value="Cash on Delivery">Cash on Delivery (Verified on call)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: var(--deep-wine); margin-bottom: 16px; border-top: 1px solid var(--border); padding-top: 14px;">
+        <span>Payable Amount:</span>
+        <span id="coOrderTotal">₹0</span>
+      </div>
+      <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; font-size: 14px;">Confirm & Place Order →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── Account Sign-In / Concierge Modal ── -->
+<div class="modal-overlay" id="accountModal">
+  <div class="modal-box" style="max-width: 440px; text-align: center;">
+    <button class="modal-close" id="closeAccountModal">✕</button>
+    <h2>Patron Concierge</h2>
+    <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 24px;">Sign in to view your bespoke orders, saved sarees, and personalized styling recommendations.</p>
+    <form id="accountForm" onsubmit="handleAccountLogin(event)">
+      <div class="form-field" style="margin-bottom: 14px; text-align: left;">
+        <label>Mobile Number or Email</label>
+        <input type="text" required placeholder="+91 or email address" id="accInput">
+      </div>
+      <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-bottom: 12px;">Sign In with OTP</button>
+      <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions,%20I%20would%20like%20to%20track%20my%20saree%20order." target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; color: var(--midnight-navy); text-decoration: underline;">Need help with an existing order? Chat on WhatsApp</a>
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+        <a href="#/admin" onclick="closeAccountModal()" style="font-size: 12px; color: var(--midnight-navy); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">Atelier Staff & Admin Portal &rarr;</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Admin Add / Edit Saree Modal ── -->
+<div class="modal-overlay" id="adminProductModal">
+  <div class="modal-box" style="max-width: 650px; text-align: left;">
+    <button class="modal-close" onclick="closeAdminProductModal()">✕</button>
+    <h2 id="adminModalTitle" style="font-family: var(--font-serif); font-size: 20px; color: var(--midnight-navy); margin-bottom: 6px;">Add New Handloom Saree</h2>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Manage catalogue specifications, pricing, inventory status and imagery.</p>
+    <form id="adminProductForm" onsubmit="handleAdminProductSave(event)">
+      <input type="hidden" id="adminProdId">
+      <div class="checkout-grid">
+        <div class="form-field full-col">
+          <label>Saree Title *</label>
+          <input type="text" id="adminProdName" required placeholder="e.g. Royal Kanchipuram Brocade Saree">
+        </div>
+        <div class="form-field">
+          <label>Collection / Category *</label>
+          <select id="adminProdCategory" required>
+            <option value="Kanchipuram">Kanchipuram</option>
+            <option value="Banarasi">Banarasi</option>
+            <option value="Organza">Organza</option>
+            <option value="Pure Silk">Pure Silk</option>
+            <option value="Handloom Cotton">Handloom Cotton</option>
+            <option value="Designer Sarees">Designer Sarees</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Fabric *</label>
+          <input type="text" id="adminProdFabric" required placeholder="e.g. Pure Mulberry Silk">
+        </div>
+        <div class="form-field">
+          <label>Primary Color *</label>
+          <input type="text" id="adminProdColor" required placeholder="e.g. Royal Burgundy, Mustard Gold">
+        </div>
+        <div class="form-field">
+          <label>Price (₹) *</label>
+          <input type="number" id="adminProdPrice" required min="100" placeholder="e.g. 6499">
+        </div>
+        <div class="form-field">
+          <label>Original / MRP (₹)</label>
+          <input type="number" id="adminProdOldPrice" min="100" placeholder="e.g. 7999">
+        </div>
+        <div class="form-field">
+          <label>Occasion</label>
+          <select id="adminProdOccasion">
+            <option value="Bridal & Wedding">Bridal & Wedding</option>
+            <option value="Festive Celebration">Festive Celebration</option>
+            <option value="Party & Cocktail">Party & Cocktail</option>
+            <option value="Everyday Grace">Everyday Grace</option>
+            <option value="Reception Glamour">Reception Glamour</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Badge Highlight</label>
+          <select id="adminProdBadge">
+            <option value="">None</option>
+            <option value="Bestseller">Bestseller</option>
+            <option value="New Arrival">New Arrival</option>
+            <option value="Trending">Trending</option>
+            <option value="Exclusive">Exclusive</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Stock Status</label>
+          <select id="adminProdStock">
+            <option value="In Stock">In Stock</option>
+            <option value="Low Stock">Low Stock</option>
+            <option value="Sold Out">Sold Out</option>
+          </select>
+        </div>
+        <div class="form-field full-col">
+          <label>Image Asset Path or URL *</label>
+          <input type="text" id="adminProdImg" required placeholder="assets/kanchipuram-loom.jpg">
+        </div>
+        <div class="form-field full-col">
+          <label>Drape Narrative / Description *</label>
+          <textarea id="adminProdDesc" rows="3" required placeholder="Describe weave authenticity, zari motifs, and draping feel..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 2px; font-size: 13px; outline: none;"></textarea>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+        <button type="button" onclick="closeAdminProductModal()" style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 2px; font-size: 13px; cursor: pointer;">Cancel</button>
+        <button type="submit" class="btn-primary" style="padding: 10px 24px; font-size: 13px;">Save Saree to Catalogue</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Floating WhatsApp Concierge ── -->
+<a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20would%20like%20to%20know%20more%20about%20your%20saree%20collections." target="_blank" rel="noopener noreferrer" class="floating-wa-concierge" aria-label="WhatsApp Concierge">
+  <svg viewBox="0 0 32 32"><path d="M16 2a14 14 0 0 0-12 21.2L2 30l7-1.9A14 14 0 1 0 16 2zm0 25.5c-2.3 0-4.5-.6-6.4-1.8l-.5-.3-4.6 1.2 1.3-4.4-.3-.5A11.5 11.5 0 1 1 16 27.5zm6.3-8.6c-.3-.2-2-.9-2.3-1s-.6-.2-.8.2-.9 1-1.1 1.2-.4.3-.7.1a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.3 0-.5.2-.7s.3-.4.5-.5.2-.3.3-.5a.6.6 0 0 0 0-.6c-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 .5 4.3 4.3 0 0 0-1.3 3.2c0 1.9 1.4 3.7 1.6 3.9.2.3 2.7 4.1 6.5 5.7 3.8 1.6 3.8 1.1 4.5 1 .7 0 2.2-.9 2.5-1.8.3-.8.3-1.6.2-1.8-.1-.2-.4-.3-.7-.4z"/></svg>
+  <span>Styling Concierge</span>
+</a>
+
+<!-- ── Toast Feedback ── -->
+<div class="toast-notice" id="toastNotice"></div>
+
+  <script src="scripts/sf_database.js"></script>
+  <script src="scripts/sf_admin.js"></script>
+
+<script>
+// ── Store Configuration ──
+const STORE = {
+  name: 'Shanmuka Fashions',
+  whatsapp: '919542156929',
+  displayPhone: '+91 95421 56929',
+  freeShippingThreshold: 5000
+};
+
+// ── Complete Catalogue Data (14 Handcrafted Sarees across All 6 Weave Collections) ──
+const DEFAULT_PRODUCTS = [
+  {
+    id: 1,
+    name: 'Royal Kanchipuram Pure Silk Saree',
+    category: 'Kanchipuram',
+    fabric: 'Pure Silk',
+    color: 'Burgundy',
+    price: 6499,
+    old: 7999,
+    badge: 'Bestseller',
+    img: 'assets/kanchipuram-loom.jpg',
+    occasion: 'Bridal & Wedding',
+    pattern: 'Temple Border',
+    type: 'Traditional Handloom',
+    rating: 4.9,
+    reviewsCount: 38,
+    desc: 'An exquisite handloom Kanchipuram pure silk saree in royal burgundy adorned with heavy gold zari temple borders and an opulent brocade pallu. Ideal for weddings and sacred festivities.'
+  },
+  {
+    id: 2,
+    name: 'Banarasi Heritage Meenakari Weave',
+    category: 'Banarasi',
+    fabric: 'Katan Silk',
+    color: 'Emerald Green',
+    price: 5299,
+    old: 6499,
+    badge: 'New Arrival',
+    img: 'assets/golden-silk-saree-clean.jpg',
+    occasion: 'Festive Celebration',
+    pattern: 'Floral Jaal',
+    type: 'Traditional Handloom',
+    rating: 4.8,
+    reviewsCount: 26,
+    desc: 'A magnificent emerald green Banarasi silk saree enriched with delicate gold zari floral jaal and kadwa weave motifs. Inspired by royal Indian court textiles.'
+  },
+  {
+    id: 3,
+    name: 'Floral Organza Tissue Saree',
+    category: 'Organza',
+    fabric: 'Organza',
+    color: 'Pastel Pink',
+    price: 2899,
+    old: 3499,
+    badge: 'Trending',
+    img: 'assets/raw-silk-yarns.jpg',
+    occasion: 'Party Wear',
+    pattern: 'Floral Jaal',
+    type: 'Contemporary Festive',
+    rating: 4.7,
+    reviewsCount: 19,
+    desc: 'Ethereal and translucent, this floral pastel organza saree features hand-painted floral motifs outlined in shimmering gold zari borders for daytime celebrations and cocktail soirées.'
+  },
+  {
+    id: 4,
+    name: 'Festive Peacock Zari Silk Saree',
+    category: 'Silk',
+    fabric: 'Pure Silk',
+    color: 'Magenta Pink',
+    price: 4199,
+    old: 4999,
+    badge: 'Featured',
+    img: 'assets/raw-silk-yarns.jpg',
+    occasion: 'Festive Celebration',
+    pattern: 'Peacock Zari',
+    type: 'Traditional Handloom',
+    rating: 4.9,
+    reviewsCount: 31,
+    desc: 'A luminous magenta pink pure silk saree featuring auspicious peacock motifs handwoven into a regal golden zari pallu. A timeless festive statement.'
+  },
+  {
+    id: 5,
+    name: 'Everyday Handloom Cotton Grace',
+    category: 'Cotton',
+    fabric: 'Handloom Cotton',
+    color: 'Indigo Blue',
+    price: 1499,
+    old: 1899,
+    badge: 'Everyday Grace',
+    img: 'assets/handloom-weaving.jpg',
+    occasion: 'Everyday Grace',
+    pattern: 'Woven Butta',
+    type: 'Traditional Handloom',
+    rating: 4.6,
+    reviewsCount: 44,
+    desc: 'Breathable, lightweight, and effortlessly poised. Spun from pure natural cotton threads with subtle tribal border motifs for refined all-day comfort.'
+  },
+  {
+    id: 6,
+    name: 'Bridal Kanchipuram Gold Brocade',
+    category: 'Kanchipuram',
+    fabric: 'Pure Silk',
+    color: 'Burgundy',
+    price: 8999,
+    old: 10999,
+    badge: 'Bestseller',
+    img: 'assets/kanchipuram-loom.jpg',
+    occasion: 'Bridal & Wedding',
+    pattern: 'Zari Brocade',
+    type: 'Traditional Handloom',
+    rating: 5.0,
+    reviewsCount: 52,
+    desc: 'A true heirloom bridal masterwork. Handwoven with pure mulberry silk and dense certified golden zari brocade across the entire body and sweeping pallu.'
+  },
+  {
+    id: 7,
+    name: 'Banarasi Celebration Silk Saree',
+    category: 'Banarasi',
+    fabric: 'Katan Silk',
+    color: 'Emerald Green',
+    price: 5799,
+    old: 6999,
+    badge: 'Popular',
+    img: 'assets/golden-silk-saree-clean.jpg',
+    occasion: 'Festive Celebration',
+    pattern: 'Floral Jaal',
+    type: 'Traditional Handloom',
+    rating: 4.8,
+    reviewsCount: 22,
+    desc: 'Woven with high-twist katan silk yarns and shimmering gold brocade borders. Drapes gracefully with a rich, soft sheen under celebratory lights.'
+  },
+  {
+    id: 8,
+    name: 'Soft Indigo Handloom Cotton',
+    category: 'Cotton',
+    fabric: 'Handloom Cotton',
+    color: 'Indigo Blue',
+    price: 1799,
+    old: 2199,
+    badge: 'Comfort Pick',
+    img: 'assets/handloom-weaving.jpg',
+    occasion: 'Everyday Grace',
+    pattern: 'Woven Butta',
+    type: 'Traditional Handloom',
+    rating: 4.7,
+    reviewsCount: 29,
+    desc: 'A finely woven cotton saree highlighting indigo blue depth with contrast gold zari selvedge. Perfect for office elegance and cultural gatherings.'
+  },
+  {
+    id: 9,
+    name: 'Shimmer Champagne Organza Tissue',
+    category: 'Organza',
+    fabric: 'Organza',
+    color: 'Champagne Gold',
+    price: 3499,
+    old: 4199,
+    badge: 'New Arrival',
+    img: 'assets/golden-silk-saree-clean.jpg',
+    occasion: 'Party Wear',
+    pattern: 'Zari Brocade',
+    type: 'Contemporary Festive',
+    rating: 4.9,
+    reviewsCount: 15,
+    desc: 'Draped in golden sunlight, this champagne organza saree glistens with metallic tissue warp and delicate scalloped embroidery.'
+  },
+  {
+    id: 10,
+    name: 'Traditional Royal Temple Silk',
+    category: 'Silk',
+    fabric: 'Pure Silk',
+    color: 'Burgundy',
+    price: 4899,
+    old: 5999,
+    badge: 'Festive Edit',
+    img: 'assets/kanchipuram-loom.jpg',
+    occasion: 'Bridal & Wedding',
+    pattern: 'Temple Border',
+    type: 'Traditional Handloom',
+    rating: 4.9,
+    reviewsCount: 34,
+    desc: 'Rich deep wine silk saree highlighting three-tier gold zari temple spires and traditional mango butti motifs. Comes with contrast unstitched blouse piece.'
+  },
+  {
+    id: 11,
+    name: 'Regal Banarasi Brocade Bridal Edit',
+    category: 'Banarasi',
+    fabric: 'Katan Silk',
+    color: 'Champagne Gold',
+    price: 7499,
+    old: 8999,
+    badge: 'Bestseller',
+    img: 'assets/golden-silk-saree-clean.jpg',
+    occasion: 'Bridal & Wedding',
+    pattern: 'Zari Brocade',
+    type: 'Traditional Handloom',
+    rating: 5.0,
+    reviewsCount: 41,
+    desc: 'An opulent bridal Banarasi drape featuring antique gold zari work and rich selvedge detailing that echoes timeless Banaras royal heritage.'
+  },
+  {
+    id: 12,
+    name: 'Pure Chanderi Cotton Silk Drape',
+    category: 'Cotton',
+    fabric: 'Handloom Cotton',
+    color: 'Indigo Blue',
+    price: 2199,
+    old: 2699,
+    badge: 'Artisan Pick',
+    img: 'assets/handloom-weaving.jpg',
+    occasion: 'Everyday Grace',
+    pattern: 'Woven Butta',
+    type: 'Traditional Handloom',
+    rating: 4.8,
+    reviewsCount: 18,
+    desc: 'An artisan-crafted cotton silk blend saree combining the breathability of fine cotton with the delicate sheen of handloom silk.'
+  },
+  {
+    id: 13,
+    name: 'Royal Atelier Cutwork Designer Saree',
+    category: 'Designer',
+    fabric: 'Pure Silk',
+    color: 'Burgundy',
+    price: 9499,
+    old: 11999,
+    badge: 'Haute Edit',
+    img: 'assets/hero-model.jpg',
+    occasion: 'Party Wear',
+    pattern: 'Zari Brocade',
+    type: 'Designer Couture',
+    rating: 5.0,
+    reviewsCount: 28,
+    desc: 'Bespoke royal designer saree featuring intricate antique gold bullion embroidery, scallop-cut borders, and rich silk brocade pallu crafted for red-carpet and grand reception soirées.'
+  },
+  {
+    id: 14,
+    name: 'Midnight Navy Tapestry Designer Saree',
+    category: 'Designer',
+    fabric: 'Katan Silk',
+    color: 'Midnight Navy',
+    price: 8299,
+    old: 9999,
+    badge: 'Exclusive',
+    img: 'assets/hero-model.jpg',
+    occasion: 'Bridal & Wedding',
+    pattern: 'Floral Jaal',
+    type: 'Designer Couture',
+    rating: 4.9,
+    reviewsCount: 33,
+    desc: 'An opulent midnight navy silk saree featuring antique champagne gold zari florals and contemporary selvedge detailing, designed for the modern royal bride.'
+  }
+];
+
+// Active products array (persisted to localStorage)
+let // Centralized Database Integration
+products = (typeof SFDatabase !== 'undefined' ? SFDatabase.getProducts() : [...DEFAULT_PRODUCTS]);
+
+function loadProducts() {
+  if (typeof SFDatabase !== 'undefined') {
+    products = SFDatabase.getProducts();
+  }
+}
+
+function saveProducts() {
+  try {
+    localStorage.setItem('sf_products_tw_v3', JSON.stringify(products));
+  } catch(e) {}
+}
+
+function getOrders() {
+  try {
+    const o = localStorage.getItem('sf_orders_tw');
+    if (o) {
+      const parsed = JSON.parse(o);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    const sample = [
+      {
+        id: 'SF-849201',
+        date: '08 Nov 2026',
+        customer: { name: 'Priya Ramanathan', phone: '+91 98401 23456', city: 'Chennai' },
+        items: [{ id: 1, name: 'Royal Kanchipuram Pure Silk Saree', price: 6499, qty: 1 }, { id: 2, name: 'Banarasi Heritage Meenakari Weave', price: 5299, qty: 1 }],
+        total: 11798,
+        payment: 'Instant Online UPI',
+        status: 'Confirmed'
+      },
+      {
+        id: 'SF-849182',
+        date: '07 Nov 2026',
+        customer: { name: 'Ananya Reddy', phone: '+91 99890 54321', city: 'Hyderabad' },
+        items: [{ id: 4, name: 'Traditional Kanjeevaram Bridal Silk', price: 7899, qty: 1 }],
+        total: 7899,
+        payment: 'WhatsApp Confirmation',
+        status: 'Shipped'
+      },
+      {
+        id: 'SF-849045',
+        date: '05 Nov 2026',
+        customer: { name: 'Deepika Sharma', phone: '+91 98801 87654', city: 'Bengaluru' },
+        items: [{ id: 3, name: 'Floral Organza Tissue Saree', price: 2899, qty: 1 }],
+        total: 2899,
+        payment: 'Cash on Delivery',
+        status: 'Delivered'
+      }
+    ];
+    saveOrders(sample);
+    return sample;
+  } catch(e) { return []; }
+}
+
+function saveOrders(orders) {
+  try {
+    localStorage.setItem('sf_orders_tw', JSON.stringify(orders));
+  } catch(e) {}
+}
+
+function getEnquiries() {
+  try {
+    const eq = localStorage.getItem('sf_enquiries_tw');
+    if (eq) {
+      const parsed = JSON.parse(eq);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    const sample = [
+      {
+        id: 'ENQ-101',
+        date: '08 Nov 2026',
+        name: 'Sunita Verma',
+        phone: '+91 98450 12345',
+        message: 'Looking for a royal magenta bridal Kanchipuram silk saree with pure gold zari for November reception.',
+        status: 'New'
+      },
+      {
+        id: 'ENQ-102',
+        date: '07 Nov 2026',
+        name: 'Radhika Menon',
+        phone: '+91 97112 67890',
+        message: 'Do you offer express insured delivery to Singapore for 3 festive silk drapes?',
+        status: 'In Progress'
+      }
+    ];
+    saveEnquiries(sample);
+    return sample;
+  } catch(e) { return []; }
+}
+
+function saveEnquiries(eqs) {
+  try {
+    localStorage.setItem('sf_enquiries_tw', JSON.stringify(eqs));
+  } catch(e) {}
+}
+let state = {
+  cart: {},
+  wishlist: [],
+  activeFilters: {
+    categories: [],
+    fabrics: [],
+    colors: [],
+    occasions: [],
+    priceRanges: []
+  },
+  sortBy: 'featured',
+  searchQuery: '',
+  quickViewProduct: null,
+  pdpProduct: null,
+  pdpQty: 1
+};
+
+const money = n => '₹' + n.toLocaleString('en-IN');
+const $ = id => document.getElementById(id);
+
+// ── Storage Helpers ──
+function loadState() {
+  loadProducts();
+  try {
+    const c = localStorage.getItem('sf_cart_tw');
+    if (c) state.cart = JSON.parse(c);
+    const w = localStorage.getItem('sf_wishlist_tw');
+    if (w) state.wishlist = JSON.parse(w);
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('sf_cart_tw', JSON.stringify(state.cart));
+    localStorage.setItem('sf_wishlist_tw', JSON.stringify(state.wishlist));
+  } catch(e) {}
+}
+
+// ── Toast Notification ──
+function toast(msg) {
+  const el = $('toastNotice');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── Router / View Controller ──
+function navigate() {
+  const hash = window.location.hash || '#/';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Update navigation link active state
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+  if (hash.startsWith('#/product/')) {
+    const id = parseInt(hash.replace('#/product/', ''), 10);
+    renderPDPView(id);
+  } else if (hash.startsWith('#/collection/')) {
+    const col = hash.replace('#/collection/', '').toLowerCase();
+    renderCollectionLandingView(col);
+  } else if (hash.startsWith('#/catalogue') || hash.startsWith('#/sarees')) {
+    $('navSarees').classList.add('active');
+    renderCatalogueView();
+  } else if (hash === '#/story') {
+    renderStoryView();
+  } else if (hash === '#/contact') {
+    renderContactView();
+  } else if (hash.startsWith('#/admin')) {
+    renderAdminView();
+  } else {
+    $('navHome').classList.add('active');
+    renderHomeView();
+  }
+}
+
+// ── VIEW 1: Luxury Homepage (Anti-Slop Editorial Design) ──
+function renderHomeView() {
+  const app = $('appRoot');
+  
+  // First 4 sarees for New Arrivals
+  const featuredNew = products.slice(0, 4);
+
+  app.innerHTML = `
+    <!-- 1. Authentic Luxury Campaign Hero Banner with Cinematic Video -->
+    <section class="hero-campaign-section" aria-label="Haute Couture Campaign">
+      <!-- Background Cinematic Video (21:9 Aspect Ratio) -->
+      <video
+        class="hero-video-bg"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="assets/hero-model.jpg"
+        aria-hidden="true"
+      >
+        <source src="gemini_generated_video_e8550a2b.mp4" type="video/mp4">
+      </video>
+
+      <!-- Gradient Overlay on Left Side only for Text Contrast -->
+      <div class="hero-video-overlay" aria-hidden="true"></div>
+
+      <div class="hero-campaign-container">
+        <div class="hero-text-block">
+          <div class="hero-eyebrow-badge" style="color: var(--antique-bronze); letter-spacing: 3.5px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Traditional Indian Saree Heritage</div>
+          <h1 class="hero-main-heading" style="color: var(--espresso-brown); font-family: var(--font-serif); font-size: clamp(34px, 4vw, 56px); font-weight: 600; line-height: 1.15; margin-bottom: 12px;">Heritage Weaves for the Modern Woman</h1>
+          <div class="hero-tagline-text" style="color: var(--antique-bronze); font-family: var(--font-serif); font-style: italic; font-size: 22px; margin-bottom: 16px;">Elegance Woven Through Generations.</div>
+          <p class="hero-narrative" style="color: var(--secondary-text); font-size: 15px; line-height: 1.8; max-width: 520px; margin-bottom: 32px;">Discover the timeless grandeur of certified pure handloom silks, authentic temple borders, and heirloom brocades hand-crafted by multi-generational master weavers.</p>
+          <div class="hero-button-group">
+            <a href="#/catalogue" class="btn-hero-primary">EXPLORE COLLECTION &rarr;</a>
+            <a href="#/catalogue?occasion=Bridal" class="btn-hero-secondary">BRIDAL TROUSSEAU</a>
+          </div>
+          <div class="hero-trust-micro" style="color: var(--secondary-text);">Silk Mark Certified &bull; Generational Handloom Heritage &bull; Worldwide Insured Delivery</div>
+        </div>
+      </div>
+      <div class="hero-model-tag">Kanchipuram Silk &bull; Certified Gold Zari &bull; Royal Atelier</div>
+    </section>
+
+    <!-- 2. Typographic Atelier Commitments Strip -->
+    <section class="commitments-bar">
+      <div class="commitments-grid">
+        <div class="commitment-item">
+          <span class="commitment-num">01</span>
+          <h4 class="commitment-title">Silk Mark Certified</h4>
+          <p class="commitment-desc">100% pure natural silk assurance verified by genuine Silk Mark standards.</p>
+        </div>
+        <div class="commitment-item">
+          <span class="commitment-num">02</span>
+          <h4 class="commitment-title">Direct Artisan Weavers</h4>
+          <p class="commitment-desc">Heritage loom provenance sourced ethically from master weaver clusters.</p>
+        </div>
+        <div class="commitment-item">
+          <span class="commitment-num">03</span>
+          <h4 class="commitment-title">Insured Worldwide Express</h4>
+          <p class="commitment-desc">Doorstep express courier dispatch; complimentary on orders above ₹15,000.</p>
+        </div>
+        <div class="commitment-item">
+          <span class="commitment-num">04</span>
+          <h4 class="commitment-title">Live Video Styling Concierge</h4>
+          <p class="commitment-desc">Private WhatsApp video drapery consultation with our senior stylists.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Curated Collections (Asymmetric Editorial Layout) -->
+    <section class="curated-collections-section">
+      <div class="editorial-header">
+        <span class="eyebrow">Curated Weaves</span>
+        <h2>Shop By Collection</h2>
+        <p>Explore centuries of Indian handloom heritage through our masterfully curated saree drapes.</p>
+      </div>
+
+      <!-- Asymmetric Editorial Composition (No Boxy Grids) -->
+      
+      <!-- Feature 01: Hero Atelier Spread (Kanchipuram Silk) -->
+      <div class="collection-editorial-spread">
+        <div class="spread-visual" onclick="window.location.hash='#/collection/kanchipuram'">
+          <img src="assets/kanchipuram-loom.jpg" alt="Kanchipuram Silk Masterloom" loading="lazy">
+        </div>
+        <div class="spread-content">
+          <span class="spread-num">I</span>
+          <span class="spread-eyebrow">The Queen of Silks &bull; Sacred Temple Weaves</span>
+          <h3 class="spread-title">Kanchipuram Silk</h3>
+          <p class="spread-desc">Handwoven from certified pure mulberry silk with traditional korvai interlocking temple spires and tested gold zari that endure across generations.</p>
+          <a href="#/collection/kanchipuram" class="editorial-link">EXPLORE COLLECTION &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Features 02 & 03: Editorial Duo with Offset Rhythm (Banarasi Silk & Designer Sarees) -->
+      <div class="collection-editorial-duo">
+        <div class="editorial-duo-item" onclick="window.location.hash='#/collection/banarasi'">
+          <div class="duo-image-wrap">
+            <img src="assets/golden-silk-saree-clean.jpg" alt="Banarasi Silk Heritage" loading="lazy">
+          </div>
+          <span class="duo-label">II &bull; Heritage Kadwa Weaves</span>
+          <h4 class="duo-title">Banarasi Silk</h4>
+          <div><a href="#/collection/banarasi" class="editorial-link">VIEW DRAPES &rarr;</a></div>
+        </div>
+
+        <div class="editorial-duo-item offset-down" onclick="window.location.hash='#/collection/designer'">
+          <div class="duo-image-wrap">
+            <img src="assets/hero-model.jpg" alt="Designer Sarees Haute Couture" loading="lazy">
+          </div>
+          <span class="duo-label">III &bull; Royal Haute Couture</span>
+          <h4 class="duo-title">Designer Sarees</h4>
+          <div><a href="#/collection/designer" class="editorial-link">VIEW DRAPES &rarr;</a></div>
+        </div>
+      </div>
+
+      <!-- Features 04, 05 & 06: Editorial Trio (Bridal Collection, Cotton & Handloom, Organza Collection) -->
+      <div class="collection-editorial-trio">
+        <div class="trio-item" onclick="window.location.hash='#/catalogue?occasion=Bridal'">
+          <div class="trio-image-wrap">
+            <img src="assets/kanchipuram-loom.jpg" alt="Bridal Collection" loading="lazy">
+          </div>
+          <span class="trio-label">IV &bull; Royal Muhurtham</span>
+          <h4 class="trio-title">Bridal Collection</h4>
+          <div><a href="#/catalogue?occasion=Bridal" class="editorial-link">VIEW DRAPES &rarr;</a></div>
+        </div>
+
+        <div class="trio-item" onclick="window.location.hash='#/collection/cotton'">
+          <div class="trio-image-wrap">
+            <img src="assets/handloom-weaving.jpg" alt="Cotton & Handloom" loading="lazy">
+          </div>
+          <span class="trio-label">V &bull; Natural Handloom</span>
+          <h4 class="trio-title">Cotton & Handloom</h4>
+          <div><a href="#/collection/cotton" class="editorial-link">VIEW DRAPES &rarr;</a></div>
+        </div>
+
+        <div class="trio-item" onclick="window.location.hash='#/collection/organza'">
+          <div class="trio-image-wrap">
+            <img src="assets/raw-silk-yarns.jpg" alt="Organza Collection" loading="lazy">
+          </div>
+          <span class="trio-label">VI &bull; Translucent Grace</span>
+          <h4 class="trio-title">Organza Collection</h4>
+          <div><a href="#/collection/organza" class="editorial-link">VIEW DRAPES &rarr;</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. The Royal Bridal & Trousseau Collection Campaign -->
+    <section class="wedding-banner-section">
+      <div class="wedding-banner-container">
+        <div class="wedding-text-block">
+          <span class="wedding-eyebrow">The Royal Bridal Atelier</span>
+          <h2 class="wedding-heading">The Royal Bridal & Trousseau Collection</h2>
+          <div class="wedding-subheading">Heirloom Silks for Once-in-a-Lifetime Celebrations</div>
+          <p class="wedding-description">From the sacred muhurtham to the grand wedding reception, every Shanmuka bridal drape is handwoven with certified zari and pure mulberry silk, customized in heritage colour dyes to grace your wedding day.</p>
+          
+          <div class="wedding-occasions-row">
+            <a href="#/catalogue?occasion=Bridal" class="wedding-occasion-tag">Muhurtham Silks &rarr;</a>
+            <a href="#/catalogue?occasion=Party" class="wedding-occasion-tag">Sangeet & Cocktail &rarr;</a>
+            <a href="#/catalogue?occasion=Reception" class="wedding-occasion-tag">Reception Glamour &rarr;</a>
+            <a href="#/catalogue?occasion=Festive" class="wedding-occasion-tag">Festive Pooja &rarr;</a>
+          </div>
+
+          <div class="wedding-actions">
+            <a href="#/catalogue?occasion=Bridal" class="btn-wedding-primary">Explore Bridal Trousseau &rarr;</a>
+            <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20would%20like%20to%20consult%20with%20your%20bridal%20stylist." target="_blank" rel="noopener noreferrer" class="btn-wedding-secondary">Consult Bridal Stylist</a>
+          </div>
+        </div>
+        <div class="wedding-media-block">
+          <img src="Shanmuka Fashions Saree Emblem.png" alt="Shanmuka Fashions Royal Bridal Emblem" class="wedding-media-img" style="object-fit: contain; background: rgba(255,255,255,0.03); padding: 16px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. New Arrivals / Masterpiece Weaves -->
+    <section class="section-wrapper">
+      <div class="editorial-header">
+        <span class="eyebrow">Autumn / Festive 2026</span>
+        <h2>New Arrivals & Masterpiece Weaves</h2>
+        <p>Fresh off the looms: handpicked pure silk sarees, intricate brocades, and contemporary drapes.</p>
+      </div>
+      <div class="product-grid" id="homeNewArrivalsGrid">
+        ${renderProductCardsHTML(featuredNew)}
+      </div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="#/catalogue" class="btn-primary">View Full Catalogue &rarr;</a>
+      </div>
+    </section>
+
+    <!-- 6. Brand Story / Heritage Section -->
+    <section class="story-section">
+      <div class="story-container">
+        <div class="story-image-frame">
+          <img src="assets/kanchipuram-loom.jpg" alt="Indian Saree Weaving Craftsmanship" loading="lazy">
+        </div>
+        <div class="story-content">
+          <span class="eyebrow" style="color: var(--antique-bronze); letter-spacing: 3.5px; font-size: 11px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 8px;">Living Weaving Traditions</span>
+          <h2 style="font-family: var(--font-serif); color: var(--espresso-brown); font-size: clamp(28px, 3.2vw, 42px); line-height: 1.2; margin-bottom: 16px;">Elegance Woven Through Generations</h2>
+          <p style="color: var(--primary-text); font-size: 15px; line-height: 1.85; margin-bottom: 14px;">The Indian handloom saree is a living testament to thousands of years of textile artistry. At Shanmuka Fashions, we celebrate the generational wisdom of master artisan communities across Kanchipuram, Varanasi, Dharmavaram, and Chanderi.</p>
+          <p style="color: var(--secondary-text); font-size: 14.5px; line-height: 1.8; margin-bottom: 24px;">Each drape represents painstaking devotion—from the spinning of pure mulberry silk yarns to the hand-setting of Jacquard punch cards and tested gold zari borders. We honor these timeless weaving traditions by curating authentic heirloom sarees for celebrations that last a lifetime.</p>
+          <div>
+            <a href="#/story" class="btn-primary">DISCOVER OUR WEAVER STORY &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Patron Voices / Magazine-Style Editorial Pull Quotes -->
+    <section class="testimonials-section" aria-label="Customer Reflections">
+      <div class="editorial-header">
+        <span class="eyebrow">Patron Reflections</span>
+        <h2>Woven into Auspicious Memories</h2>
+        <p>Honored reflections from brides and connoisseurs who chose Shanmuka heirlooms for their lifetime celebrations.</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <span class="testimonial-quote-mark">“</span>
+          <p class="testimonial-text">The Kanchipuram bridal saree I received for my Muhurtham was breathtaking. The pure mulberry silk and the subtle brilliance of the tested gold zari exceeded every expectation.</p>
+          <div class="testimonial-author">
+            <strong>Ananya Ramaswamy</strong>
+            <small>Chennai &bull; Bridal Trousseau Patron</small>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <span class="testimonial-quote-mark">“</span>
+          <p class="testimonial-text">Their live video concierge helped me examine the exact pallu weave and zari sheen in natural daylight before shipping to London. It arrived impeccably wrapped in breathable cotton.</p>
+          <div class="testimonial-author">
+            <strong>Dr. Radhika Varma</strong>
+            <small>London &bull; International Patron</small>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <span class="testimonial-quote-mark">“</span>
+          <p class="testimonial-text">You immediately sense the heritage of master weavers the instant you touch the silk. It drapes with liquid grace. Shanmuka preserves authentic handloom artistry.</p>
+          <div class="testimonial-author">
+            <strong>Kavitha Sundaram</strong>
+            <small>Bangalore &bull; Festive Silk Collector</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Atelier Journal / Private Salon Invitation -->
+    <section class="atelier-journal-section" aria-label="Private Atelier Access">
+      <div class="atelier-journal-card">
+        <span class="journal-eyebrow">The Shanmuka Saree Circle</span>
+        <h2 class="journal-heading">Private Loom Previews & Heirloom Edits</h2>
+        <p class="journal-desc">Receive intimate invitations to limited-edition handloom releases, master weaver retrospectives, and private drapery appointments.</p>
+        <form class="journal-form" onsubmit="event.preventDefault(); showToast('Thank you for subscribing to The Shanmuka Saree Circle.'); this.reset();">
+          <input type="email" placeholder="Enter your email address" required aria-label="Email address">
+          <button type="submit" class="journal-submit-btn">REQUEST INVITATION &rarr;</button>
+        </form>
+      </div>
+    </section>
+  `;
+
+  attachProductCardEvents();
+
+  // Ensure hero video playback and respect prefers-reduced-motion
+  const heroVid = document.querySelector('.hero-video-bg');
+  if (heroVid) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      heroVid.pause();
+    } else {
+      heroVid.play().catch(() => {
+        // Handled silently by muted autoplay
+      });
+    }
+  }
+}
+
+// ── VIEW 2: Saree Catalogue Page (Twamev 4-Col + Multi-Filter Sidebar) ──
+function renderCatalogueView() {
+  const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  
+  // Parse initial filter params if any
+  const categoryParam = params.get('category');
+  const occasionParam = params.get('occasion');
+  const filterParam = params.get('filter');
+  const fabricParam = params.get('fabric');
+  const colorParam = params.get('color');
+
+  if (categoryParam && !state.activeFilters.categories.includes(categoryParam)) {
+    state.activeFilters.categories = [categoryParam];
+  }
+  if (occasionParam && !state.activeFilters.occasions.includes(occasionParam)) {
+    state.activeFilters.occasions = [occasionParam];
+  }
+  if (fabricParam && !state.activeFilters.fabrics.includes(fabricParam)) {
+    state.activeFilters.fabrics = [fabricParam];
+  }
+  if (colorParam && !state.activeFilters.colors.includes(colorParam)) {
+    state.activeFilters.colors = [colorParam];
+  }
+
+  const app = $('appRoot');
+  app.innerHTML = `
+    <div class="catalogue-page">
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="#/">Home</a>
+        <span>/</span>
+        <a href="#/catalogue">Sarees</a>
+        <span>/</span>
+        <span id="breadcrumbCurrent">All Collections</span>
+      </nav>
+
+      <!-- Top Banner -->
+      <div class="catalogue-top-banner">
+        <h1 id="catalogueHeading">Handcrafted Sarees</h1>
+        <p>Explore our master catalogue of authentic Kanchipuram, Banarasi, Organza, Pure Silk, and fine Cotton sarees, thoughtfully woven for weddings, rituals, and unforgettable celebrations.</p>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="catalogue-toolbar">
+        <div class="product-count-label">
+          Showing <b id="displayedCount">0</b> of <b id="totalCatalogueCount">${products.length}</b> Sarees
+        </div>
+        <div class="catalogue-controls">
+          <button class="mobile-filter-btn" onclick="toggleMobileFilterSidebar()">
+            <span>Filters</span>
+          </button>
+          <select class="sort-select" id="catalogueSortSelect" onchange="handleSortChange(event)">
+            <option value="featured" ${state.sortBy === 'featured' ? 'selected' : ''}>Sort: Featured</option>
+            <option value="bestseller" ${state.sortBy === 'bestseller' ? 'selected' : ''}>Sort: Best Sellers</option>
+            <option value="new" ${state.sortBy === 'new' ? 'selected' : ''}>Sort: New Arrivals</option>
+            <option value="low" ${state.sortBy === 'low' ? 'selected' : ''}>Price: Low to High</option>
+            <option value="high" ${state.sortBy === 'high' ? 'selected' : ''}>Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Active Filter Chips -->
+      <div class="active-filters-bar" id="activeFilterPillsBar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Main Layout: Left Sidebar + Right 4-Col Grid -->
+      <div class="catalogue-layout">
+        <!-- Sidebar Filters -->
+        <aside class="filter-sidebar" id="filterSidebar">
+          <div class="filter-sidebar-header">
+            <h3>Filters</h3>
+            <button onclick="clearAllFilters()" class="clear-all-filters" style="margin: 0; padding: 0;">Clear All</button>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <div class="filter-group-title">Category <span>▾</span></div>
+            <div class="filter-options">
+              ${['Kanchipuram', 'Banarasi', 'Organza', 'Silk', 'Cotton'].map(cat => `
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" value="${cat}" onchange="toggleFilter('categories', '${cat}')" ${state.activeFilters.categories.includes(cat) ? 'checked' : ''}>
+                  <span>${cat} Sarees</span>
+                  <span class="filter-count">(${products.filter(p => p.category === cat).length})</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Fabric Filter -->
+          <div class="filter-group">
+            <div class="filter-group-title">Fabric <span>▾</span></div>
+            <div class="filter-options">
+              ${['Pure Silk', 'Katan Silk', 'Organza', 'Handloom Cotton'].map(f => `
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" value="${f}" onchange="toggleFilter('fabrics', '${f}')" ${state.activeFilters.fabrics.includes(f) ? 'checked' : ''}>
+                  <span>${f}</span>
+                  <span class="filter-count">(${products.filter(p => p.fabric === f).length})</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Occasion Filter -->
+          <div class="filter-group">
+            <div class="filter-group-title">Occasion <span>▾</span></div>
+            <div class="filter-options">
+              ${['Bridal & Wedding', 'Festive Celebration', 'Party Wear', 'Everyday Grace'].map(occ => `
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" value="${occ}" onchange="toggleFilter('occasions', '${occ}')" ${state.activeFilters.occasions.includes(occ) ? 'checked' : ''}>
+                  <span>${occ}</span>
+                  <span class="filter-count">(${products.filter(p => p.occasion === occ).length})</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Color Filter -->
+          <div class="filter-group">
+            <div class="filter-group-title">Colour <span>▾</span></div>
+            <div class="filter-options">
+              ${['Burgundy', 'Emerald Green', 'Indigo Blue', 'Pastel Pink', 'Champagne Gold'].map(col => `
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" value="${col}" onchange="toggleFilter('colors', '${col}')" ${state.activeFilters.colors.includes(col) ? 'checked' : ''}>
+                  <span>${col}</span>
+                  <span class="filter-count">(${products.filter(p => p.color === col).length})</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="filter-group">
+            <div class="filter-group-title">Price Range <span>▾</span></div>
+            <div class="filter-options">
+              <label class="filter-checkbox-label">
+                <input type="checkbox" value="under-3000" onchange="toggleFilter('priceRanges', 'under-3000')" ${state.activeFilters.priceRanges.includes('under-3000') ? 'checked' : ''}>
+                <span>Under ₹3,000</span>
+              </label>
+              <label class="filter-checkbox-label">
+                <input type="checkbox" value="3000-5000" onchange="toggleFilter('priceRanges', '3000-5000')" ${state.activeFilters.priceRanges.includes('3000-5000') ? 'checked' : ''}>
+                <span>₹3,000 – ₹5,000</span>
+              </label>
+              <label class="filter-checkbox-label">
+                <input type="checkbox" value="5000-8000" onchange="toggleFilter('priceRanges', '5000-8000')" ${state.activeFilters.priceRanges.includes('5000-8000') ? 'checked' : ''}>
+                <span>₹5,000 – ₹8,000</span>
+              </label>
+              <label class="filter-checkbox-label">
+                <input type="checkbox" value="above-8000" onchange="toggleFilter('priceRanges', 'above-8000')" ${state.activeFilters.priceRanges.includes('above-8000') ? 'checked' : ''}>
+                <span>Above ₹8,000</span>
+              </label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Product Grid -->
+        <section>
+          <div class="product-grid" id="catalogueProductGrid">
+            <!-- Filtered products rendered dynamically -->
+          </div>
+        </section>
+      </div>
+    </div>
+  `;
+
+  renderCatalogueProducts();
+}
+
+// ── Catalogue Filtering & Re-rendering Logic ──
+function getFilteredProducts() {
+  let list = [...products];
+
+  // Category filter
+  if (state.activeFilters.categories.length) {
+    list = list.filter(p => state.activeFilters.categories.includes(p.category));
+  }
+  // Fabric filter
+  if (state.activeFilters.fabrics.length) {
+    list = list.filter(p => state.activeFilters.fabrics.includes(p.fabric));
+  }
+  // Color filter
+  if (state.activeFilters.colors.length) {
+    list = list.filter(p => state.activeFilters.colors.includes(p.color));
+  }
+  // Occasion filter
+  if (state.activeFilters.occasions.length) {
+    list = list.filter(p => state.activeFilters.occasions.some(occ => p.occasion.includes(occ)));
+  }
+  // Price Range filter
+  if (state.activeFilters.priceRanges.length) {
+    list = list.filter(p => {
+      return state.activeFilters.priceRanges.some(range => {
+        if (range === 'under-3000') return p.price < 3000;
+        if (range === '3000-5000') return p.price >= 3000 && p.price <= 5000;
+        if (range === '5000-8000') return p.price > 5000 && p.price <= 8000;
+        if (range === 'above-8000') return p.price > 8000;
+        return true;
+      });
+    });
+  }
+  // Search query
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    list = list.filter(p => 
+      (p.name + ' ' + p.category + ' ' + p.fabric + ' ' + p.color + ' ' + p.desc).toLowerCase().includes(q)
+    );
+  }
+
+  // Sorting
+  if (state.sortBy === 'low') {
+    list.sort((a, b) => a.price - b.price);
+  } else if (state.sortBy === 'high') {
+    list.sort((a, b) => b.price - a.price);
+  } else if (state.sortBy === 'bestseller') {
+    list.sort((a, b) => (b.badge === 'Bestseller' ? 1 : 0) - (a.badge === 'Bestseller' ? 1 : 0));
+  } else if (state.sortBy === 'new') {
+    list.sort((a, b) => (b.badge === 'New Arrival' ? 1 : 0) - (a.badge === 'New Arrival' ? 1 : 0));
+  }
+
+  return list;
+}
+
+function renderCatalogueProducts() {
+  const grid = $('catalogueProductGrid');
+  if (!grid) return;
+
+  const filtered = getFilteredProducts();
+  const countEl = $('displayedCount');
+  if (countEl) countEl.textContent = filtered.length;
+
+  renderActiveFilterPills();
+
+  if (!filtered.length) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: white; border: 1px solid var(--border); border-radius: 4px;">
+        <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--deep-wine); margin-bottom: 8px;">No Matching Sarees Found</h3>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 18px;">Try loosening your filters or search keywords to explore more drapes.</p>
+        <button onclick="clearAllFilters()" class="btn-primary">Reset All Filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = renderProductCardsHTML(filtered);
+  attachProductCardEvents();
+}
+
+function renderActiveFilterPills() {
+  const bar = $('activeFilterPillsBar');
+  if (!bar) return;
+
+  const allActive = [];
+  state.activeFilters.categories.forEach(c => allActive.push({ type: 'categories', val: c, label: c + ' Saree' }));
+  state.activeFilters.fabrics.forEach(f => allActive.push({ type: 'fabrics', val: f, label: f }));
+  state.activeFilters.colors.forEach(col => allActive.push({ type: 'colors', val: col, label: col }));
+  state.activeFilters.occasions.forEach(o => allActive.push({ type: 'occasions', val: o, label: o }));
+  state.activeFilters.priceRanges.forEach(p => allActive.push({ type: 'priceRanges', val: p, label: p }));
+
+  if (state.searchQuery) {
+    allActive.push({ type: 'search', val: state.searchQuery, label: `Search: "${state.searchQuery}"` });
+  }
+
+  if (!allActive.length) {
+    bar.innerHTML = '';
+    return;
+  }
+
+  bar.innerHTML = allActive.map(item => `
+    <span class="filter-pill">
+      <span>${item.label}</span>
+      <button onclick="removeFilterItem('${item.type}', '${item.val}')" aria-label="Remove filter">✕</button>
+    </span>
+  `).join('') + `<span class="clear-all-filters" onclick="clearAllFilters()">Clear All</span>`;
+}
+
+function toggleFilter(type, val) {
+  const arr = state.activeFilters[type];
+  const idx = arr.indexOf(val);
+  if (idx > -1) {
+    arr.splice(idx, 1);
+  } else {
+    arr.push(val);
+  }
+  renderCatalogueProducts();
+}
+
+function removeFilterItem(type, val) {
+  if (type === 'search') {
+    state.searchQuery = '';
+    const input = $('globalSearchInput');
+    if (input) input.value = '';
+  } else {
+    const arr = state.activeFilters[type];
+    const idx = arr.indexOf(val);
+    if (idx > -1) arr.splice(idx, 1);
+  }
+  renderCatalogueProducts();
+}
+
+function clearAllFilters() {
+  state.activeFilters = {
+    categories: [],
+    fabrics: [],
+    colors: [],
+    occasions: [],
+    priceRanges: []
+  };
+  state.searchQuery = '';
+  const input = $('globalSearchInput');
+  if (input) input.value = '';
+  renderCatalogueProducts();
+}
+
+function handleSortChange(e) {
+  state.sortBy = e.target.value;
+  renderCatalogueProducts();
+}
+
+function toggleMobileFilterSidebar() {
+  const sb = $('filterSidebar');
+  if (sb) sb.classList.toggle('open');
+}
+
+// ── Shared Product Cards HTML Generator ──
+function renderProductCardsHTML(list) {
+  return list.map(p => {
+    const inWishlist = state.wishlist.includes(p.id);
+    return `
+      <article class="product-card" data-id="${p.id}">
+        <div class="card-media">
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          <span class="card-badge">${p.badge}</span>
+          <button class="card-wishlist-btn ${inWishlist ? 'active' : ''}" data-wishlist-id="${p.id}" aria-label="Save to Wishlist">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+          <div class="card-quick-actions">
+            <button class="quick-view-btn" data-qv-id="${p.id}">Quick View</button>
+            <button class="quick-add-btn" data-add-id="${p.id}">Add to Bag</button>
+          </div>
+        </div>
+        <div class="card-details">
+          <span class="card-category">${p.category} &bull; ${p.fabric}</span>
+          <h3 class="card-title" onclick="window.location.hash='#/product/${p.id}'">${p.name}</h3>
+          <div class="card-price-row">
+            <span class="current-price">${money(p.price)}</span>
+            <del class="original-price">${money(p.old)}</del>
+          </div>
+          <button class="card-cta-btn" onclick="window.location.hash='#/product/${p.id}'">View Saree &rarr;</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function attachProductCardEvents() {
+  // Wishlist toggle
+  document.querySelectorAll('[data-wishlist-id]').forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.wishlistId, 10);
+      toggleWishlist(id);
+    };
+  });
+
+  // Quick view
+  document.querySelectorAll('[data-qv-id]').forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.qvId, 10);
+      openQuickView(id);
+    };
+  });
+
+  // Quick add
+  document.querySelectorAll('[data-add-id]').forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.addId, 10);
+      addToCart(id, 1);
+    };
+  });
+}
+
+// ── VIEW 3: Dedicated Product Detail Page (PDP) ──
+function renderPDPView(id) {
+  const p = products.find(x => x.id === id) || products[0];
+  state.pdpProduct = p;
+  state.pdpQty = 1;
+  const inWishlist = state.wishlist.includes(p.id);
+  const discount = Math.round(((p.old - p.price) / p.old) * 100);
+
+  const app = $('appRoot');
+  app.innerHTML = `
+    <div class="pdp-page">
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="#/">Home</a>
+        <span>/</span>
+        <a href="#/catalogue">Sarees</a>
+        <span>/</span>
+        <a href="#/catalogue?category=${p.category}">${p.category}</a>
+        <span>/</span>
+        <span>${p.name}</span>
+      </nav>
+
+      <!-- Main PDP 2-Column Showcase -->
+      <div class="pdp-grid">
+        <!-- Left Image Gallery with interactive Zoom Magnifier -->
+        <div class="pdp-gallery">
+          <div class="pdp-thumbnails">
+            <div class="pdp-thumb active" onclick="changePdpImage('${p.img}', this)">
+              <img src="${p.img}" alt="${p.name} Angle 1">
+            </div>
+            <div class="pdp-thumb" onclick="changePdpImage('assets/hero-model.jpg', this)">
+              <img src="assets/hero-model.jpg" alt="Model Drape Angle">
+            </div>
+            <div class="pdp-thumb" onclick="changePdpImage('${p.img}', this)">
+              <img src="${p.img}" alt="Zari Close-up">
+            </div>
+          </div>
+          <div class="pdp-main-image" id="pdpMainImageWrap">
+            <img src="${p.img}" id="pdpMainImg" alt="${p.name}">
+          </div>
+        </div>
+
+        <!-- Right Saree Information -->
+        <div class="pdp-info">
+          <span class="pdp-category-eyebrow">${p.category} Collection • Handcrafted In India</span>
+          <h1 class="pdp-title">${p.name}</h1>
+          <div class="pdp-price-box">
+            <span class="pdp-current-price">${money(p.price)}</span>
+            <del class="pdp-old-price">${money(p.old)}</del>
+            
+          </div>
+          <div class="pdp-tax-note">Inclusive of all taxes &bull; Free express delivery across India</div>
+
+          <p class="pdp-desc">${p.desc}</p>
+
+          <!-- Saree Specifications Table -->
+          <table class="pdp-specs-table">
+            <tbody>
+              <tr><td>Fabric & Material</td><td>${p.fabric} with Certified Zari</td></tr>
+              <tr><td>Saree Length</td><td>5.5 Meters + 0.8m Blouse Piece Included</td></tr>
+              <tr><td>Weave Technique</td><td>${p.type}</td></tr>
+              <tr><td>Motif / Pattern</td><td>${p.pattern}</td></tr>
+              <tr><td>Recommended Occasion</td><td>${p.occasion}</td></tr>
+              <tr><td>Care Instructions</td><td>Dry Clean Only (Wrap in pure cotton/muslin)</td></tr>
+              <tr><td>Availability</td><td><b style="color: #1b7a3a;">In Stock — Ready to Dispatch in 24h</b></td></tr>
+            </tbody>
+          </table>
+
+          <!-- Delivery PIN Code Checker -->
+          <div class="delivery-checker">
+            <label>Check Delivery & COD Availability</label>
+            <div class="checker-form">
+              <input type="text" id="pdpPinInput" placeholder="Enter 6-digit PIN code (e.g. 500001)">
+              <button type="button" onclick="checkDeliveryPin()">Check</button>
+            </div>
+            <div class="pincode-result" id="pinResult">Express Delivery Available. Estimated delivery in 3–4 business days.</div>
+          </div>
+
+          <!-- Quantity & Purchase Actions -->
+          <div class="pdp-actions-wrap">
+            <div class="qty-box">
+              <button type="button" onclick="updatePdpQty(-1)">−</button>
+              <span id="pdpQtyDisplay">1</span>
+              <button type="button" onclick="updatePdpQty(1)">+</button>
+            </div>
+            <button class="pdp-add-bag-btn" onclick="addToCart(${p.id}, state.pdpQty)">Add to Shopping Bag →</button>
+          </div>
+
+          <button class="pdp-whatsapp-btn" onclick="enquireProductWhatsApp(${p.id})">
+            <span>Enquire / Buy Now via WhatsApp</span>
+          </button>
+
+          <button class="pdp-wishlist-toggle" onclick="toggleWishlist(${p.id})">
+            <span>${inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabbed Information: Fabric, Care, Shipping & Reviews -->
+      <div class="pdp-tabs">
+        <div class="tabs-nav">
+          <button class="tab-btn active" onclick="switchPdpTab('tabStory', this)">Artisan & Fabric Story</button>
+          <button class="tab-btn" onclick="switchPdpTab('tabShipping', this)">Shipping & Authenticity</button>
+          <button class="tab-btn" onclick="switchPdpTab('tabReviews', this)">Client Reviews (${p.reviewsCount})</button>
+        </div>
+        <div class="tab-content" id="tabContentBox">
+          <p>Every Shanmuka Fashions saree is an investment in Indian textile mastery. Woven slowly by master artisans, this drape exhibits precision selvedges, pure zari embroidery, and breathable luxury that drapes like second skin.</p>
+          <p style="margin-top: 10px;"><b>How to preserve your saree:</b> Store wrapped inside a muslin or unbleached cotton bag away from direct moisture. Refold along new creases every 4–6 months to maintain zari luster.</p>
+        </div>
+      </div>
+
+      <!-- Related Products -->
+      <div style="margin-top: 70px;">
+        <div class="editorial-header">
+          <span class="eyebrow">You May Also Admire</span>
+          <h2>Complementary Drapes</h2>
+        </div>
+        <div class="product-grid">
+          ${renderProductCardsHTML(products.filter(x => x.id !== p.id).slice(0, 4))}
+        </div>
+      </div>
+    </div>
+  `;
+
+  attachProductCardEvents();
+}
+
+function changePdpImage(src, el) {
+  $('pdpMainImg').src = src;
+  document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updatePdpQty(delta) {
+  state.pdpQty = Math.max(1, state.pdpQty + delta);
+  $('pdpQtyDisplay').textContent = state.pdpQty;
+}
+
+function checkDeliveryPin() {
+  const val = $('pdpPinInput').value.trim();
+  const res = $('pinResult');
+  if (val.length >= 6) {
+    res.style.display = 'block';
+    res.textContent = `Delivery confirmed for PIN ${val}. Express dispatch in 24 hours. COD & UPI supported.`;
+  } else {
+    res.style.display = 'block';
+    res.style.color = '#B71C1C';
+    res.textContent = 'Please enter a valid 6-digit Indian postal code.';
+  }
+}
+
+function switchPdpTab(tab, el) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const box = $('tabContentBox');
+  if (tab === 'tabStory') {
+    box.innerHTML = `
+      <p>Every Shanmuka Fashions saree is an investment in Indian textile mastery. Woven slowly by master artisans, this drape exhibits precision selvedges, pure zari embroidery, and breathable luxury that drapes like second skin.</p>
+      <p style="margin-top: 10px;"><b>How to preserve your saree:</b> Store wrapped inside a muslin or unbleached cotton bag away from direct moisture. Refold along new creases every 4–6 months to maintain zari luster.</p>
+    `;
+  } else if (tab === 'tabShipping') {
+    box.innerHTML = `
+      <p><b>Express Delivery:</b> Delivered safely within 3–5 business days across all Indian metro cities. Fully insured shipping in tamper-proof presentation boxes.</p>
+      <p style="margin-top: 10px;"><b>7-Day Return Guarantee:</b> If the saree does not meet your expectations, request a free pickup within 7 days in original folded condition with tags intact.</p>
+    `;
+  } else if (tab === 'tabReviews') {
+    box.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <span style="font-size: 26px; font-weight: 700; color: var(--deep-wine);">4.9 / 5.0</span>
+        <span style="font-size: 13px; color: var(--muted);">(Verified Silk Mark Buyer Reviews)</span>
+      </div>
+      <p style="font-style: italic; color: var(--main-text);">"The zari border has authentic weight and breathtaking sheen. It photographed magnificently during the rituals. Highly recommend Shanmuka Fashions!" — Meera K., Hyderabad</p>
+    `;
+  }
+}
+
+// ── VIEW 4: Dedicated Collection Landing View ──
+function renderCollectionLandingView(collectionSlug) {
+  const map = {
+    'kanchipuram': { name: 'Kanchipuram Sarees', category: 'Kanchipuram', banner: 'assets/kanchipuram-loom.jpg', desc: 'Renowned as the queen of silks, each Kanchipuram drape features authentic temple spires, heavy gold zari brocades, and vibrant celebratory palettes.' },
+    'banarasi': { name: 'Banarasi Sarees', category: 'Banarasi', banner: 'assets/golden-silk-saree-clean.jpg', desc: 'Heirloom gold meenakari and floral kadwa weaves from the historic handlooms of Varanasi, crafted for celebratory majesty.' },
+    'organza': { name: 'Organza Sarees', category: 'Organza', banner: 'assets/golden-silk-saree-clean.jpg', desc: 'Feather-light translucent silk organza drapes in soft pastels and shimmering metallic tissue, tailored for modern cocktail & day festive elegance.' },
+    'silk': { name: 'Festive Silk Sarees', category: 'Silk', banner: 'assets/raw-silk-yarns.jpg', desc: 'Pure mulberry silk sarees adorned with auspicious peacock and mango butta zari, ideal for celebrations and family traditions.' },
+    'cotton': { name: 'Cotton & Handloom Sarees', category: 'Cotton', banner: 'assets/handloom-weaving.jpg', desc: 'Spun from pure breathable cotton yarns with classic border detailing for effortless, poise-filled everyday grace.' },
+    'designer': { name: 'Designer Sarees', category: 'Designer', banner: 'assets/hero-model.jpg', desc: 'Curated royal haute couture edits featuring intricate embroidery, contemporary silhouettes, and bespoke artisan luxury.' }
+  };
+
+  const colData = map[collectionSlug] || map['kanchipuram'];
+  const filtered = products.filter(p => p.category.toLowerCase().includes(colData.category.toLowerCase()));
+
+  const app = $('appRoot');
+  app.innerHTML = `
+    <div class="catalogue-page">
+      <nav class="breadcrumbs">
+        <a href="#/">Home</a>
+        <span>/</span>
+        <a href="#/catalogue">Collections</a>
+        <span>/</span>
+        <span>${colData.name}</span>
+      </nav>
+
+      <!-- Collection Banner -->
+      <div style="background: var(--deep-wine); border-radius: 4px; overflow: hidden; margin-bottom: 32px; border: 1px solid rgba(181, 138, 69, 0.3); color: white; display: grid; grid-template-columns: 1fr 1fr; align-items: center;">
+        <div style="padding: 48px 36px;">
+          <span class="eyebrow" style="color: var(--champagne-gold);">Handloom Showcase</span>
+          <h1 style="font-family: var(--font-serif); font-size: 34px; color: #FFF2D1; margin: 10px 0 14px;">${colData.name}</h1>
+          <p style="color: #E6D2C2; font-size: 14.5px; line-height: 1.8;">${colData.desc}</p>
+        </div>
+        <div style="height: 280px;">
+          <img src="${colData.banner}" alt="${colData.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+
+      <div class="editorial-header" style="text-align: left; margin-bottom: 24px;">
+        <h2 style="font-size: 24px;">Explore ${colData.name} (${filtered.length} Sarees)</h2>
+      </div>
+
+      <div class="product-grid">
+        ${renderProductCardsHTML(filtered)}
+      </div>
+    </div>
+  `;
+
+  attachProductCardEvents();
+}
+
+// ── VIEW 5: Brand Story View ──
+function renderStoryView() {
+  const app = $('appRoot');
+  app.innerHTML = `
+    <div style="max-width: 1200px; margin: auto; padding: 50px 32px 80px;">
+      <nav class="breadcrumbs">
+        <a href="#/">Home</a>
+        <span>/</span>
+        <span>Our Brand Story</span>
+      </nav>
+
+      <div class="editorial-header">
+        <span class="eyebrow">The Shanmuka Philosophy</span>
+        <h2>Woven With Heritage, Worn With Pride</h2>
+        <p>A celebration of Indian handloom artistry, generational weaving guilds, and uncompromising fabric purity.</p>
+      </div>
+
+      <div style="margin-bottom: 40px; border-radius: 4px; overflow: hidden; border: 1px solid var(--champagne-gold); box-shadow: var(--shadow-lg);">
+        <img src="Shanmuka Fashions Saree Emblem.png" alt="Shanmuka Royal Saree Heritage" style="width: 100%; height: 420px; object-fit: cover;">
+      </div>
+
+      <div style="max-width: 820px; margin: auto; font-size: 15.5px; line-height: 1.9; color: var(--main-text);">
+        <p style="margin-bottom: 18px;">At Shanmuka Fashions, we believe that an authentic Indian saree is not simply attire—it is an heirloom of memory, celebration, and living art. For centuries, Indian weavers have translated sacred geometry, temple architecture, and nature's grandeur into gossamer silk and golden zari.</p>
+        <p style="margin-bottom: 18px;">Our boutique works in direct harmony with weaver clusters across Kanchipuram, Varanasi, Chanderi, and Bengal. Every saree in our collection is curated with meticulous attention to yarn count, selvedge perfection, and gold brocade density.</p>
+        <p style="margin-bottom: 30px;">Whether you are stepping into a wedding mandap or dressing for an auspicious puja, Shanmuka Fashions brings the splendor of the finest Indian handlooms directly to your doorstep.</p>
+        <div style="text-align: center;">
+          <a href="#/catalogue" class="btn-primary">Discover the Saree Collections →</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── VIEW 6: Contact & Store Concierge View ──
+function renderContactView() {
+  const app = $('appRoot');
+  app.innerHTML = `
+    <div style="max-width: 1200px; margin: auto; padding: 50px 32px 80px;">
+      <nav class="breadcrumbs">
+        <a href="#/">Home</a>
+        <span>/</span>
+        <span>Contact & Store</span>
+      </nav>
+
+      <div class="editorial-header">
+        <span class="eyebrow">Personal Concierge</span>
+        <h2>Visit Us & Connect</h2>
+        <p>We are delighted to assist you with bespoke order consultations, fabric queries, and video call viewings.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; background: white; border: 1px solid var(--border); border-radius: 4px; padding: 40px; box-shadow: var(--shadow-sm);">
+        <div>
+          <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--deep-wine); margin-bottom: 20px;">Boutique Showroom</h3>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--main-text); margin-bottom: 14px;">
+            <b>Shanmuka Fashions Flagship Salon</b><br>
+            Main Fashion Boulevard, Hyderabad, Telangana — 500034
+          </p>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--main-text); margin-bottom: 14px;">
+            Direct Call: <b>+91 95421 56929</b><br>
+            WhatsApp Concierge: <b>+91 95421 56929</b><br>
+            Email: <b>contact@shanmukafashions.com</b>
+          </p>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--main-text); margin-bottom: 24px;">
+            Salon Timings: 10:00 AM – 9:00 PM (All 7 Days)
+          </p>
+          <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions,%20I%20would%20like%20to%20book%20a%20video%20call%20styling%20session." target="_blank" rel="noopener noreferrer" class="btn-primary">Chat with Stylist on WhatsApp →</a>
+        </div>
+
+        <div>
+          <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--deep-wine); margin-bottom: 20px;">Send an Enquiry</h3>
+          <form onsubmit="handleContactSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="form-field">
+              <label>Your Name *</label>
+              <input type="text" required placeholder="Enter your full name">
+            </div>
+            <div class="form-field">
+              <label>Phone / WhatsApp Number *</label>
+              <input type="tel" required placeholder="+91 95421 56929">
+            </div>
+            <div class="form-field">
+              <label>Your Message / Saree Requirements *</label>
+              <textarea rows="4" required placeholder="Tell us about the occasion, color palette, or specific saree you are looking for..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 2px; font-size: 13px; outline: none;"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="justify-content: center;">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Shopping Cart Functionality ──
+function addToCart(id, qty = 1) {
+  state.cart[id] = (state.cart[id] || 0) + qty;
+  saveState();
+  updateCartUI();
+  openCartDrawer();
+  const p = products.find(x => x.id === id);
+  toast(`Added "${p ? p.name : 'Saree'}" to your shopping bag`);
+}
+
+function updateCartUI() {
+  const count = Object.values(state.cart).reduce((a, b) => a + b, 0);
+  $('cartCount').textContent = count;
+
+  let total = 0;
+  const listEl = $('cartItemsList');
+  if (!listEl) return;
+
+  if (!count) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 40px 10px;">
+        <p style="font-family: 'Playfair Display', serif; font-size: 18px; color: var(--deep-wine); margin-bottom: 8px;">Your Shopping Bag is Empty</p>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Explore our handcrafted collections and save your favorite drapes.</p>
+        <button onclick="closeCartDrawer(); window.location.hash='#/catalogue';" class="btn-primary">Browse Sarees →</button>
+      </div>
+    `;
+    $('cartSubtotalAmount').textContent = '₹0';
+    $('shippingMeterText').textContent = `Add ₹${STORE.freeShippingThreshold.toLocaleString('en-IN')} more to unlock Free Express Delivery`;
+    $('shippingMeterFill').style.width = '0%';
+    return;
+  }
+
+  listEl.innerHTML = Object.entries(state.cart).map(([idStr, qty]) => {
+    const id = parseInt(idStr, 10);
+    const p = products.find(x => x.id === id);
+    if (!p) return '';
+    const lineTotal = p.price * qty;
+    total += lineTotal;
+
+    return `
+      <div class="drawer-item">
+        <img src="${p.img}" alt="${p.name}">
+        <div class="drawer-item-info">
+          <strong>${p.name}</strong>
+          <small>${p.category} • ${money(p.price)}</small>
+          <div class="drawer-qty-control">
+            <button onclick="changeCartQty(${id}, -1)">−</button>
+            <span style="font-size: 12px; font-weight: 700;">${qty}</span>
+            <button onclick="changeCartQty(${id}, 1)">+</button>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <b style="font-size: 14px; color: var(--deep-wine);">${money(lineTotal)}</b>
+          <button onclick="removeCartItem(${id})" style="display: block; font-size: 11px; color: var(--muted); margin-top: 6px; text-decoration: underline;">Remove</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  $('cartSubtotalAmount').textContent = money(total);
+
+  // Free shipping meter
+  const remaining = STORE.freeShippingThreshold - total;
+  if (remaining <= 0) {
+    $('shippingMeterText').textContent = 'You have unlocked Free Express Shipping across India!';
+    $('shippingMeterFill').style.width = '100%';
+  } else {
+    $('shippingMeterText').textContent = `Add ${money(remaining)} more for Free Express Shipping!`;
+    const pct = Math.min(100, Math.round((total / STORE.freeShippingThreshold) * 100));
+    $('shippingMeterFill').style.width = `${pct}%`;
+  }
+}
+
+function changeCartQty(id, delta) {
+  state.cart[id] = (state.cart[id] || 0) + delta;
+  if (state.cart[id] <= 0) delete state.cart[id];
+  saveState();
+  updateCartUI();
+}
+
+function removeCartItem(id) {
+  delete state.cart[id];
+  saveState();
+  updateCartUI();
+}
+
+function openCartDrawer() {
+  $('cartDrawerBackdrop').classList.add('active');
+}
+function closeCartDrawer() {
+  $('cartDrawerBackdrop').classList.remove('active');
+}
+
+// ── WhatsApp Direct Checkout ──
+function checkoutWhatsApp() {
+  const entries = Object.entries(state.cart);
+  if (!entries.length) {
+    toast('Your shopping bag is empty.');
+    return;
+  }
+
+  let text = `Hello ${STORE.name}!\nI would like to place an order for the following handcrafted sarees:\n\n`;
+  let total = 0;
+  entries.forEach(([idStr, qty]) => {
+    const id = parseInt(idStr, 10);
+    const p = products.find(x => x.id === id);
+    if (p) {
+      const line = p.price * qty;
+      total += line;
+      text += `• ${p.name} (${p.category}) x ${qty} — ${money(line)}\n`;
+    }
+  });
+
+  text += `\n*Subtotal Amount:* ${money(total)}\n\nPlease confirm product availability, shipping schedule, and payment options. Thank you!`;
+  const url = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function enquireProductWhatsApp(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const msg = `Hello ${STORE.name}!\nI am interested in ordering: *${p.name}* (${p.category} Collection) priced at ${money(p.price)}.\nCould you please share pure silk certification details, blouse yardage, and more photos/video? Thank you!`;
+  window.open(`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ── Wishlist Management ──
+function toggleWishlist(id) {
+  const idx = state.wishlist.indexOf(id);
+  const p = products.find(x => x.id === id);
+  if (idx > -1) {
+    state.wishlist.splice(idx, 1);
+    toast(`Removed "${p ? p.name : 'Saree'}" from Wishlist`);
+  } else {
+    state.wishlist.push(id);
+    toast(`Saved "${p ? p.name : 'Saree'}" to your Wishlist`);
+  }
+  saveState();
+  updateWishlistUI();
+
+  // Refresh current view button states
+  document.querySelectorAll(`[data-wishlist-id="${id}"]`).forEach(btn => {
+    btn.classList.toggle('active', state.wishlist.includes(id));
+    // icon styled via svg
+  });
+}
+
+function updateWishlistUI() {
+  const count = state.wishlist.length;
+  $('wishlistCount').textContent = count;
+  $('wishlistHeaderCount').textContent = count;
+
+  const listEl = $('wishlistItemsList');
+  if (!listEl) return;
+
+  if (!count) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 40px 10px;">
+        <p style="font-family: 'Playfair Display', serif; font-size: 18px; color: var(--deep-wine); margin-bottom: 8px;">Your Wishlist is Empty</p>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Save the sarees you love to review them anytime.</p>
+        <button onclick="closeWishlistDrawer(); window.location.hash='#/catalogue';" class="btn-primary">Browse Sarees →</button>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = state.wishlist.map(id => {
+    const p = products.find(x => x.id === id);
+    if (!p) return '';
+    return `
+      <div class="drawer-item">
+        <img src="${p.img}" alt="${p.name}">
+        <div class="drawer-item-info">
+          <strong>${p.name}</strong>
+          <small>${p.category} • ${money(p.price)}</small>
+          <div style="margin-top: 8px;">
+            <button onclick="addToCart(${p.id}, 1); toggleWishlist(${p.id});" style="font-size: 11.5px; color: var(--burgundy); font-weight: 700; text-decoration: underline;">Move to Bag →</button>
+          </div>
+        </div>
+        <button onclick="toggleWishlist(${p.id})" style="font-size: 18px; color: #D32F2F;" title="Remove from wishlist">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function openWishlistDrawer() {
+  updateWishlistUI();
+  $('wishlistDrawerBackdrop').classList.add('active');
+}
+function closeWishlistDrawer() {
+  $('wishlistDrawerBackdrop').classList.remove('active');
+}
+
+// ── Quick View Modal ──
+function openQuickView(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  state.quickViewProduct = p;
+
+  $('qvImage').src = p.img;
+  $('qvCategory').textContent = `${p.category} Collection • ${p.fabric}`;
+  $('qvName').textContent = p.name;
+  $('qvPrice').textContent = money(p.price);
+  $('qvOldPrice').textContent = money(p.old);
+  $('qvDesc').textContent = p.desc;
+
+  $('qvAddBag').onclick = () => {
+    addToCart(p.id, 1);
+    closeQuickView();
+  };
+  $('qvViewFull').onclick = () => {
+    closeQuickView();
+    window.location.hash = `#/product/${p.id}`;
+  };
+  $('qvWaEnquiry').onclick = () => {
+    enquireProductWhatsApp(p.id);
+  };
+
+  $('quickViewModal').classList.add('active');
+}
+
+function closeQuickView() {
+  $('quickViewModal').classList.remove('active');
+}
+
+// ── Standard Checkout Modal ──
+function openCheckoutModal() {
+  const entries = Object.entries(state.cart);
+  if (!entries.length) {
+    toast('Your bag is empty.');
+    return;
+  }
+  let total = 0;
+  entries.forEach(([idStr, qty]) => {
+    const id = parseInt(idStr, 10);
+    const p = products.find(x => x.id === id);
+    if (p) total += p.price * qty;
+  });
+  $('coOrderTotal').textContent = money(total);
+  closeCartDrawer();
+  $('checkoutModal').classList.add('active');
+}
+
+function closeCheckoutModal() {
+  $('checkoutModal').classList.remove('active');
+}
+
+$('checkoutForm').onsubmit = e => {
+  e.preventDefault();
+  const name = $('coName').value.trim();
+  const phone = $('coPhone').value.trim();
+  const email = $('coEmail').value.trim();
+  const address = $('coAddress').value.trim();
+  const city = $('coCity').value.trim();
+  const pincode = $('coPin').value.trim();
+  const payment = $('coPayment').value;
+
+  const saleItems = [];
+  Object.entries(state.cart).forEach(([idStr, qty]) => {
+    const id = parseInt(idStr, 10);
+    saleItems.push({ product_id: id, qty });
+  });
+
+  if (!saleItems.length) {
+    toast('Your bag is empty.');
+    return;
+  }
+
+  try {
+    const order = SFDatabase.processSaleTransaction({
+      channel: 'ONLINE',
+      customer_name: name,
+      customer_phone: phone,
+      customer_email: email,
+      items: saleItems,
+      delivery_address: { street: address, city, state: 'Telangana', pincode },
+      payment_method: payment.toUpperCase(),
+      payment_status: 'PAID'
+    });
+
+    closeCheckoutModal();
+    state.cart = {};
+    saveState();
+    updateCartUI();
+
+    alert(`Thank you, ${name}! Your order #${order.order_number} has been received and confirmed. We have dispatched your bridal packaging details to ${phone}.`);
+    
+    if (window.location.hash.startsWith('#/catalogue')) {
+      renderCatalogueProducts();
+    }
+  } catch (err) {
+    alert('Checkout transaction error: ' + err.message);
+  }
+};
+
+// ── Account Modal ──
+function openAccountModal() { $('accountModal').classList.add('active'); }
+function closeAccountModal() { $('accountModal').classList.remove('active'); }
+function handleAccountLogin(e) {
+  e.preventDefault();
+  const val = $('accInput').value.trim();
+  closeAccountModal();
+  toast('Welcome back! OTP sent to ' + val);
+}
+
+// ── Newsletter & Contact Forms ──
+function handleNewsletter(e) {
+  e.preventDefault();
+  toast('Welcome to the Shanmuka Fashions VIP Salon');
+  e.target.reset();
+}
+function handleContactSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const name = form.querySelector('input[type="text"]').value.trim();
+  const phone = form.querySelector('input[type="tel"]').value.trim();
+  const message = form.querySelector('textarea').value.trim();
+
+  if (typeof SFDatabase !== 'undefined') {
+    SFDatabase.recordEnquiry({ name, phone, message, source: 'WEBSITE' });
+  }
+
+  toast('Thank you for contacting us! Our styling concierge will connect with you shortly.');
+  form.reset();
+}
+
+// ── Unified Admin & POS Retail Management Controller ──
+let adminActiveTab = 'dashboard';
+
+function renderAdminView(tab) {
+  if (tab) adminActiveTab = tab;
+  if (typeof SFAdmin !== 'undefined') {
+    SFAdmin.render('appRoot', tab || adminActiveTab);
+  } else {
+    $('appRoot').innerHTML = '<div style="padding: 40px; text-align: center;">Loading Shanmuka Atelier Management...</div>';
+  }
+}
+
+// ── Mobile Menu Handlers ──
+$('menuToggleBtn').onclick = () => $('mobileNavDrawer').classList.add('open');
+$('closeMobileNav').onclick = closeMobileMenu;
+function closeMobileMenu() { $('mobileNavDrawer').classList.remove('open'); }
+
+// ── Drawer & Modal Event Listeners ──
+$('cartBtn').onclick = openCartDrawer;
+$('closeCartDrawer').onclick = closeCartDrawer;
+$('cartDrawerBackdrop').onclick = e => {
+  if (e.target === $('cartDrawerBackdrop')) closeCartDrawer();
+};
+
+$('wishlistBtn').onclick = openWishlistDrawer;
+$('closeWishlistDrawer').onclick = closeWishlistDrawer;
+$('wishlistDrawerBackdrop').onclick = e => {
+  if (e.target === $('wishlistDrawerBackdrop')) closeWishlistDrawer();
+};
+
+$('closeQuickView').onclick = closeQuickView;
+$('quickViewModal').onclick = e => {
+  if (e.target === $('quickViewModal')) closeQuickView();
+};
+
+$('closeCheckoutModal').onclick = closeCheckoutModal;
+$('checkoutModal').onclick = e => {
+  if (e.target === $('checkoutModal')) closeCheckoutModal();
+};
+
+$('accountBtn').onclick = openAccountModal;
+$('closeAccountModal').onclick = closeAccountModal;
+$('accountModal').onclick = e => {
+  if (e.target === $('accountModal')) closeAccountModal();
+};
+
+$('checkoutWaBtn').onclick = checkoutWhatsApp;
+$('checkoutStandardBtn').onclick = openCheckoutModal;
+
+// ── Initialize App ──
+$('currentYear').textContent = new Date().getFullYear();
+window.addEventListener('hashchange', navigate);
+
+loadState();
+updateCartUI();
+updateWishlistUI();
+navigate();
+</script>
+</body>
+</html>
