@@ -90,43 +90,43 @@
         <nav class="sf-admin-nav">
           <div class="sf-nav-scroll">
             <button class="sf-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}" onclick="SFAdmin.switchTab('dashboard')">
-              <span class="nav-icon">📊</span> Executive Dashboard
+              <span class="nav-icon">📊</span> Dashboard
             </button>
             <button class="sf-nav-btn pos-highlight ${activeTab === 'pos' ? 'active' : ''}" onclick="SFAdmin.switchTab('pos')">
-              <span class="nav-icon">⚡</span> Physical Shop POS
+              <span class="nav-icon">🧾</span> POS Billing
             </button>
             <button class="sf-nav-btn ${activeTab === 'products' ? 'active' : ''}" onclick="SFAdmin.switchTab('products')">
-              <span class="nav-icon">🥻</span> Saree Catalogue (${db.getProducts().length})
+              <span class="nav-icon">🥻</span> Products (${db.getProducts().length})
             </button>
             <button class="sf-nav-btn ${activeTab === 'inventory' ? 'active' : ''}" onclick="SFAdmin.switchTab('inventory')">
-              <span class="nav-icon">📦</span> Stock Ledger ${lowStockCount > 0 ? `<span class="nav-pill-alert">${lowStockCount}</span>` : ''}
+              <span class="nav-icon">📦</span> Inventory Ledger ${lowStockCount > 0 ? `<span class="nav-pill-alert">${lowStockCount}</span>` : ''}
             </button>
             <button class="sf-nav-btn ${activeTab === 'orders' ? 'active' : ''}" onclick="SFAdmin.switchTab('orders')">
-              <span class="nav-icon">🛍️</span> Customer Orders (${db.getOrders().length})
+              <span class="nav-icon">🛍️</span> Orders (${db.getOrders().length})
             </button>
             <button class="sf-nav-btn ${activeTab === 'customers' ? 'active' : ''}" onclick="SFAdmin.switchTab('customers')">
               <span class="nav-icon">👥</span> Customers (${db.getCustomers().length})
             </button>
             <button class="sf-nav-btn ${activeTab === 'suppliers' ? 'active' : ''}" onclick="SFAdmin.switchTab('suppliers')">
-              <span class="nav-icon">🧵</span> Master Suppliers (${db.getSuppliers().length})
+              <span class="nav-icon">🧵</span> Suppliers (${db.getSuppliers().length})
             </button>
             <button class="sf-nav-btn ${activeTab === 'expenses' ? 'active' : ''}" onclick="SFAdmin.switchTab('expenses')">
               <span class="nav-icon">💸</span> Expenses (${db.getExpenses().length})
             </button>
             <button class="sf-nav-btn ${activeTab === 'reports' ? 'active' : ''}" onclick="SFAdmin.switchTab('reports')">
-              <span class="nav-icon">📈</span> Financial Reports
+              <span class="nav-icon">📈</span> Reports
             </button>
             <button class="sf-nav-btn ${activeTab === 'coupons' ? 'active' : ''}" onclick="SFAdmin.switchTab('coupons')">
-              <span class="nav-icon">🏷️</span> Coupons & Offers
+              <span class="nav-icon">🏷️</span> Coupons
             </button>
             <button class="sf-nav-btn ${activeTab === 'cms' ? 'active' : ''}" onclick="SFAdmin.switchTab('cms')">
-              <span class="nav-icon">✨</span> Website Content
+              <span class="nav-icon">🌐</span> CMS
             </button>
             <button class="sf-nav-btn ${activeTab === 'enquiries' ? 'active' : ''}" onclick="SFAdmin.switchTab('enquiries')">
-              <span class="nav-icon">💬</span> Inquiries & Reviews
+              <span class="nav-icon">💬</span> Enquiries
             </button>
             <button class="sf-nav-btn ${activeTab === 'settings' ? 'active' : ''}" onclick="SFAdmin.switchTab('settings')">
-              <span class="nav-icon">⚙️</span> Store Settings
+              <span class="nav-icon">⚙️</span> Settings
             </button>
           </div>
         </nav>

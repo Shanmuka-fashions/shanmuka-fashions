@@ -3164,7 +3164,7 @@ img { max-width: 100%; display: block; }
 </div>
 
 <!-- ── Floating WhatsApp Concierge ── -->
-<a href="https://wa.me/919876543210?text=Hello%20Shanmuka%20Fashions!%20I%20would%20like%20to%20know%20more%20about%20your%20saree%20collections." target="_blank" rel="noopener noreferrer" class="floating-wa-concierge" aria-label="WhatsApp Concierge">
+<a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20would%20like%20to%20know%20more%20about%20your%20saree%20collections." target="_blank" rel="noopener noreferrer" class="floating-wa-concierge" aria-label="WhatsApp Concierge">
   <svg viewBox="0 0 32 32"><path d="M16 2a14 14 0 0 0-12 21.2L2 30l7-1.9A14 14 0 1 0 16 2zm0 25.5c-2.3 0-4.5-.6-6.4-1.8l-.5-.3-4.6 1.2 1.3-4.4-.3-.5A11.5 11.5 0 1 1 16 27.5zm6.3-8.6c-.3-.2-2-.9-2.3-1s-.6-.2-.8.2-.9 1-1.1 1.2-.4.3-.7.1a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.3 0-.5.2-.7s.3-.4.5-.5.2-.3.3-.5a.6.6 0 0 0 0-.6c-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 .5 4.3 4.3 0 0 0-1.3 3.2c0 1.9 1.4 3.7 1.6 3.9.2.3 2.7 4.1 6.5 5.7 3.8 1.6 3.8 1.1 4.5 1 .7 0 2.2-.9 2.5-1.8.3-.8.3-1.6.2-1.8-.1-.2-.4-.3-.7-.4z"/></svg>
   <span>Styling Concierge</span>
 </a>
@@ -3172,12 +3172,17 @@ img { max-width: 100%; display: block; }
 <!-- ── Toast Feedback ── -->
 <div class="toast-notice" id="toastNotice"></div>
 
+  <!-- Shanmuka Fashions Central Engine & Retail Admin Suite -->
+  <script src="scripts/sf_database.js"></script>
+  <script src="scripts/sf_supabase.js"></script>
+  <script src="scripts/sf_admin.js"></script>
+
 <script>
 // ── Store Configuration ──
 const STORE = {
   name: 'Shanmuka Fashions',
-  whatsapp: '919876543210',
-  displayPhone: '+91 98765 43210',
+  whatsapp: '919542156929',
+  displayPhone: '+91 95421 56929',
   freeShippingThreshold: 5000
 };
 
@@ -4919,432 +4924,26 @@ function handleContactSubmit(e) {
 }
 
 // ── Admin Dashboard State & Controller ──
-let adminActiveTab = 'products';
+let adminActiveTab = 'dashboard';
 
 function renderAdminView(tab) {
   if (typeof SFAdmin !== 'undefined' && typeof SFAdmin.render === 'function') {
     SFAdmin.render('appRoot', tab || 'dashboard');
     return;
   }
-  if (tab) adminActiveTab = tab;
   const app = $('appRoot');
-  const orders = getOrders();
-  const enquiries = getEnquiries();
-  
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
-  
-  app.innerHTML = `
-    <div class="admin-page">
-      <div class="admin-header">
-        <div>
-          <nav class="breadcrumbs" style="margin-bottom: 8px;">
-            <a href="#/">Live Boutique</a>
-            <span>/</span>
-            <span>Atelier Management</span>
-          </nav>
-          <h1>Shanmuka Atelier Admin Portal</h1>
-          <p>Real-time catalogue control, inventory stock status, order dispatching, and patron enquiries.</p>
-        </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <button onclick="openAddProductModal()" class="btn-primary" style="padding: 10px 20px; font-size: 12px;">+ Add New Drape</button>
-          <a href="#/" class="btn-outline-gold" style="padding: 10px 18px; font-size: 12px; color: var(--midnight-navy); border-color: var(--midnight-navy);">View Storefront ↗</a>
-        </div>
-      </div>
-
-      <!-- Admin KPIs -->
-      <div class="admin-kpis">
-        <div class="admin-kpi-card">
-          <span class="admin-kpi-num">${products.length}</span>
-          <span class="admin-kpi-label">Active Sarees in Catalogue</span>
-        </div>
-        <div class="admin-kpi-card">
-          <span class="admin-kpi-num">${orders.length}</span>
-          <span class="admin-kpi-label">Customer Orders Received</span>
-        </div>
-        <div class="admin-kpi-card">
-          <span class="admin-kpi-num">${money(totalRevenue)}</span>
-          <span class="admin-kpi-label">Gross Order Volume</span>
-        </div>
-        <div class="admin-kpi-card">
-          <span class="admin-kpi-num">${enquiries.length}</span>
-          <span class="admin-kpi-label">Patron Inquiries</span>
-        </div>
-      </div>
-
-      <!-- Admin Tabs -->
-      <div class="admin-tabs">
-        <button class="admin-tab-btn ${adminActiveTab === 'products' ? 'active' : ''}" onclick="renderAdminView('products')">Saree Catalogue (${products.length})</button>
-        <button class="admin-tab-btn ${adminActiveTab === 'orders' ? 'active' : ''}" onclick="renderAdminView('orders')">Customer Orders (${orders.length})</button>
-        <button class="admin-tab-btn ${adminActiveTab === 'categories' ? 'active' : ''}" onclick="renderAdminView('categories')">Weave Collections (6)</button>
-        <button class="admin-tab-btn ${adminActiveTab === 'enquiries' ? 'active' : ''}" onclick="renderAdminView('enquiries')">Patron Inquiries (${enquiries.length})</button>
-      </div>
-
-      <!-- Tab Content -->
-      <div id="adminTabContent">
-        ${renderAdminTabContentHTML(adminActiveTab, orders, enquiries)}
-      </div>
-    </div>
-  `;
-}
-
-function renderAdminTabContentHTML(tab, orders, enquiries) {
-  if (tab === 'products') {
-    return `
-      <div class="admin-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-          <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--midnight-navy);">Handcrafted Sarees (${products.length})</h3>
-          <div>
-            <input type="text" id="adminSearchFilter" placeholder="Search sarees by name, weave, color..." oninput="filterAdminProducts(this.value)" style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; width: 280px; outline: none;">
-          </div>
-        </div>
-        <div style="overflow-x: auto;">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th style="width: 60px;">Image</th>
-                <th>Saree Name & Details</th>
-                <th>Category</th>
-                <th>Fabric / Color</th>
-                <th>Price / MRP</th>
-                <th>Stock Status</th>
-                <th>Badge</th>
-                <th style="text-align: right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="adminProductsTableBody">
-              ${renderAdminProductsRows(products)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  if (tab === 'orders') {
-    if (!orders.length) {
-      return `
-        <div class="admin-card" style="text-align: center; padding: 48px 20px;">
-          <p style="font-family: 'Playfair Display', serif; font-size: 18px; color: var(--midnight-navy); margin-bottom: 8px;">No customer orders placed yet</p>
-          <p style="color: var(--muted); font-size: 13.5px;">Orders submitted through the storefront checkout or WhatsApp checkout will appear here.</p>
-        </div>
-      `;
-    }
-    return `
-      <div class="admin-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--midnight-navy);">Recent Patron Orders (${orders.length})</h3>
-        </div>
-        <div style="overflow-x: auto;">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Patron Details</th>
-                <th>Drapes Ordered</th>
-                <th>Total</th>
-                <th>Payment Mode</th>
-                <th>Status</th>
-                <th>Update Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${orders.map(o => `
-                <tr>
-                  <td><b>#${o.id}</b></td>
-                  <td>${o.date}</td>
-                  <td>
-                    <strong>${o.customer ? o.customer.name : 'Patron'}</strong><br>
-                    <small style="color: var(--muted);">${o.customer ? o.customer.phone : ''} • ${o.customer ? o.customer.city : ''}</small>
-                  </td>
-                  <td>
-                    ${o.items ? o.items.map(i => `${i.name} (x${i.qty})`).join(', ') : '1 Saree'}
-                  </td>
-                  <td><b>${money(o.total || 0)}</b></td>
-                  <td><small>${o.payment || 'Standard'}</small></td>
-                  <td>
-                    <span class="admin-status-badge status-${(o.status || 'pending').toLowerCase()}">${o.status || 'Pending'}</span>
-                  </td>
-                  <td>
-                    <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: white;">
-                      <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                      <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                      <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                      <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                    </select>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  if (tab === 'categories') {
-    const categoriesList = [
-      { name: 'Kanchipuram Sarees', cat: 'Kanchipuram', slug: 'kanchipuram', img: 'assets/kanchipuram-loom.jpg', desc: 'Temple borders and heavyweight pure mulberry silk from Tamil Nadu.' },
-      { name: 'Banarasi Sarees', cat: 'Banarasi', slug: 'banarasi', img: 'assets/golden-silk-saree-clean.jpg', desc: 'Historic gold meenakari and floral kadwa weaves from Varanasi.' },
-      { name: 'Organza Sarees', cat: 'Organza', slug: 'organza', img: 'assets/golden-silk-saree-clean.jpg', desc: 'Feather-light translucent tissue pastels for modern festive grace.' },
-      { name: 'Pure Silk Sarees', cat: 'Pure Silk', slug: 'silk', img: 'assets/raw-silk-yarns.jpg', desc: 'Lustrous festive pure silks with traditional peacock and mango butta motifs.' },
-      { name: 'Handloom Cotton Sarees', cat: 'Handloom Cotton', slug: 'cotton', img: 'assets/handloom-weaving.jpg', desc: 'Airy breathable handwoven cotton sarees for timeless poise.' },
-      { name: 'Designer Sarees', cat: 'Designer Sarees', slug: 'designer', img: 'assets/hero-model.jpg', desc: 'Royal haute couture bespoke drapes with signature artisan detailing.' }
-    ];
-
-    return `
-      <div class="admin-card">
-        <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--midnight-navy); margin-bottom: 20px;">Active Weave Collections</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-          ${categoriesList.map(c => {
-            const count = products.filter(p => p.category.toLowerCase().includes(c.cat.split(' ')[0].toLowerCase())).length;
-            return `
-              <div style="border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--warm-ivory); display: flex; flex-direction: column;">
-                <img src="${c.img}" alt="${c.name}" style="height: 140px; width: 100%; object-fit: cover;">
-                <div style="padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                  <div>
-                    <h4 style="font-family: var(--font-serif); font-size: 15px; color: var(--midnight-navy); margin-bottom: 6px;">${c.name}</h4>
-                    <p style="font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 12px;">${c.desc}</p>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px;">
-                    <span style="font-size: 12px; font-weight: 700; color: var(--antique-gold);">${count} Active Sarees</span>
-                    <a href="#/collection/${c.slug}" style="font-size: 12px; font-weight: 600; color: var(--midnight-navy); text-decoration: underline;">View Live →</a>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }
-
-  if (tab === 'enquiries') {
-    if (!enquiries.length) {
-      return `
-        <div class="admin-card" style="text-align: center; padding: 48px 20px;">
-          <p style="font-family: 'Playfair Display', serif; font-size: 18px; color: var(--midnight-navy); margin-bottom: 8px;">No customer enquiries yet</p>
-          <p style="color: var(--muted); font-size: 13.5px;">Messages submitted via the contact form or concierge widget will appear here.</p>
-        </div>
-      `;
-    }
-    return `
-      <div class="admin-card">
-        <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--midnight-navy); margin-bottom: 20px;">Patron Styling & Saree Inquiries (${enquiries.length})</h3>
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Patron Name</th>
-              <th>Phone / WhatsApp</th>
-              <th>Requirement / Message</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${enquiries.map(eq => `
-              <tr>
-                <td>${eq.date}</td>
-                <td><strong>${eq.name}</strong></td>
-                <td><a href="tel:${eq.phone}">${eq.phone}</a></td>
-                <td style="max-width: 380px;">${eq.message}</td>
-                <td>
-                  <a href="https://wa.me/${(eq.phone || '').replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(eq.name)},%20thank%20you%20for%20reaching%20out%20to%20Shanmuka%20Fashions!" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 6px 12px; background: var(--deep-navy); color: var(--pearl-white); border: 1px solid var(--antique-gold); border-radius: 2px; font-size: 11.5px; font-weight: 600;">Reply on WhatsApp &rarr;</a>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+  if (app) {
+    app.innerHTML = `
+      <div style="padding: 80px 24px; text-align: center; font-family: sans-serif; color: #3B2B25;">
+        <h2>Loading Shanmuka Atelier ERP & POS Management System...</h2>
+        <p>Connecting to central retail database.</p>
       </div>
     `;
   }
 }
 
-function renderAdminProductsRows(list) {
-  if (!list.length) {
-    return '<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--muted);">No matching sarees found in catalogue.</td></tr>';
-  }
-  return list.map(p => {
-    const stockStatus = p.stock || 'In Stock';
-    let badgeClass = 'status-instock';
-    if (stockStatus === 'Low Stock') badgeClass = 'status-lowstock';
-    if (stockStatus === 'Sold Out') badgeClass = 'status-outofstock';
+// Old admin functions migrated to SFAdmin suite
 
-    return `
-      <tr>
-        <td>
-          <img src="${p.img}" alt="${p.name}" style="width: 48px; height: 56px; object-fit: cover; border-radius: 2px; border: 1px solid var(--border);">
-        </td>
-        <td>
-          <strong>${p.name}</strong>
-          <small style="display: block; color: var(--muted); font-size: 11.5px;">ID: #${p.id} • ${p.pattern || 'Heritage'}</small>
-        </td>
-        <td>${p.category}</td>
-        <td>${p.fabric} • ${p.color}</td>
-        <td>
-          <b>${money(p.price)}</b>
-          ${p.old ? `<small style="display: block; text-decoration: line-through; color: var(--muted); font-size: 11px;">${money(p.old)}</small>` : ''}
-        </td>
-        <td>
-          <select onchange="updateProductStock(${p.id}, this.value)" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-weight: 600;">
-            <option value="In Stock" ${stockStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
-            <option value="Low Stock" ${stockStatus === 'Low Stock' ? 'selected' : ''}>Low Stock</option>
-            <option value="Sold Out" ${stockStatus === 'Sold Out' ? 'selected' : ''}>Sold Out</option>
-          </select>
-        </td>
-        <td>${p.badge ? `<span class="product-badge" style="position: static; font-size: 9px;">${p.badge}</span>` : '—'}</td>
-        <td style="text-align: right; white-space: nowrap;">
-          <button onclick="openEditProductModal(${p.id})" style="padding: 5px 12px; background: var(--warm-ivory); border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 6px; cursor: pointer;">Edit</button>
-          <button onclick="deleteProduct(${p.id})" style="padding: 5px 10px; background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">Delete</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function filterAdminProducts(query) {
-  const q = (query || '').toLowerCase().trim();
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(q) ||
-    p.category.toLowerCase().includes(q) ||
-    p.color.toLowerCase().includes(q) ||
-    p.fabric.toLowerCase().includes(q)
-  );
-  const tbody = $('adminProductsTableBody');
-  if (tbody) tbody.innerHTML = renderAdminProductsRows(filtered);
-}
-
-function updateProductStock(id, newStock) {
-  const p = products.find(x => x.id === id);
-  if (p) {
-    p.stock = newStock;
-    saveProducts();
-    toast(`Updated #${p.id} ${p.name} stock to "${newStock}"`);
-  }
-}
-
-function updateOrderStatus(orderId, newStatus) {
-  const orders = getOrders();
-  const o = orders.find(x => x.id === orderId);
-  if (o) {
-    o.status = newStatus;
-    saveOrders(orders);
-    toast(`Order #${orderId} marked as "${newStatus}"`);
-    renderAdminView('orders');
-  }
-}
-
-function openAddProductModal() {
-  $('adminModalTitle').textContent = 'Add New Handloom Saree';
-  $('adminProdId').value = '';
-  $('adminProdName').value = '';
-  $('adminProdCategory').value = 'Kanchipuram';
-  $('adminProdFabric').value = 'Pure Silk';
-  $('adminProdColor').value = '';
-  $('adminProdPrice').value = '';
-  $('adminProdOldPrice').value = '';
-  $('adminProdOccasion').value = 'Bridal & Wedding';
-  $('adminProdBadge').value = 'New Arrival';
-  $('adminProdStock').value = 'In Stock';
-  $('adminProdImg').value = 'assets/kanchipuram-loom.jpg';
-  $('adminProdDesc').value = '';
-  $('adminProductModal').classList.add('active');
-}
-
-function openEditProductModal(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  $('adminModalTitle').textContent = `Edit Saree: ${p.name}`;
-  $('adminProdId').value = p.id;
-  $('adminProdName').value = p.name;
-  $('adminProdCategory').value = p.category;
-  $('adminProdFabric').value = p.fabric;
-  $('adminProdColor').value = p.color;
-  $('adminProdPrice').value = p.price;
-  $('adminProdOldPrice').value = p.old || '';
-  $('adminProdOccasion').value = p.occasion || 'Bridal & Wedding';
-  $('adminProdBadge').value = p.badge || '';
-  $('adminProdStock').value = p.stock || 'In Stock';
-  $('adminProdImg').value = p.img;
-  $('adminProdDesc').value = p.desc || '';
-  $('adminProductModal').classList.add('active');
-}
-
-function closeAdminProductModal() {
-  $('adminProductModal').classList.remove('active');
-}
-
-function handleAdminProductSave(e) {
-  e.preventDefault();
-  const idVal = $('adminProdId').value;
-  const name = $('adminProdName').value.trim();
-  const category = $('adminProdCategory').value;
-  const fabric = $('adminProdFabric').value.trim();
-  const color = $('adminProdColor').value.trim();
-  const price = parseInt($('adminProdPrice').value, 10);
-  const oldPrice = $('adminProdOldPrice').value ? parseInt($('adminProdOldPrice').value, 10) : Math.round(price * 1.25);
-  const occasion = $('adminProdOccasion').value;
-  const badge = $('adminProdBadge').value;
-  const stock = $('adminProdStock').value;
-  const img = $('adminProdImg').value.trim() || 'assets/kanchipuram-loom.jpg';
-  const desc = $('adminProdDesc').value.trim();
-
-  if (idVal) {
-    const id = parseInt(idVal, 10);
-    const p = products.find(x => x.id === id);
-    if (p) {
-      p.name = name;
-      p.category = category;
-      p.fabric = fabric;
-      p.color = color;
-      p.price = price;
-      p.old = oldPrice;
-      p.occasion = occasion;
-      p.badge = badge;
-      p.stock = stock;
-      p.img = img;
-      p.desc = desc;
-      saveProducts();
-      toast(`Updated "${name}" in catalogue`);
-    }
-  } else {
-    const newId = Math.max(...products.map(p => p.id), 0) + 1;
-    const newProduct = {
-      id: newId,
-      name,
-      category,
-      fabric,
-      color,
-      price,
-      old: oldPrice,
-      occasion,
-      badge,
-      stock,
-      img,
-      desc,
-      rating: 5.0,
-      reviewsCount: 1,
-      type: 'Traditional Handloom'
-    };
-    products.unshift(newProduct);
-    saveProducts();
-    toast(`Added "${name}" to catalogue`);
-  }
-
-  closeAdminProductModal();
-  renderAdminView('products');
-}
-
-function deleteProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  if (confirm(`Are you sure you want to delete "${p.name}" from the catalogue?`)) {
-    products = products.filter(x => x.id !== id);
-    saveProducts();
-    toast(`Deleted "${p.name}" from catalogue`);
-    renderAdminView('products');
-  }
-}
 
 // ── Global Search Handling ──
 $('globalSearchInput').addEventListener('input', e => {

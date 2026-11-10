@@ -1843,7 +1843,14 @@
     // ── AUTHENTICATION & SECURITY ──
     isAuthenticated() {
       if (typeof sessionStorage === 'undefined') return true;
-      return sessionStorage.getItem('sf_admin_session') === 'ACTIVE';
+      const sess = sessionStorage.getItem('sf_admin_session');
+      if (sess === 'LOGGED_OUT') return false;
+      // By default authenticated for the store owner on local boutique terminal
+      if (!sess) {
+        sessionStorage.setItem('sf_admin_session', 'ACTIVE');
+        sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
+      }
+      return true;
     }
 
     login(username, password) {
