@@ -3,3 +3,7 @@
 *.bak_*
 scripts/*.pyc
 __pycache__/
+node_modules/
+.temp/
+
+
