@@ -1842,15 +1842,18 @@
 
     // ── AUTHENTICATION & SECURITY ──
     isAuthenticated() {
-      if (typeof sessionStorage === 'undefined') return true;
-      const sess = sessionStorage.getItem('sf_admin_session');
+      const sess = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sf_admin_session') : (this._adminSession || null);
       if (sess === 'LOGGED_OUT') return false;
       // By default authenticated for the store owner on local boutique terminal
       if (!sess) {
-        sessionStorage.setItem('sf_admin_session', 'ACTIVE');
-        sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('sf_admin_session', 'ACTIVE');
+          sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
+        } else {
+          this._adminSession = 'ACTIVE';
+        }
       }
-      return true;
+      return (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sf_admin_session') : this._adminSession) !== 'LOGGED_OUT';
     }
 
     login(username, password) {
@@ -1861,6 +1864,7 @@
           sessionStorage.setItem('sf_admin_session', 'ACTIVE');
           sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
         }
+        this._adminSession = 'ACTIVE';
         this.logAudit('LOGIN_SUCCESS', 'AUTH', u, 'Successful administrative login', u);
         return { success: true };
       }
@@ -1870,9 +1874,10 @@
 
     logout() {
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem('sf_admin_session');
+        sessionStorage.setItem('sf_admin_session', 'LOGGED_OUT');
         sessionStorage.removeItem('sf_admin_user');
       }
+      this._adminSession = 'LOGGED_OUT';
       this.logAudit('LOGOUT', 'AUTH', 'ADMIN', 'Owner logged out of admin session');
       return true;
     }

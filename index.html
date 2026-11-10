@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#402238">
 <meta name="description" content="Shanmuka Fashions - Sarees & More. Premium Indian ethnic fashion boutique. Kanchipuram, Banarasi, Organza, Pure Silk, Handloom Cotton, and Designer Sarees.">
 <link rel="icon" type="image/png" href="logo.png">
@@ -12,7 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="scripts/sf_admin.css">
+<link rel="stylesheet" href="scripts/sf_admin.css?v=20261110b">
+<link rel="stylesheet" href="scripts/sf_customer_auth.css?v=20261110b">
 
 <style>
 
@@ -2846,10 +2850,13 @@ img { max-width: 100%; display: block; }
         <input type="text" id="globalSearchInput" class="search-input-field" placeholder="Search sarees, silks..." aria-label="Search sarees">
       </div>
 
-      <!-- Account Button -->
-      <button class="action-btn" id="accountBtn" aria-label="Account">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      </button>
+      <!-- Account Button & Dropdown Menu -->
+      <div class="sf-header-account-wrap" id="headerAccountWrap">
+        <button class="action-btn" id="accountBtn" aria-label="Account" onclick="toggleAccountDropdown(event)">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </button>
+        <div class="sf-account-dropdown-menu" id="headerAccountDropdown"></div>
+      </div>
 
       <!-- Wishlist Button -->
       <button class="action-btn" id="wishlistBtn" aria-label="Wishlist">
@@ -3173,9 +3180,12 @@ img { max-width: 100%; display: block; }
 <div class="toast-notice" id="toastNotice"></div>
 
   <!-- Shanmuka Fashions Central Engine & Retail Admin Suite -->
-  <script src="scripts/sf_database.js"></script>
-  <script src="scripts/sf_supabase.js"></script>
-  <script src="scripts/sf_admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/sf_database.js?v=20261110b"></script>
+  <script src="scripts/sf_supabase.js?v=20261110b"></script>
+  <script src="scripts/sf_customer_auth.js?v=20261110b"></script>
+  <script src="scripts/sf_customer_views.js?v=20261110b"></script>
+  <script src="scripts/sf_admin.js?v=20261110b"></script>
 
 <script>
 // ── Store Configuration ──
@@ -3609,6 +3619,18 @@ function navigate() {
     renderStoryView();
   } else if (hash === '#/contact') {
     renderContactView();
+  } else if (hash.startsWith('#/login')) {
+    if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderLogin('appRoot');
+  } else if (hash.startsWith('#/register')) {
+    if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderRegister('appRoot');
+  } else if (hash.startsWith('#/forgot-password')) {
+    if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderForgotPassword('appRoot');
+  } else if (hash.startsWith('#/reset-password')) {
+    if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderResetPassword('appRoot');
+  } else if (hash.startsWith('#/account')) {
+    const subMatch = hash.match(/#\/account\/([a-z0-9_-]+)/i);
+    const subtab = subMatch ? subMatch[1] : 'profile';
+    if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderAccountPortal(subtab, 'appRoot');
   } else if (hash.startsWith('#/admin')) {
     const tabMatch = hash.match(/#\/admin\/([a-z0-9_-]+)/i);
     const initialTab = tabMatch ? tabMatch[1] : null;
@@ -3616,6 +3638,11 @@ function navigate() {
   } else {
     $('navHome').classList.add('active');
     renderHomeView();
+  }
+
+  // Update customer account button/dropdown in header
+  if (typeof updateHeaderAuthUI === 'function') {
+    updateHeaderAuthUI();
   }
 }
 
@@ -4805,6 +4832,21 @@ function openCheckoutModal() {
     if (p) total += p.price * qty;
   });
   $('coOrderTotal').textContent = money(total);
+
+  // Auto-fill logged-in customer credentials
+  if (typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated()) {
+    const cust = SFCustomerAuth.getCurrentCustomer();
+    if ($('coName') && !$('coName').value) $('coName').value = cust.full_name || '';
+    if ($('coEmail') && !$('coEmail').value) $('coEmail').value = cust.email || '';
+    if ($('coPhone') && !$('coPhone').value) $('coPhone').value = (cust.phone || '').replace(/[^0-9]/g, '').slice(-10);
+    const defAddr = (cust.addresses || []).find(a => a.is_default) || (cust.addresses || [])[0];
+    if (defAddr) {
+      if ($('coAddress') && !$('coAddress').value) $('coAddress').value = defAddr.street || '';
+      if ($('coCity') && !$('coCity').value) $('coCity').value = defAddr.city || '';
+      if ($('coPin') && !$('coPin').value) $('coPin').value = defAddr.pincode || '';
+    }
+  }
+
   closeCartDrawer();
   $('checkoutModal').classList.add('active');
 }
@@ -4835,10 +4877,17 @@ $('checkoutForm').onsubmit = e => {
     }
   });
 
+  // Link authenticated patron ID
+  let loggedInCustId = null;
+  if (typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated()) {
+    loggedInCustId = SFCustomerAuth.getCurrentCustomer().id;
+  }
+
   // Central Omnichannel Inventory Ledger sync
   if (typeof SFDatabase !== 'undefined') {
     const saleResult = SFDatabase.processSaleTransaction({
       channel: 'ONLINE',
+      customer_id: loggedInCustId,
       customer_name: name,
       customer_phone: phone,
       customer_email: email,
@@ -4883,14 +4932,84 @@ $('checkoutForm').onsubmit = e => {
   alert(`Thank you, ${name}!\n\nYour order #${orderId} has been successfully placed.\nOur styling team will confirm your dispatch and tracking details via WhatsApp on ${phone}.`);
 };
 
-// ── Account Modal ──
-function openAccountModal() { $('accountModal').classList.add('active'); }
-function closeAccountModal() { $('accountModal').classList.remove('active'); }
-function handleAccountLogin(e) {
-  e.preventDefault();
-  const val = $('accInput').value.trim();
-  closeAccountModal();
-  toast(`Welcome back! OTP sent to ${val}.`);
+// ── Patron Account Dropdown & Authentication UI ──
+function toggleAccountDropdown(e) {
+  if (e) e.stopPropagation();
+  const dropdown = $('headerAccountDropdown');
+  if (!dropdown) return;
+  
+  if (typeof SFCustomerAuth !== 'undefined' && !SFCustomerAuth.isAuthenticated()) {
+    window.location.hash = '#/login';
+    return;
+  }
+  dropdown.classList.toggle('show');
+}
+
+function closeAccountDropdown() {
+  const dropdown = $('headerAccountDropdown');
+  if (dropdown) dropdown.classList.remove('show');
+}
+
+window.addEventListener('click', e => {
+  const wrap = $('headerAccountWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    closeAccountDropdown();
+  }
+});
+
+async function handleSignOutClick() {
+  closeAccountDropdown();
+  if (typeof SFCustomerAuth !== 'undefined') {
+    await SFCustomerAuth.logout();
+    toast('You have successfully signed out of your account.');
+    window.location.hash = '#/';
+    updateHeaderAuthUI();
+  }
+}
+
+function updateHeaderAuthUI() {
+  const btn = $('accountBtn');
+  const dropdown = $('headerAccountDropdown');
+  if (!btn || !dropdown) return;
+
+  const isAuth = typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated();
+  if (isAuth) {
+    const cust = SFCustomerAuth.getCurrentCustomer();
+    const firstName = (cust.full_name || 'Patron').split(' ')[0];
+    btn.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #3B2B25;">
+        <span style="width: 28px; height: 28px; border-radius: 50%; background: #A77950; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 1.5px solid #F5EBDD;">${firstName[0].toUpperCase()}</span>
+      </div>
+    `;
+    btn.title = `Signed in as ${cust.full_name}`;
+    dropdown.innerHTML = `
+      <div class="sf-dropdown-user-info">
+        <div class="sf-dropdown-user-name">${cust.full_name}</div>
+        <div class="sf-dropdown-user-email">${cust.email}</div>
+      </div>
+      <a href="#/account/profile" class="sf-dropdown-link" onclick="closeAccountDropdown()">👤 My Profile</a>
+      <a href="#/account/orders" class="sf-dropdown-link" onclick="closeAccountDropdown()">🛍️ My Orders (${SFCustomerAuth.getCustomerOrders().length})</a>
+      <a href="#/account/addresses" class="sf-dropdown-link" onclick="closeAccountDropdown()">📍 Saved Addresses</a>
+      <a href="#/account/wishlist" class="sf-dropdown-link" onclick="closeAccountDropdown()">❤️ Saved Drapes</a>
+      <a href="#/account/security" class="sf-dropdown-link" onclick="closeAccountDropdown()">🔒 Security</a>
+      <div class="sf-dropdown-signout">
+        <a href="javascript:void(0)" onclick="handleSignOutClick()" class="sf-dropdown-link" style="color: #C25E5E;">Sign Out</a>
+      </div>
+    `;
+  } else {
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+    btn.title = "Patron Sign In / Register";
+    dropdown.innerHTML = `
+      <div style="padding: 16px 18px 12px; text-align: center;">
+        <h4 style="font-family: 'Playfair Display', serif; font-size: 16px; color: #3B2B25; margin-bottom: 4px;">Atelier Patron</h4>
+        <p style="font-size: 12px; color: #76675D; margin-bottom: 14px; line-height: 1.4;">Sign in to view saved drapes, real-time tracking, and private edits.</p>
+        <a href="#/login" onclick="closeAccountDropdown()" class="sf-auth-btn-primary" style="padding: 9px 16px; font-size: 11.5px; text-decoration: none; width: 100%; justify-content: center; margin-bottom: 8px;">Sign In</a>
+        <div style="font-size: 12px; color: #76675D;">
+          New here? <a href="#/register" onclick="closeAccountDropdown()" class="sf-auth-link">Create Account</a>
+        </div>
+      </div>
+    `;
+  }
 }
 
 // ── Newsletter & Contact Forms ──
@@ -4983,11 +5102,7 @@ $('checkoutModal').onclick = e => {
   if (e.target === $('checkoutModal')) closeCheckoutModal();
 };
 
-$('accountBtn').onclick = openAccountModal;
-$('closeAccountModal').onclick = closeAccountModal;
-$('accountModal').onclick = e => {
-  if (e.target === $('accountModal')) closeAccountModal();
-};
+$('accountBtn').onclick = toggleAccountDropdown;
 
 $('checkoutWaBtn').onclick = checkoutWhatsApp;
 $('checkoutStandardBtn').onclick = openCheckoutModal;
@@ -4999,6 +5114,7 @@ window.addEventListener('hashchange', navigate);
 loadState();
 updateCartUI();
 updateWishlistUI();
+updateHeaderAuthUI();
 navigate();
 </script>
 </body>

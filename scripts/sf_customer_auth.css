@@ -1,0 +1,674 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHANMUKA FASHIONS: LUXURY CUSTOMER AUTHENTICATION & ACCOUNT STYLES
+   Heritage Elegance Theme (Espresso Brown, Champagne Ivory, Antique Bronze)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Split-Screen Authentication Container ── */
+.sf-auth-split-wrapper {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #F5EBDD; /* Champagne Ivory */
+  color: #3B2B25;      /* Espresso Brown */
+}
+
+@media (max-width: 991px) {
+  .sf-auth-split-wrapper {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+}
+
+/* ── Left Editorial Campaign Visual ── */
+.sf-auth-visual-pane {
+  position: relative;
+  background-size: cover;
+  background-position: center 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  overflow: hidden;
+  min-height: 580px;
+}
+
+@media (max-width: 991px) {
+  .sf-auth-visual-pane {
+    display: none; /* Mobile prioritizes immediate accessible form */
+  }
+}
+
+.sf-auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(59, 43, 37, 0.45) 0%,
+    rgba(59, 43, 37, 0.25) 40%,
+    rgba(59, 43, 37, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+.sf-auth-visual-content {
+  position: relative;
+  z-index: 2;
+  color: #FFFFFF;
+}
+
+.sf-auth-visual-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(245, 235, 221, 0.18);
+  border: 1px solid rgba(167, 121, 80, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #F5EBDD;
+}
+
+.sf-auth-visual-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  line-height: 1.5;
+  font-style: italic;
+  color: #FFFFFF;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.sf-auth-visual-subquote {
+  font-size: 13.5px;
+  color: #D8C3A5;
+  letter-spacing: 0.5px;
+}
+
+/* ── Right Form Pane ── */
+.sf-auth-form-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 36px;
+  background: #FDFBF7;
+}
+
+@media (max-width: 600px) {
+  .sf-auth-form-pane {
+    padding: 32px 20px;
+  }
+}
+
+.sf-auth-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+.sf-auth-brand-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.sf-auth-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid #A77950;
+  margin: 0 auto 14px;
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(59, 43, 37, 0.08);
+}
+
+.sf-auth-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: #3B2B25;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.sf-auth-subtitle {
+  font-size: 13.5px;
+  color: #76675D;
+  line-height: 1.5;
+}
+
+/* ── Form Inputs & Floating Elements ── */
+.sf-auth-group {
+  margin-bottom: 18px;
+}
+
+.sf-auth-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3B2B25;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.sf-auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sf-auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #3B2B25;
+  background: #FFFFFF;
+  border: 1.5px solid #D8C3A5;
+  border-radius: 3px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.sf-auth-input:focus {
+  border-color: #3B2B25;
+  box-shadow: 0 0 0 3px rgba(167, 121, 80, 0.15);
+}
+
+.sf-auth-input.has-prefix {
+  padding-left: 56px;
+}
+
+.sf-auth-prefix {
+  position: absolute;
+  left: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #76675D;
+  border-right: 1px solid #D8C3A5;
+  padding-right: 8px;
+  user-select: none;
+}
+
+.sf-pwd-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #76675D;
+  display: flex;
+  align-items: center;
+}
+
+.sf-pwd-toggle-btn:hover {
+  color: #3B2B25;
+}
+
+/* ── Password Strength Bar ── */
+.sf-pwd-meter {
+  margin-top: 8px;
+}
+
+.sf-meter-track {
+  height: 4px;
+  background: #E8DFD8;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  gap: 3px;
+}
+
+.sf-meter-fill {
+  height: 100%;
+  flex: 1;
+  background: transparent;
+  transition: background 0.3s ease;
+  border-radius: 1px;
+}
+
+.sf-meter-fill.active {
+  background: #C25E5E;
+}
+.sf-meter-fill.active.mod {
+  background: #B58A45;
+}
+.sf-meter-fill.active.str {
+  background: #388E3C;
+}
+
+.sf-meter-label {
+  font-size: 11.5px;
+  color: #76675D;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ── Form Actions & Buttons ── */
+.sf-auth-row-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  margin-bottom: 22px;
+  color: #76675D;
+}
+
+.sf-auth-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sf-auth-link {
+  color: #A77950;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.sf-auth-link:hover {
+  color: #3B2B25;
+  text-decoration: underline;
+}
+
+.sf-auth-btn-primary {
+  width: 100%;
+  padding: 14px 24px;
+  background: #3B2B25;
+  color: #F5EBDD;
+  border: 1px solid #3B2B25;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(59, 43, 37, 0.15);
+}
+
+.sf-auth-btn-primary:hover {
+  background: #271C17;
+  border-color: #271C17;
+  transform: translateY(-1px);
+}
+
+.sf-auth-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sf-auth-footer-nav {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #76675D;
+}
+
+.sf-auth-error-alert {
+  padding: 12px 16px;
+  background: #FDF2F2;
+  border-left: 3px solid #C25E5E;
+  color: #991B1B;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sf-auth-success-alert {
+  padding: 12px 16px;
+  background: #F0FDF4;
+  border-left: 3px solid #22C55E;
+  color: #166534;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Verification Notice Screen ── */
+.sf-verify-card {
+  text-align: center;
+  padding: 40px 24px;
+  background: #FFFFFF;
+  border: 1px solid #D8C3A5;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(59, 43, 37, 0.06);
+}
+
+.sf-verify-icon-box {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #F5EBDD;
+  border: 1.5px solid #A77950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A77950;
+}
+
+.sf-verify-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: #3B2B25;
+  margin-bottom: 12px;
+}
+
+.sf-verify-desc {
+  font-size: 14px;
+  color: #76675D;
+  line-height: 1.6;
+  max-width: 360px;
+  margin: 0 auto 24px;
+}
+
+.sf-cooldown-text {
+  font-size: 12px;
+  color: #9C8E84;
+  margin-top: 10px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOMER ACCOUNT PORTAL (#/account)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sf-portal-wrapper {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* Patron Profile Top Bar */
+.sf-portal-header-banner {
+  background: #3B2B25;
+  color: #F5EBDD;
+  padding: 32px 36px;
+  border-radius: 4px;
+  border: 1px solid #A77950;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 4px 18px rgba(59, 43, 37, 0.12);
+}
+
+.sf-patron-profile-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sf-patron-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #A77950;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-family: 'Playfair Display', serif;
+  border: 2px solid #F5EBDD;
+  flex-shrink: 0;
+}
+
+.sf-patron-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: #F5EBDD;
+  margin-bottom: 4px;
+}
+
+.sf-patron-email {
+  font-size: 13px;
+  color: #D8C3A5;
+}
+
+.sf-patron-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(167, 121, 80, 0.25);
+  border: 1px solid #A77950;
+  border-radius: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #F5EBDD;
+  margin-top: 6px;
+}
+
+.sf-portal-nav-bar {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1.5px solid #D8C3A5;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.sf-portal-tab-btn {
+  padding: 12px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #76675D;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.sf-portal-tab-btn:hover {
+  color: #3B2B25;
+}
+
+.sf-portal-tab-btn.active {
+  color: #3B2B25;
+  border-bottom-color: #A77950;
+}
+
+/* Card Container */
+.sf-portal-card {
+  background: #FFFFFF;
+  border: 1px solid #D8C3A5;
+  border-radius: 4px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(59, 43, 37, 0.04);
+}
+
+.sf-portal-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #3B2B25;
+  margin-bottom: 8px;
+}
+
+.sf-portal-card-subtitle {
+  font-size: 13.5px;
+  color: #76675D;
+  margin-bottom: 24px;
+}
+
+/* Orders Cards & Status */
+.sf-order-item-card {
+  border: 1px solid #D8C3A5;
+  border-radius: 4px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.sf-order-header {
+  background: #F5EBDD;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #D8C3A5;
+}
+
+.sf-order-body {
+  padding: 20px;
+}
+
+.sf-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sf-status-badge.pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+.sf-status-badge.confirmed {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+.sf-status-badge.shipped {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+.sf-status-badge.delivered {
+  background: #DCFCE7;
+  color: #166534;
+}
+.sf-status-badge.cancelled {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Address Grid */
+.sf-addresses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.sf-address-card {
+  border: 1.5px solid #D8C3A5;
+  border-radius: 4px;
+  padding: 20px;
+  background: #FDFBF7;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sf-address-card.is-default {
+  border-color: #A77950;
+  background: #FAF5EE;
+}
+
+.sf-default-pill {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #A77950;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── Header Account Dropdown ── */
+.sf-header-account-wrap {
+  position: relative;
+}
+
+.sf-account-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 10px;
+  width: 240px;
+  background: #FFFFFF;
+  border: 1.5px solid #D8C3A5;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(59, 43, 37, 0.15);
+  padding: 12px 0;
+  z-index: 1000;
+  display: none;
+}
+
+.sf-header-account-wrap:hover .sf-account-dropdown-menu,
+.sf-account-dropdown-menu.show {
+  display: block;
+}
+
+.sf-dropdown-user-info {
+  padding: 10px 18px 14px;
+  border-bottom: 1px solid #E8DFD8;
+  margin-bottom: 6px;
+}
+
+.sf-dropdown-user-name {
+  font-weight: 600;
+  color: #3B2B25;
+  font-size: 13.5px;
+}
+
+.sf-dropdown-user-email {
+  font-size: 11.5px;
+  color: #76675D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sf-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  color: #3B2B25;
+  text-decoration: none;
+  font-size: 13px;
+  transition: background 0.15s ease;
+}
+
+.sf-dropdown-link:hover {
+  background: #F5EBDD;
+  color: #3B2B25;
+}
+
+.sf-dropdown-signout {
+  border-top: 1px solid #E8DFD8;
+  margin-top: 6px;
+  padding-top: 6px;
+}

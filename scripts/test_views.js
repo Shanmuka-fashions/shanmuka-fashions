@@ -3,9 +3,11 @@ const vm = require('vm');
 
 const html = fs.readFileSync('index.html', 'utf8');
 
-// Read sf_database.js, sf_admin.js, and main script
+// Read sf_database.js, sf_admin.js, customer auth & views, and main script
 const dbScript = fs.readFileSync('scripts/sf_database.js', 'utf8');
 const adminScript = fs.readFileSync('scripts/sf_admin.js', 'utf8');
+const custAuthScript = fs.readFileSync('scripts/sf_customer_auth.js', 'utf8');
+const custViewsScript = fs.readFileSync('scripts/sf_customer_views.js', 'utf8');
 
 // Find the inline script in index.html (the one without src)
 const inlineMatches = html.match(/<script(?![^>]*src=)[\s\S]*?>([\s\S]*?)<\/script>/i);
@@ -109,7 +111,14 @@ try {
   vm.runInContext(adminScript, sandbox);
   console.log('SFAdmin loaded in sandbox:', typeof sandbox.SFAdmin);
 
-  // 3. Run Storefront App
+  // 3. Run Customer Authentication & Views
+  vm.runInContext(custAuthScript, sandbox);
+  console.log('SFCustomerAuth loaded in sandbox:', typeof sandbox.SFCustomerAuth);
+
+  vm.runInContext(custViewsScript, sandbox);
+  console.log('SFCustomerViews loaded in sandbox:', typeof sandbox.SFCustomerViews);
+
+  // 4. Run Storefront App
   vm.runInContext(scriptContent, sandbox);
   console.log('Storefront application initialized successfully!');
 
@@ -157,7 +166,59 @@ try {
   sandbox.renderAdminView('cms');
   console.log('renderAdminView(cms): OK, length =', dom.appRoot.innerHTML.length);
 
-  console.log('\n🎉 ALL STOREFRONT AND ADMIN VIEW TESTS PASSED PERFECTLY!');
+  // Test Customer Authentication & Account Views
+  sandbox.SFCustomerViews.renderLogin();
+  console.log('SFCustomerViews.renderLogin: OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderRegister();
+  console.log('SFCustomerViews.renderRegister: OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderVerificationNotice('meera@example.com');
+  console.log('SFCustomerViews.renderVerificationNotice: OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderForgotPassword();
+  console.log('SFCustomerViews.renderForgotPassword: OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderResetPassword();
+  console.log('SFCustomerViews.renderResetPassword: OK, length =', dom.appRoot.innerHTML.length);
+
+  // Seed customer session for account portal
+  sandbox.SFCustomerAuth.saveAddress({
+    full_name: 'Meera Rao',
+    phone: '9876543210',
+    street: 'Flat 302, Sagar View',
+    city: 'Hyderabad',
+    state: 'Telangana',
+    pincode: '500034',
+    is_default: true
+  });
+
+  // Temporarily set mock customer
+  sandbox.localStorage.setItem('sf_customer_auth_session_v1', JSON.stringify({
+    id: 'cust_test_1',
+    full_name: 'Meera Rao',
+    email: 'meera@example.com',
+    phone: '9876543210',
+    addresses: [{ id: 'a1', full_name: 'Meera Rao', phone: '9876543210', street: 'Road 36', city: 'Hyderabad', state: 'Telangana', pincode: '500033', is_default: true }]
+  }));
+  sandbox.SFCustomerAuth.init();
+
+  sandbox.SFCustomerViews.renderAccountPortal('profile');
+  console.log('SFCustomerViews.renderAccountPortal(profile): OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderAccountPortal('orders');
+  console.log('SFCustomerViews.renderAccountPortal(orders): OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderAccountPortal('addresses');
+  console.log('SFCustomerViews.renderAccountPortal(addresses): OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderAccountPortal('wishlist');
+  console.log('SFCustomerViews.renderAccountPortal(wishlist): OK, length =', dom.appRoot.innerHTML.length);
+
+  sandbox.SFCustomerViews.renderAccountPortal('security');
+  console.log('SFCustomerViews.renderAccountPortal(security): OK, length =', dom.appRoot.innerHTML.length);
+
+  console.log('\n🎉 ALL STOREFRONT, ADMIN, AND CUSTOMER AUTH VIEW TESTS PASSED PERFECTLY!');
 } catch (err) {
   console.error('Test view harness error:', err);
   process.exit(1);
