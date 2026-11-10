@@ -344,3 +344,4 @@ VALUES
     ('c2', 'FESTIVE2500', 'flat', 2500, 30000, 50, 8, true),
     ('c3', 'BRIDALROYAL', 'percentage', 15, 50000, 25, 4, true)
 ON CONFLICT (id) DO NOTHING;
+
