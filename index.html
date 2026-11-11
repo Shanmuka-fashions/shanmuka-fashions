@@ -2863,12 +2863,12 @@
 
     .editorial-collections-tier2 {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
     }
 
     .editorial-card-featured {
-      height: 380px;
+      height: 400px;
       border-radius: 2px;
       overflow: hidden;
       position: relative;
@@ -2888,6 +2888,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center 20%;
       transition: transform 0.6s ease;
     }
 
@@ -2939,7 +2940,7 @@
     }
 
     .editorial-card-quad {
-      height: 290px;
+      height: 310px;
       border-radius: 2px;
       overflow: hidden;
       position: relative;
@@ -2959,6 +2960,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center 25%;
       transition: transform 0.6s ease;
     }
 
@@ -3517,11 +3519,31 @@
 
       .editorial-collections-tier2 {
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        gap: 12px;
       }
 
       .editorial-card-quad {
-        height: 180px;
+        height: 210px;
+      }
+
+      .editorial-card-quad .editorial-card-overlay {
+        padding: 12px 10px;
+      }
+
+      .editorial-card-quad .editorial-card-overlay .cat-label {
+        font-size: 8.5px;
+        letter-spacing: 1px;
+      }
+
+      .editorial-card-quad .editorial-card-overlay h3 {
+        font-size: 14px;
+        line-height: 1.25;
+        margin-bottom: 2px;
+      }
+
+      .editorial-card-quad .editorial-card-overlay .card-link {
+        font-size: 10px;
+        letter-spacing: 0.5px;
       }
 
       .product-grid {
@@ -3871,18 +3893,20 @@
                   <li><a href="#/collection/kanchipuram">Kanchipuram Sarees</a></li>
                   <li><a href="#/collection/banarasi">Banarasi Heritage</a></li>
                   <li><a href="#/collection/silk">Festive Silk Sarees</a></li>
+                  <li><a href="#/collection/bridal">Royal Bridal Trousseau</a></li>
                 </ul>
               </div>
               <div class="mega-col">
                 <h4>Modern Grace</h4>
                 <ul>
                   <li><a href="#/collection/organza">Organza Sarees</a></li>
-                  <li><a href="#/collection/cotton">Cotton Sarees</a></li>
+                  <li><a href="#/collection/cotton">Handloom Cotton & Linen</a></li>
                   <li><a href="#/collection/designer">Designer Sarees</a></li>
+                  <li><a href="#/collection/tussar">Tussar & Chanderi</a></li>
                 </ul>
               </div>
               <div class="mega-card">
-                <img src="assets/golden-silk-saree-clean.jpg" alt="Banarasi Collection">
+                <img src="assets/collections/banarasi-heritage.jpeg" alt="Banarasi Collection" style="object-fit: cover; object-position: center 20%;" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.23 (1).jpeg'">
                 <div class="mega-card-body">
                   <h5>Heritage Banaras</h5>
                   <p>Pure katan silk with gold meenakari jaal.</p>
@@ -4547,7 +4571,7 @@
       <!-- Tier 1: Marquee Feature Duo -->
       <div class="editorial-collections-tier1">
         <div class="editorial-card-featured" onclick="window.location.hash='#/collection/kanchipuram'">
-          <img src="assets/kanchipuram-loom.jpg" alt="Kanchipuram Silks" loading="lazy">
+          <img src="assets/collections/kanchipuram-silk.jpeg" alt="Kanchipuram Silks" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.24.jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">01 / Marquee Silk</span>
             <h3>Kanchipuram Silks</h3>
@@ -4556,7 +4580,7 @@
           </div>
         </div>
         <div class="editorial-card-featured" onclick="window.location.hash='#/collection/banarasi'">
-          <img src="assets/golden-silk-saree-clean.jpg" alt="Banarasi Heritage" loading="lazy">
+          <img src="assets/collections/banarasi-heritage.jpeg" alt="Banarasi Heritage" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.23 (1).jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">02 / Heritage Brocade</span>
             <h3>Banarasi Heritage</h3>
@@ -4566,10 +4590,10 @@
         </div>
       </div>
 
-      <!-- Tier 2: 4-Card Quad -->
+      <!-- Tier 2: Signature 6-Card Grid (All Handloom Categories) -->
       <div class="editorial-collections-tier2">
         <div class="editorial-card-quad" onclick="window.location.hash='#/collection/organza'">
-          <img src="assets/golden-silk-saree-clean.jpg" alt="Floral Organza" loading="lazy">
+          <img src="assets/collections/floral-organza.jpeg" alt="Floral Organza" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.25.jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">03 / Sheer Grace</span>
             <h3>Floral Organza</h3>
@@ -4577,7 +4601,7 @@
           </div>
         </div>
         <div class="editorial-card-quad" onclick="window.location.hash='#/collection/silk'">
-          <img src="assets/raw-silk-yarns.jpg" alt="Festive Pure Silk" loading="lazy">
+          <img src="assets/collections/festive-silk.jpeg" alt="Festive Pure Silk" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.25 (2).jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">04 / Celebration Drapes</span>
             <h3>Festive Pure Silk</h3>
@@ -4585,18 +4609,34 @@
           </div>
         </div>
         <div class="editorial-card-quad" onclick="window.location.hash='#/collection/cotton'">
-          <img src="assets/handloom-weaving.jpg" alt="Handloom Cotton" loading="lazy">
+          <img src="assets/collections/handloom-cotton.jpeg" alt="Handloom Cotton & Linen" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.24 (2).jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">05 / Artisan Combed</span>
-            <h3>Handloom Cotton</h3>
+            <h3>Handloom Cotton & Linen</h3>
             <span class="card-link">View Sarees &rarr;</span>
           </div>
         </div>
         <div class="editorial-card-quad" onclick="window.location.hash='#/collection/designer'">
-          <img src="assets/hero-model.jpg" alt="Designer Sarees" loading="lazy">
+          <img src="assets/collections/designer-couture.jpeg" alt="Designer Sarees" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.24 (1).jpeg'">
           <div class="editorial-card-overlay">
             <span class="cat-label">06 / Haute Couture</span>
             <h3>Designer Sarees</h3>
+            <span class="card-link">View Sarees &rarr;</span>
+          </div>
+        </div>
+        <div class="editorial-card-quad" onclick="window.location.hash='#/collection/bridal'">
+          <img src="assets/collections/bridal-crimson.jpeg" alt="Royal Bridal Trousseau" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.23.jpeg'">
+          <div class="editorial-card-overlay">
+            <span class="cat-label">07 / Royal Bridal</span>
+            <h3>Bridal Trousseau</h3>
+            <span class="card-link">View Sarees &rarr;</span>
+          </div>
+        </div>
+        <div class="editorial-card-quad" onclick="window.location.hash='#/collection/tussar'">
+          <img src="assets/collections/tussar-chanderi.jpeg" alt="Tussar & Chanderi" loading="lazy" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.25 (1).jpeg'">
+          <div class="editorial-card-overlay">
+            <span class="cat-label">08 / Earthy Elegance</span>
+            <h3>Tussar & Chanderi</h3>
             <span class="card-link">View Sarees &rarr;</span>
           </div>
         </div>
@@ -4625,7 +4665,7 @@
           </div>
         </div>
         <div class="wedding-media-block">
-          <img src="Shanmuka Fashions Saree Emblem.png" alt="Shanmuka Fashions Royal Bridal Emblem" class="wedding-media-img" style="object-fit: contain; background: rgba(255,255,255,0.03); padding: 16px;">
+          <img src="assets/collections/bridal-crimson.jpeg" alt="Shanmuka Fashions Royal Bridal Saree" class="wedding-media-img" style="object-fit: cover; object-position: center 20%;" onerror="this.src='WhatsApp Image 2026-11-11 at 13.35.23.jpeg'">
         </div>
       </div>
     </section>
@@ -5280,16 +5320,24 @@
     // ── VIEW 4: Dedicated Collection Landing View ──
     function renderCollectionLandingView(collectionSlug) {
       const map = {
-        'kanchipuram': { name: 'Kanchipuram Sarees', category: 'Kanchipuram', banner: 'assets/kanchipuram-loom.jpg', desc: 'Renowned as the queen of silks, each Kanchipuram drape features authentic temple spires, heavy gold zari brocades, and vibrant celebratory palettes.' },
-        'banarasi': { name: 'Banarasi Sarees', category: 'Banarasi', banner: 'assets/golden-silk-saree-clean.jpg', desc: 'Heirloom gold meenakari and floral kadwa weaves from the historic handlooms of Varanasi, crafted for celebratory majesty.' },
-        'organza': { name: 'Organza Sarees', category: 'Organza', banner: 'assets/golden-silk-saree-clean.jpg', desc: 'Feather-light translucent silk organza drapes in soft pastels and shimmering metallic tissue, tailored for modern cocktail & day festive elegance.' },
-        'silk': { name: 'Festive Silk Sarees', category: 'Silk', banner: 'assets/raw-silk-yarns.jpg', desc: 'Pure mulberry silk sarees adorned with auspicious peacock and mango butta zari, ideal for celebrations and family traditions.' },
-        'cotton': { name: 'Handloom Cotton Sarees', category: 'Cotton', banner: 'assets/handloom-weaving.jpg', desc: 'Spun from pure breathable cotton yarns with classic border detailing for effortless, poise-filled everyday grace.' },
-        'designer': { name: 'Designer Sarees', category: 'Designer', banner: 'assets/hero-model.jpg', desc: 'Curated royal haute couture edits featuring intricate embroidery, contemporary silhouettes, and bespoke artisan luxury.' }
+        'kanchipuram': { name: 'Kanchipuram Sarees', category: 'Kanchipuram', banner: 'assets/collections/kanchipuram-silk.jpeg', desc: 'Renowned as the queen of silks, each Kanchipuram drape features authentic temple spires, heavy gold zari brocades, and vibrant celebratory palettes.' },
+        'banarasi': { name: 'Banarasi Sarees', category: 'Banarasi', banner: 'assets/collections/banarasi-heritage.jpeg', desc: 'Heirloom gold meenakari and floral kadwa weaves from the historic handlooms of Varanasi, crafted for celebratory majesty.' },
+        'organza': { name: 'Organza Sarees', category: 'Organza', banner: 'assets/collections/floral-organza.jpeg', desc: 'Feather-light translucent silk organza drapes in soft pastels and shimmering metallic tissue, tailored for modern cocktail & day festive elegance.' },
+        'silk': { name: 'Festive Silk Sarees', category: 'Silk', banner: 'assets/collections/festive-silk.jpeg', desc: 'Pure mulberry silk sarees adorned with auspicious peacock and mango butta zari, ideal for celebrations and family traditions.' },
+        'cotton': { name: 'Handloom Cotton Sarees', category: 'Cotton', banner: 'assets/collections/handloom-cotton.jpeg', desc: 'Spun from pure breathable cotton yarns with classic border detailing for effortless, poise-filled everyday grace.' },
+        'designer': { name: 'Designer Sarees', category: 'Designer', banner: 'assets/collections/designer-couture.jpeg', desc: 'Curated royal haute couture edits featuring intricate embroidery, contemporary silhouettes, and bespoke artisan luxury.' },
+        'bridal': { name: 'Royal Bridal & Trousseau', category: 'Bridal', banner: 'assets/collections/bridal-crimson.jpeg', desc: 'Heirloom bridal drapes in regal crimson and vermillion with opulent hand-embroidered scalloped borders and tested gold zari.' },
+        'tussar': { name: 'Tussar & Chanderi Sarees', category: 'Silk', banner: 'assets/collections/tussar-chanderi.jpeg', desc: 'Artisan handloom textures with earthy sophistication, subtle checks, and contrasting temple zari borders.' }
       };
 
       const colData = map[collectionSlug] || map['kanchipuram'];
-      const filtered = products.filter(p => p.category.toLowerCase().includes(colData.category.toLowerCase()));
+      const filtered = products.filter(p => {
+        const cat = (p.category || '').toLowerCase();
+        const occ = (p.occasion || '').toLowerCase();
+        const fab = (p.fabric || '').toLowerCase();
+        const target = colData.category.toLowerCase();
+        return cat.includes(target) || occ.includes(target) || fab.includes(target);
+      });
 
       const app = $('appRoot');
       app.innerHTML = `
@@ -5310,7 +5358,7 @@
           <p style="color: #E6D2C2; font-size: 14px; line-height: 1.7;">${colData.desc}</p>
         </div>
         <div style="height: 240px;">
-          <img src="${colData.banner}" alt="${colData.name}" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="${colData.banner}" alt="${colData.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
         </div>
       </div>
 
