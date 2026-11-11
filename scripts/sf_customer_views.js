@@ -1206,7 +1206,10 @@
                       <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px dashed #D8C3A5; flex-wrap: wrap; gap: 12px;">
                         <div style="font-size: 12.5px; color: #76675D;">
                           Payment: <b>${(o.payment_method || o.payment || 'UPI').toUpperCase()}</b> &bull; Status: <b>${o.payment_status || 'Completed'}</b>
-                          ${o.tracking_number ? `<br>Tracking AWB: <strong style="color: #3B2B25;">${o.tracking_number}</strong> (${o.courier || 'Blue Dart Express'})` : ''}
+                          ${o.tracking_number ? `
+                            <br>Tracking AWB: <strong style="color: #3B2B25;">${o.tracking_number}</strong> (${o.courier || 'Blue Dart Express'})
+                            <a href="https://shiprocket.co//tracking/${encodeURIComponent(o.tracking_number)}" target="_blank" style="margin-left: 6px; color: #8C6239; font-weight: 600; text-decoration: underline;">Track on Shiprocket &rarr;</a>
+                          ` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
                           <div style="text-align: right; margin-right: 8px;">
@@ -1338,9 +1341,14 @@
                   <strong style="color: #3B2B25; font-size: 13.5px;">Carrier: ${order.courier || 'Blue Dart Express'}</strong>
                   <div style="font-size: 12px; color: #76675D;">AWB Air Waybill Number: <b>${order.tracking_number}</b></div>
                 </div>
-                <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20Please%20provide%20live%20dispatch%20status%20for%20AWB%20${order.tracking_number}" target="_blank" class="sf-btn-sm" style="text-decoration: none;">
-                  Track on WhatsApp Concierge &rarr;
-                </a>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <a href="https://shiprocket.co//tracking/${encodeURIComponent(order.tracking_number)}" target="_blank" class="sf-btn-sm" style="text-decoration: none; background: #3B2B25; color: #FFF; padding: 6px 12px; font-size: 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                    🚚 Live Tracking (Shiprocket) &rarr;
+                  </a>
+                  <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20Please%20provide%20live%20dispatch%20status%20for%20AWB%20${order.tracking_number}" target="_blank" class="sf-btn-sm" style="text-decoration: none; background: #25D366; color: #FFF; padding: 6px 12px; font-size: 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                    💬 WhatsApp Concierge
+                  </a>
+                </div>
               </div>
             ` : ''}
 

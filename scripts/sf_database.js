@@ -35,7 +35,12 @@
       pos_prefix: 'POS-2026-',
       receipt_header: 'SHANMUKA FASHIONS\\nFlagship Saree Atelier, Jubilee Hills, Hyderabad\\nGSTIN: 36AAECS9843K1ZN • WhatsApp: +91 95421 56929',
       receipt_footer: 'Silk Mark Certified Pure Handloom Sarees.\\nExchanges accepted within 7 days with price tag and original invoice.\\nThank you for choosing Shanmuka Fashions!',
-      low_stock_threshold: 2
+      low_stock_threshold: 2,
+      shiprocket_enabled: true,
+      shiprocket_api_key: '4Be!Q7$#QPz3%XM5czxHgbpo*ed0MnB4',
+      shiprocket_email: 'shanmukafashions@gmail.com',
+      shiprocket_pickup_pincode: '500033',
+      shiprocket_pickup_location: 'Jubilee Hills Atelier'
     },
     auth: {
       username: 'admin',
@@ -1002,6 +1007,8 @@
 
       if (updates.courier !== undefined) order.courier = updates.courier;
       if (updates.tracking_number !== undefined) order.tracking_number = updates.tracking_number;
+      if (updates.shipping_status !== undefined) order.shipping_status = updates.shipping_status;
+      if (updates.status !== undefined) order.status = updates.status;
       if (updates.order_notes !== undefined) order.order_notes = updates.order_notes;
       if (updates.payment_status !== undefined) order.payment_status = updates.payment_status;
       order.updated_at = new Date().toISOString();
