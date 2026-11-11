@@ -449,6 +449,28 @@
       }
     },
 
+    updateProductStock: async function (productId, newQty, stockStatus) {
+      const sb = this.getClient();
+      if (!sb) return { success: false, error: 'Database disconnected' };
+      try {
+        const qtyNum = Math.max(0, parseInt(newQty, 10) || 0);
+        const statusStr = stockStatus || (qtyNum <= 0 ? 'Sold Out' : (qtyNum <= 2 ? 'Low Stock' : 'In Stock'));
+        const payload = {
+          stock_qty: qtyNum,
+          stock: statusStr,
+          updated_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('products').update(payload).eq('id', String(productId)).select();
+        if (error) {
+          console.warn('Supabase product stock update note:', error.message);
+          return { success: false, error: error.message };
+        }
+        return { success: true, data: data ? data[0] : null };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+
     // ── 3. REAL-TIME DATABASE: ORDERS CRUD ──
     fetchOrders: async function () {
       const sb = this.getClient();

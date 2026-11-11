@@ -313,8 +313,14 @@
     }
 
     getProduct(id) {
+      if (id === null || id === undefined) return null;
+      const idStr = String(id).trim();
       const numId = parseInt(id, 10);
-      return this.getProducts().find(p => p.id === numId);
+      return this.getProducts().find(p =>
+        p.id === id ||
+        String(p.id) === idStr ||
+        (!isNaN(numId) && p.id === numId)
+      );
     }
 
     getProductBySkuOrBarcode(code) {
@@ -782,6 +788,10 @@
 
       this.logAudit('STOCK_ADJUST', 'INVENTORY', prod.id, `Stock adjusted for "${prod.name}" from ${prevQty} to ${newQty} (${delta > 0 ? '+' : ''}${delta}). Reason: ${reason}`, adminUser);
       this.commit();
+      const sbAdjust = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sbAdjust && typeof sbAdjust.updateProductStock === 'function') {
+        sbAdjust.updateProductStock(prod.id, prod.stock_qty, prod.stock).catch(e => console.warn('Supabase stock adjust sync error:', e));
+      }
       return prod;
     }
 
@@ -883,10 +893,10 @@
             name: saleData.customer_name || 'Walk-in Patron',
             phone: saleData.customer_phone || '',
             email: saleData.customer_email || '',
-            street: saleData.delivery_address?.street || 'In-Store',
-            city: saleData.delivery_address?.city || 'Hyderabad',
-            state: saleData.delivery_address?.state || 'Telangana',
-            pincode: saleData.delivery_address?.pincode || '500033',
+            street: saleData.customer_street || saleData.delivery_address?.street || 'In-Store',
+            city: saleData.customer_city || saleData.delivery_address?.city || 'Hyderabad',
+            state: saleData.customer_state || saleData.delivery_address?.state || 'Telangana',
+            pincode: saleData.customer_pincode || saleData.delivery_address?.pincode || '500033',
             total_orders: 1,
             total_spent: netTotal,
             notes: channel === 'POS' ? 'Physical Shop Customer' : 'Online Store Customer',
@@ -898,11 +908,17 @@
           cust.total_orders = (cust.total_orders || 0) + 1;
           cust.total_spent = (cust.total_spent || 0) + netTotal;
           if (saleData.customer_name && cust.name === 'Walk-in Patron') cust.name = saleData.customer_name;
+          if (saleData.customer_city) cust.city = saleData.customer_city;
+          if (saleData.customer_email) cust.email = saleData.customer_email;
           customerId = cust.id;
         }
       }
 
       // 6. Create Order Record
+      const amountReceived = saleData.amount_received !== undefined ? Number(saleData.amount_received) : (saleData.payment_status === 'PAID' ? netTotal : 0);
+      const changeDue = saleData.change_due !== undefined ? Number(saleData.change_due) : Math.max(0, amountReceived - netTotal);
+      const pendingAmount = saleData.pending_amount !== undefined ? Number(saleData.pending_amount) : Math.max(0, netTotal - amountReceived);
+
       const newOrder = {
         id: orderNum,
         order_number: orderNum,
@@ -919,19 +935,23 @@
         tax_amount: taxAmount,
         shipping_charges: shipping,
         total: netTotal,
+        amount_received: amountReceived,
+        change_due: changeDue,
+        pending_amount: pendingAmount,
         payment_method: saleData.payment_method || (channel === 'POS' ? 'CASH' : 'UPI'),
-        payment_status: saleData.payment_status || 'PAID',
+        payment_status: saleData.payment_status || (pendingAmount > 0 && amountReceived > 0 ? 'PARTIAL' : (pendingAmount > 0 ? 'PENDING' : 'PAID')),
         payment_reference: saleData.payment_reference || (channel === 'POS' ? `POS-CASH-${orderNum}` : `ONLINE-PG-${orderNum}`),
         order_status: channel === 'POS' ? 'DELIVERED' : 'NEW',
         delivery_address: saleData.delivery_address || {
           street: channel === 'POS' ? 'Showroom Handover' : '',
-          city: channel === 'POS' ? 'Hyderabad' : '',
+          city: channel === 'POS' ? (saleData.customer_city || 'Hyderabad') : '',
           state: channel === 'POS' ? 'Telangana' : '',
           pincode: channel === 'POS' ? '500033' : ''
         },
         courier: channel === 'POS' ? 'In-Store Handover' : (saleData.courier || 'Blue Dart Express'),
         tracking_number: channel === 'POS' ? orderNum : (saleData.tracking_number || ''),
         order_notes: saleData.order_notes || '',
+        success: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -954,8 +974,24 @@
 
       this.commit();
       const sbOrder = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
-      if (sbOrder && typeof sbOrder.pushOrderToCloud === 'function') {
-        sbOrder.pushOrderToCloud(newOrder).catch(e => console.warn('Supabase order cloud sync:', e));
+      if (sbOrder) {
+        if (typeof sbOrder.pushOrderToCloud === 'function') {
+          sbOrder.pushOrderToCloud(newOrder).catch(e => console.warn('Supabase order cloud sync:', e));
+        }
+        if (typeof sbOrder.updateProductStock === 'function') {
+          resolvedItems.forEach(it => {
+            const p = this.getProduct(it.product_id);
+            if (p) {
+              sbOrder.updateProductStock(p.id, p.stock_qty, p.stock).catch(e => console.warn('Supabase product stock sync err:', e));
+            }
+          });
+        }
+        if (typeof sbOrder.saveCustomerToCloud === 'function' && customerId) {
+          const custObj = this.state.customers.find(c => c.id === customerId);
+          if (custObj) {
+            sbOrder.saveCustomerToCloud(custObj).catch(e => console.warn('Supabase customer cloud sync:', e));
+          }
+        }
       }
       return newOrder;
     }
@@ -998,6 +1034,15 @@
 
       this.logAudit('ORDER_STATUS', 'ORDER', order.order_number, `Updated order #${order.order_number} status from ${oldStatus} to ${newStatus}`, adminUser);
       this.commit();
+      const sbStatus = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sbStatus && typeof sbStatus.updateProductStock === 'function' && ((newStatus === 'CANCELLED' || newStatus === 'RETURNED') && oldStatus !== 'CANCELLED' && oldStatus !== 'RETURNED')) {
+        for (const item of order.items) {
+          const prod = this.getProduct(item.product_id);
+          if (prod) {
+            sbStatus.updateProductStock(prod.id, prod.stock_qty, prod.stock).catch(e => console.warn('Supabase restock sync err:', e));
+          }
+        }
+      }
       return order;
     }
 

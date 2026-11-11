@@ -4334,14 +4334,20 @@
         if (sb && typeof sb.fetchProducts === 'function') {
           const rawProds = await sb.fetchProducts({ publishedOnly: true });
           const cloudProds = Array.isArray(rawProds) ? rawProds : (rawProds && Array.isArray(rawProds.data) ? rawProds.data : []);
-          products = cloudProds.map(p => ({
-            ...p,
-            id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
-            price: Number(p.price) || 0,
-            old: Number(p.old_price || p.old) || 0,
-            desc: p.description || p.desc || '',
-            images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
-          }));
+          products = cloudProds.map(p => {
+            const qty = Number(p.stock_qty !== undefined ? p.stock_qty : (p.stock && !isNaN(Number(p.stock)) ? Number(p.stock) : 0));
+            const status = (p.stock && isNaN(Number(p.stock))) ? p.stock : (qty <= 0 ? 'Sold Out' : (qty <= 2 ? 'Low Stock' : 'In Stock'));
+            return {
+              ...p,
+              id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
+              price: Number(p.price) || 0,
+              old: Number(p.old_price || p.old) || 0,
+              stock_qty: qty,
+              stock: status,
+              desc: p.description || p.desc || '',
+              images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
+            };
+          });
 
           // Sync into SFDatabase preserving any local pending items
           if (typeof SFDatabase !== 'undefined') {
@@ -5151,17 +5157,22 @@
       return list.map(p => {
         const inWishlist = state.wishlist.includes(p.id);
         const cardImg = p.img || (Array.isArray(p.images) && p.images.length ? p.images[0] : 'assets/kanchipuram-loom.jpg');
+        const isSoldOut = (p.stock_qty !== undefined && p.stock_qty <= 0) || p.stock === 'Sold Out';
+        const isLowStock = !isSoldOut && p.stock_qty !== undefined && p.stock_qty <= 2;
+        const stockBadge = isSoldOut 
+          ? `<span class="card-badge" style="background: #C62828; color: #FFF;">Sold Out</span>` 
+          : (isLowStock ? `<span class="card-badge" style="background: #E65100; color: #FFF;">Only ${p.stock_qty} Left</span>` : (p.badge ? `<span class="card-badge">${p.badge}</span>` : ''));
         return `
-      <article class="product-card" data-id="${p.id}">
+      <article class="product-card ${isSoldOut ? 'product-sold-out' : ''}" data-id="${p.id}">
         <div class="card-media">
           <img src="${cardImg}" alt="${p.name}" loading="lazy" onerror="this.src='assets/kanchipuram-loom.jpg'">
-          ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
+          ${stockBadge}
           <button class="card-wishlist-btn ${inWishlist ? 'active' : ''}" data-wishlist-id="${p.id}" aria-label="Save to Wishlist">
             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           </button>
           <div class="card-quick-actions">
             <button class="quick-view-btn" data-qv-id="${p.id}">Quick View</button>
-            <button class="quick-add-btn" data-add-id="${p.id}">Add to Bag</button>
+            ${isSoldOut ? `<button class="quick-add-btn" disabled style="opacity: 0.6; cursor: not-allowed;">Sold Out</button>` : `<button class="quick-add-btn" data-add-id="${p.id}">Add to Bag</button>`}
           </div>
         </div>
         <div class="card-details">
@@ -5171,7 +5182,7 @@
             <span class="current-price">${money(p.price)}</span>
             ${p.old && p.old > p.price ? `<del class="original-price">${money(p.old)}</del>` : ''}
           </div>
-          <button class="card-cta-btn" onclick="window.location.hash='#/product/${p.id}'">View Saree &rarr;</button>
+          <button class="card-cta-btn" onclick="window.location.hash='#/product/${p.id}'">${isSoldOut ? 'View Details &rarr;' : 'View Saree &rarr;'}</button>
         </div>
       </article>
     `;
@@ -5283,7 +5294,13 @@
               <tr><td>Motif / Pattern</td><td>${p.pattern || 'Heritage Zari Work'}</td></tr>
               <tr><td>Recommended Occasion</td><td>${p.occasion || 'Bridal & Festive'}</td></tr>
               <tr><td>Care Instructions</td><td>Dry Clean Only (Wrap in pure cotton/muslin)</td></tr>
-              <tr><td>Availability</td><td><b style="color: #1b7a3a;">${p.stock_qty > 0 ? 'In Stock — Ready to Dispatch' : 'Made to Order — Master Loom'}</b></td></tr>
+              <tr><td>Availability</td><td>${
+                (p.stock_qty !== undefined && p.stock_qty <= 0) || p.stock === 'Sold Out'
+                  ? '<b style="color: #C62828;">Sold Out — Pre-Order from Master Loom</b>'
+                  : (p.stock_qty <= 2
+                    ? `<b style="color: #E65100;">Low Stock — Only ${p.stock_qty} Drape${p.stock_qty > 1 ? 's' : ''} Left!</b>`
+                    : `<b style="color: #1b7a3a;">In Stock (${p.stock_qty} Drapes Available) — Ready to Dispatch</b>`)
+              }</td></tr>
             </tbody>
           </table>
 
@@ -5304,7 +5321,10 @@
               <span id="pdpQtyDisplay">1</span>
               <button type="button" onclick="updatePdpQty(1)">+</button>
             </div>
-            <button class="pdp-add-bag-btn" onclick="addToCart(${p.id}, state.pdpQty)">Add to Shopping Bag →</button>
+            ${(p.stock_qty !== undefined && p.stock_qty <= 0) || p.stock === 'Sold Out'
+              ? `<button class="pdp-add-bag-btn disabled" disabled style="background: #888; border-color: #888; cursor: not-allowed; opacity: 0.7;">Sold Out</button>`
+              : `<button class="pdp-add-bag-btn" onclick="addToCart(${p.id}, state.pdpQty)">Add to Shopping Bag →</button>`
+            }
           </div>
 
           <button class="pdp-whatsapp-btn" onclick="enquireProductWhatsApp(${p.id})">
@@ -5881,13 +5901,30 @@
           }))
         });
 
-        if (!saleResult.success) {
-          alert('Cannot complete order: ' + saleResult.message);
+        if (saleResult && saleResult.success === false) {
+          alert('Cannot complete order: ' + (saleResult.message || 'Inventory reservation failed.'));
           return;
         }
-        if (saleResult.order && saleResult.order.order_number) {
+        if (saleResult && saleResult.order && saleResult.order.order_number) {
           orderId = saleResult.order.order_number;
+        } else if (saleResult && saleResult.order_number) {
+          orderId = saleResult.order_number;
         }
+
+        // Immediately reflect reduced stock in storefront memory array
+        items.forEach(it => {
+          const p = products.find(x => x.id === it.id || String(x.id) === String(it.id));
+          if (p) {
+            const dbP = SFDatabase.getProduct(p.id);
+            if (dbP) {
+              p.stock_qty = dbP.stock_qty;
+              p.stock = dbP.stock;
+            } else {
+              p.stock_qty = Math.max(0, (p.stock_qty || 1) - it.qty);
+              p.stock = p.stock_qty <= 0 ? 'Sold Out' : (p.stock_qty <= 2 ? 'Low Stock' : 'In Stock');
+            }
+          }
+        });
       }
 
       const newOrder = {
@@ -5910,6 +5947,12 @@
       updateCartUI();
 
       alert(`Thank you, ${name}!\n\nYour order #${orderId} has been successfully placed.\nOur styling team will confirm your dispatch and tracking details via WhatsApp on ${phone}.`);
+
+      // Refresh current view if displaying products
+      const currentHash = window.location.hash || '#/';
+      if (currentHash === '#/' || currentHash.startsWith('#/catalogue') || currentHash.startsWith('#/product/')) {
+        navigate();
+      }
     };
 
     // ── Patron Account Dropdown & Authentication UI ──

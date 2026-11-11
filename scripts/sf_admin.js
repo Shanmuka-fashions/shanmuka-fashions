@@ -13,10 +13,13 @@
 
   let activeTab = 'dashboard';
   let posCart = [];
-  let posCustomer = { name: 'Walk-in Customer', phone: '', city: 'Hyderabad' };
+  let posCustomer = { name: 'Walk-in Patron', phone: '', email: '', city: 'Hyderabad', id: null };
   let posDiscount = 0;
   let posPaymentMethod = 'CASH';
   let posCashTendered = 0;
+  let posScanMode = 'BILL'; // 'BILL' (Instant add to ticket) or 'CHECK' (Price/stock inspection)
+  let posCatalogSearch = '';
+  let posActiveCategory = 'ALL';
   let selectedReportFilter = 'all';
 
   // ── BARCODE & THERMAL PRINTING STATE ──
@@ -460,8 +463,81 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 2. PHYSICAL SHOP POS BILLING TAB
+  // 2. PHYSICAL SHOP POS BILLING TAB & OMNICHANNEL CHECKOUT
   // ═══════════════════════════════════════════════════════════════════════════
+  function getFilteredPOSProducts(products) {
+    let prods = (products || []).filter(p => p.status !== 'Archived');
+    if (posActiveCategory && posActiveCategory !== 'ALL') {
+      prods = prods.filter(p => (p.category || '').toLowerCase() === posActiveCategory.toLowerCase());
+    }
+    if (posCatalogSearch) {
+      prods = prods.filter(p =>
+        (p.name && p.name.toLowerCase().includes(posCatalogSearch)) ||
+        (p.sku && p.sku.toLowerCase().includes(posCatalogSearch)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(posCatalogSearch)) ||
+        (p.fabric && p.fabric.toLowerCase().includes(posCatalogSearch)) ||
+        (p.weave && p.weave.toLowerCase().includes(posCatalogSearch)) ||
+        (p.color && p.color.toLowerCase().includes(posCatalogSearch))
+      );
+    }
+    return prods;
+  }
+
+  function renderCashStatusHTML(received, total) {
+    if (posPaymentMethod !== 'CASH') {
+      return `
+        <div class="pos-status-badge status-paid" style="background: #E8F5E9; color: #2E7D32; padding: 6px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; text-align: center;">
+          ✓ Payment Mode: ${posPaymentMethod} — Complete on terminal
+        </div>
+      `;
+    }
+    if (total <= 0) {
+      return `<div class="pos-status-info" style="font-size: 12px; color: #76675D; text-align: center;">Add sarees to calculate payment.</div>`;
+    }
+    if (received <= 0) {
+      return `
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px;">
+          <span>Awaiting Cash:</span>
+          <b style="color: #3B2B25;">${formatMoney(total)}</b>
+        </div>
+        <div class="pos-status-badge status-pending" style="background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; padding: 6px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; text-align: center;">
+          ⚠️ Payment Due: ${formatMoney(total)}
+        </div>
+      `;
+    }
+    if (received >= total) {
+      const change = received - total;
+      return `
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 2px;">
+          <span>Cash Received: <b>${formatMoney(received)}</b></span>
+          <span>Net Bill: <b>${formatMoney(total)}</b></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13.5px; color: #1B5E20; font-weight: 700; margin: 4px 0;">
+          <span>Change to Return:</span>
+          <b style="font-size: 16px;">${formatMoney(change)}</b>
+        </div>
+        <div class="pos-status-badge status-paid" style="background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; padding: 6px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; text-align: center;">
+          ✓ Paid in Full${change > 0 ? ` (Handover ${formatMoney(change)} change)` : ''}
+        </div>
+      `;
+    } else {
+      const pending = total - received;
+      return `
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 2px;">
+          <span>Cash Received: <b>${formatMoney(received)}</b></span>
+          <span>Net Bill: <b>${formatMoney(total)}</b></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13.5px; color: #C62828; font-weight: 700; margin: 4px 0;">
+          <span>Pending Balance:</span>
+          <b style="font-size: 16px;">${formatMoney(pending)}</b>
+        </div>
+        <div class="pos-status-badge status-pending" style="background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; padding: 6px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; text-align: center;">
+          ⚠️ Pending Balance: ${formatMoney(pending)} (Short by ${formatMoney(pending)})
+        </div>
+      `;
+    }
+  }
+
   function renderPOSTab(db) {
     const products = db.getProducts().filter(p => p.status !== 'Archived');
     const customers = db.getCustomers();
@@ -476,51 +552,101 @@
     const taxRate = 5;
     const taxAmount = Math.round(taxable * (taxRate / 100));
     const netTotal = taxable + taxAmount;
-    const changeDue = Math.max(0, (parseInt(posCashTendered || 0, 10) || 0) - netTotal);
 
     return `
       <div class="sf-pos-layout">
         <!-- Left Panel: Fast Product Search & Visual Catalog -->
         <div class="sf-pos-catalog-panel">
+          <!-- Scanner Mode & Barcode Search Header -->
           <div class="pos-search-bar-wrap">
-            <div class="pos-search-input-group">
-              <span class="barcode-icon">📷</span>
-              <input type="text" id="posBarcodeInput" placeholder="Scan Barcode or Type SKU / Saree Name [ENTER to Add]..." onkeydown="SFAdmin.handlePOSBarcodeKeyDown(event)" autofocus>
+            <div class="pos-mode-toggle-wrap" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="pos-mode-label" style="font-size: 12px; font-weight: 600; color: #76675D; text-transform: uppercase; letter-spacing: 0.5px;">Scanner Mode:</span>
+              <div class="pos-scan-mode-buttons" style="display: flex; gap: 6px;">
+                <button type="button" class="pos-scan-mode-btn ${posScanMode === 'BILL' ? 'active' : ''}" data-mode="BILL" onclick="SFAdmin.setPOSScanMode('BILL')">
+                  ⚡ Scan to Bill
+                </button>
+                <button type="button" class="pos-scan-mode-btn ${posScanMode === 'CHECK' ? 'active' : ''}" data-mode="CHECK" onclick="SFAdmin.setPOSScanMode('CHECK')">
+                  🔍 Price & Stock Check
+                </button>
+              </div>
+            </div>
+
+            <div class="pos-search-input-group" style="display: flex; align-items: center; background: #F9F6F0; border: 1.5px solid #A77950; border-radius: 4px; padding: 4px 10px;">
+              <span class="barcode-icon" style="font-size: 18px; margin-right: 8px; color: #A77950;">📷</span>
+              <input type="text" id="posBarcodeInput" placeholder="${posScanMode === 'BILL' ? 'Scan Barcode or Type SKU / Saree Name [ENTER to Add]...' : 'Scan Barcode or Type SKU [ENTER to Check Details & Stock]...'}" onkeydown="SFAdmin.handlePOSBarcodeKeyDown(event)" autofocus autocomplete="off" style="flex: 1; border: none; background: transparent; padding: 8px 0; font-size: 13.5px; outline: none; color: #3B2B25;">
+              <button type="button" class="pos-check-btn" onclick="SFAdmin.checkPOSCurrentBarcodeInput()" style="background: #3B2B25; color: #F5EBDD; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">🔍 Check Details</button>
             </div>
           </div>
 
-          <div class="pos-category-pills">
-            <button class="pos-cat-pill active" onclick="SFAdmin.filterPOSCategory('ALL', this)">All Weaves</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Kanchipuram', this)">Kanchipuram</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Banarasi', this)">Banarasi</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Organza', this)">Organza</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Silk', this)">Festive Silk</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Cotton', this)">Cotton Handloom</button>
-            <button class="pos-cat-pill" onclick="SFAdmin.filterPOSCategory('Designer', this)">Designer</button>
+          <!-- Catalog Filter & Live Search Row -->
+          <div class="pos-filter-toolbar" style="margin-bottom: 14px;">
+            <div class="pos-search-box" style="position: relative; margin-bottom: 10px;">
+              <input type="text" id="posCatalogSearchInput" value="${posCatalogSearch}" placeholder="Filter catalogue by title, SKU, fabric, weave..." oninput="SFAdmin.handlePOSCatalogSearch(this.value)" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #E5D7C5; border-radius: 4px; background: #FFF; outline: none;">
+              ${posCatalogSearch ? `<button type="button" onclick="SFAdmin.handlePOSCatalogSearch('')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 14px; color: #888; cursor: pointer;">✕</button>` : ''}
+            </div>
+            <div class="pos-category-pills" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+              <button class="pos-cat-pill ${posActiveCategory === 'ALL' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('ALL', this)">All Weaves</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Kanchipuram' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Kanchipuram', this)">Kanchipuram</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Banarasi' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Banarasi', this)">Banarasi</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Organza' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Organza', this)">Organza</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Silk' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Silk', this)">Festive Silk</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Cotton' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Cotton', this)">Cotton Handloom</button>
+              <button class="pos-cat-pill ${posActiveCategory === 'Designer' ? 'active' : ''}" onclick="SFAdmin.filterPOSCategory('Designer', this)">Designer</button>
+            </div>
           </div>
 
           <div id="posScanFeedbackWrap"></div>
           <div class="pos-products-grid" id="posProductsGrid">
-            ${renderPOSProductsGrid(products)}
+            ${renderPOSProductsGrid(getFilteredPOSProducts(products))}
           </div>
         </div>
 
         <!-- Right Panel: Billing Cart & Checkout -->
         <div class="sf-pos-billing-panel">
           <div class="pos-panel-header">
-            <h3>Showroom Bill</h3>
+            <div>
+              <h3 style="margin: 0;">Showroom Bill</h3>
+              <small style="color: var(--secondary-text);">Counter Register Ticket</small>
+            </div>
             <button class="sf-link-btn" onclick="SFAdmin.clearPOSCart()">Clear All</button>
           </div>
 
-          <!-- Customer Selection Row -->
+          <!-- Walk-in Customer Selection & Capture Card -->
           <div class="pos-customer-selector">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label>Patron Information:</label>
-              <button class="sf-link-btn" onclick="SFAdmin.openAddCustomerModal(true)">+ New Patron</button>
+              <label>Walk-in Patron Details:</label>
+              <button type="button" class="sf-link-btn" onclick="SFAdmin.resetPOSCustomer()">+ New / Reset</button>
             </div>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="posCustName" placeholder="Patron Name" value="${posCustomer.name}" oninput="SFAdmin.updatePOSCustomer('name', this.value)" style="flex: 1;">
-              <input type="tel" id="posCustPhone" placeholder="Mobile / WhatsApp" value="${posCustomer.phone}" oninput="SFAdmin.updatePOSCustomer('phone', this.value)" style="width: 140px;">
+
+            <!-- Fast Autocomplete Search -->
+            <div class="pos-cust-search-wrap" style="position: relative; margin-bottom: 8px;">
+              <input type="text" id="posCustomerSearchInput" placeholder="🔍 Search patron by mobile or name..." oninput="SFAdmin.handlePOSCustomerSearch(this.value)" autocomplete="off" style="width: 100%; padding: 6px 10px; font-size: 12px; border: 1px solid #E5D7C5; border-radius: 4px; background: #FFF;">
+              <div id="posCustomerSearchResults" class="pos-cust-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #FFF; border: 1.5px solid #3B2B25; border-radius: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); z-index: 50; max-height: 180px; overflow-y: auto;"></div>
+            </div>
+
+            <div id="posCustomerBadgeWrap">
+              ${posCustomer.id ? `
+                <div class="pos-patron-badge" style="display: flex; align-items: center; justify-content: space-between; background: #E8F5E9; border: 1px solid #C8E6C9; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; color: #1B5E20; margin-bottom: 8px;">
+                  <span>⭐ Verified Patron: <b>${posCustomer.name}</b> (${posCustomer.phone || 'No phone'})</span>
+                  <button type="button" onclick="SFAdmin.resetPOSCustomer()" style="background: none; border: none; color: #C62828; cursor: pointer; font-size: 13px; font-weight: bold;">✕</button>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Customer Details Grid -->
+            <div class="pos-cust-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div>
+                <input type="text" id="posCustName" placeholder="Patron Full Name" value="${posCustomer.name || ''}" oninput="SFAdmin.updatePOSCustomerField('name', this.value)" style="width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid #E5D7C5; border-radius: 4px;">
+              </div>
+              <div>
+                <input type="tel" id="posCustPhone" placeholder="Mobile / WhatsApp" value="${posCustomer.phone || ''}" oninput="SFAdmin.updatePOSCustomerField('phone', this.value)" style="width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid #E5D7C5; border-radius: 4px;">
+              </div>
+              <div>
+                <input type="email" id="posCustEmail" placeholder="Email (Optional)" value="${posCustomer.email || ''}" oninput="SFAdmin.updatePOSCustomerField('email', this.value)" style="width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid #E5D7C5; border-radius: 4px;">
+              </div>
+              <div>
+                <input type="text" id="posCustCity" placeholder="City (e.g. Hyderabad)" value="${posCustomer.city || 'Hyderabad'}" oninput="SFAdmin.updatePOSCustomerField('city', this.value)" style="width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid #E5D7C5; border-radius: 4px;">
+              </div>
             </div>
           </div>
 
@@ -573,25 +699,25 @@
           <div class="pos-calculations">
             <div class="calc-row">
               <span>Gross Subtotal:</span>
-              <b>${formatMoney(subtotal)}</b>
+              <b id="posGrossSubtotalDisplay">${formatMoney(subtotal)}</b>
             </div>
 
             <div class="calc-row">
               <span>Special In-Store Discount:</span>
               <div style="display: flex; align-items: center; gap: 4px;">
                 <span>₹</span>
-                <input type="number" min="0" value="${posDiscount}" oninput="SFAdmin.updatePOSDiscount(this.value)" class="pos-discount-input" style="width: 80px; text-align: right;">
+                <input type="number" id="posDiscountInput" min="0" value="${posDiscount || ''}" placeholder="0" oninput="SFAdmin.updatePOSDiscount(this.value)" class="pos-discount-input" style="width: 80px; text-align: right;">
               </div>
             </div>
 
             <div class="calc-row">
               <span>GST (5% Handloom):</span>
-              <b>${formatMoney(taxAmount)}</b>
+              <b id="posTaxAmountDisplay">${formatMoney(taxAmount)}</b>
             </div>
 
             <div class="calc-row total-row">
               <span>Net Payable Amount:</span>
-              <span class="pos-total-amount">${formatMoney(netTotal)}</span>
+              <span class="pos-total-amount" id="posNetTotalDisplay">${formatMoney(netTotal)}</span>
             </div>
           </div>
 
@@ -611,24 +737,34 @@
             </label>
           </div>
 
-          <!-- Cash Tendered Helper -->
-          ${posPaymentMethod === 'CASH' && netTotal > 0 ? `
-            <div class="pos-cash-helper">
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <label style="font-size: 12px;">Cash Received:</label>
-                <input type="number" value="${posCashTendered || ''}" placeholder="₹ Amount" oninput="SFAdmin.updatePOSCashTendered(this.value)" class="pos-tendered-input">
+          <!-- Cash Received Input & Payment Breakdown Helper -->
+          <div class="pos-cash-calculator-box" id="posCashCalculatorBox" style="${posPaymentMethod === 'CASH' && netTotal > 0 ? 'display: block;' : 'display: none;'}">
+            <div class="pos-cash-input-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label for="posCashTenderedInput" style="font-size: 12.5px; font-weight: 600; color: #3B2B25;">Cash Received:</label>
+              <div class="pos-cash-input-wrap" style="display: flex; align-items: center; background: #FFF; border: 1.5px solid #A77950; border-radius: 4px; padding: 2px 8px;">
+                <span class="pos-currency-symbol" style="font-weight: bold; color: #A77950; margin-right: 4px;">₹</span>
+                <input type="number" id="posCashTenderedInput" placeholder="Enter Full Amount" value="${posCashTendered > 0 ? posCashTendered : ''}" oninput="SFAdmin.updatePOSCashTendered(this.value)" class="pos-tendered-input" autocomplete="off" style="width: 140px; border: none; outline: none; font-size: 14px; font-weight: bold; color: #3B2B25;">
               </div>
-              ${posCashTendered > 0 ? `
-                <div style="font-size: 13px; color: ${changeDue >= 0 ? '#2E7D32' : '#C62828'};">
-                  ${changeDue >= 0 ? `Return Change: <b>${formatMoney(changeDue)}</b>` : `Short by <b>${formatMoney(Math.abs(changeDue))}</b>`}
-                </div>
-              ` : ''}
             </div>
-          ` : ''}
+
+            <!-- Quick Denomination Shortcuts -->
+            <div class="pos-quick-denominations" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+              <button type="button" class="pos-denom-btn" id="posExactDenomBtn" onclick="SFAdmin.setPOSQuickCash(${netTotal})">Exact: ${formatMoney(netTotal)}</button>
+              <button type="button" class="pos-denom-btn" onclick="SFAdmin.addPOSQuickCash(500)">+ ₹500</button>
+              <button type="button" class="pos-denom-btn" onclick="SFAdmin.addPOSQuickCash(1000)">+ ₹1,000</button>
+              <button type="button" class="pos-denom-btn" onclick="SFAdmin.addPOSQuickCash(2000)">+ ₹2,000</button>
+              <button type="button" class="pos-denom-btn denom-clear" onclick="SFAdmin.setPOSQuickCash(0)">Clear</button>
+            </div>
+
+            <!-- Status Breakdown (Change Due vs Pending) -->
+            <div class="pos-cash-status-box" id="posCashStatusBox">
+              ${renderCashStatusHTML(posCashTendered, netTotal)}
+            </div>
+          </div>
 
           <!-- Complete Sale Action -->
-          <div class="pos-action-buttons">
-            <button class="sf-btn-complete-sale" onclick="SFAdmin.completePOSSale()" ${posCart.length === 0 ? 'disabled' : ''}>
+          <div class="pos-action-buttons" style="margin-top: 14px;">
+            <button class="sf-btn-complete-sale" id="posCompleteSaleBtn" onclick="SFAdmin.completePOSSale()" ${posCart.length === 0 ? 'disabled' : ''}>
               COMPLETE SALE & PRINT INVOICE &rarr;
             </button>
           </div>
@@ -638,19 +774,39 @@
   }
 
   function renderPOSProductsGrid(list) {
+    if (!list || list.length === 0) {
+      return `
+        <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; color: #76675D;">
+          <div style="font-size: 28px; margin-bottom: 6px;">🔍</div>
+          <b>No drapes matched "${posCatalogSearch || posActiveCategory}"</b>
+          <p style="font-size: 12px; margin-top: 4px;">Try scanning barcode or searching by alternative weave / SKU.</p>
+        </div>
+      `;
+    }
+
     return list.map(p => {
       const isOut = (p.stock_qty || 0) <= 0;
+      const isLow = !isOut && (p.stock_qty || 0) <= (p.low_stock_threshold || 2);
+      const stockBadgeClass = isOut ? 'stock-zero' : (isLow ? 'stock-low' : 'stock-ok');
+      const stockText = isOut ? 'Sold Out' : `${p.stock_qty} left`;
+
       return `
-        <div class="pos-item-card ${isOut ? 'out-of-stock' : ''}" onclick="SFAdmin.addPOStoCart(${p.id})">
-          <img src="${p.img}" alt="${p.name}" class="pos-item-img" loading="lazy">
+        <div class="pos-item-card ${isOut ? 'out-of-stock' : ''}" onclick="SFAdmin.handlePOSCardClick(${p.id})">
+          <div style="position: relative;">
+            <img src="${p.img || (p.images && p.images[0]) || 'assets/kanchipuram-loom.jpg'}" alt="${p.name}" class="pos-item-img" loading="lazy">
+            <span class="pos-item-stock-tag ${stockBadgeClass}" style="position: absolute; top: 6px; right: 6px; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 3px; z-index: 2;">
+              ${stockText}
+            </span>
+          </div>
           <div class="pos-item-body">
             <span class="pos-item-cat">${p.category} • ${p.sku}</span>
             <div class="pos-item-name">${p.name}</div>
-            <div class="pos-item-footer">
+            <div class="pos-item-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
               <span class="pos-item-price">${formatMoney(p.price)}</span>
-              <span class="pos-item-stock ${isOut ? 'stock-zero' : (p.stock_qty <= 2 ? 'stock-low' : 'stock-ok')}">
-                ${isOut ? 'Sold Out' : `${p.stock_qty} left`}
-              </span>
+              <div class="pos-card-btns" style="display: flex; gap: 4px;">
+                <button type="button" class="pos-inspect-btn" onclick="event.stopPropagation(); SFAdmin.openPOSProductCheckModal(${p.id})" style="padding: 3px 6px; font-size: 11px; background: #F5EBDD; border: 1px solid #A77950; border-radius: 3px; color: #3B2B25; cursor: pointer;">🔍 Check</button>
+                <button type="button" class="pos-quick-add-btn" onclick="event.stopPropagation(); SFAdmin.addPOStoCart(${p.id})" ${isOut ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : 'style="padding: 3px 8px; font-size: 11px; background: #3B2B25; border: 1px solid #3B2B25; border-radius: 3px; color: #F5EBDD; cursor: pointer;"'}>+ Add</button>
+              </div>
             </div>
           </div>
         </div>
@@ -658,19 +814,47 @@
     }).join('');
   }
 
-  function filterPOSCategory(cat, btn) {
-    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
-    document.querySelectorAll('.pos-cat-pill').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-
-    let prods = db.getProducts().filter(p => p.status !== 'Archived');
-    if (cat !== 'ALL') {
-      prods = prods.filter(p => p.category.toLowerCase() === cat.toLowerCase());
+  function handlePOSCardClick(productId) {
+    if (posScanMode === 'CHECK') {
+      openPOSProductCheckModal(productId);
+    } else {
+      addPOStoCart(productId);
     }
-    const grid = document.getElementById('posProductsGrid');
-    if (grid) grid.innerHTML = renderPOSProductsGrid(prods);
   }
 
+  function setPOSScanMode(mode) {
+    posScanMode = mode;
+    document.querySelectorAll('.pos-scan-mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    const input = document.getElementById('posBarcodeInput');
+    if (input) {
+      input.placeholder = mode === 'BILL'
+        ? 'Scan Barcode or Type SKU / Saree Name [ENTER to Add]...'
+        : 'Scan Barcode or Type SKU [ENTER to Check Details & Stock]...';
+      input.focus();
+    }
+  }
+
+  function handlePOSCatalogSearch(query) {
+    posCatalogSearch = (query || '').trim().toLowerCase();
+    filterAndRenderPOSGrid();
+  }
+
+  function filterPOSCategory(cat, btn) {
+    posActiveCategory = cat;
+    document.querySelectorAll('.pos-cat-pill').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    filterAndRenderPOSGrid();
+  }
+
+  function filterAndRenderPOSGrid() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const prods = db.getProducts().filter(p => p.status !== 'Archived');
+    const filtered = getFilteredPOSProducts(prods);
+    const grid = document.getElementById('posProductsGrid');
+    if (grid) grid.innerHTML = renderPOSProductsGrid(filtered);
+  }
 
   // Audio Synthesis for Hardware Barcode Scanners (Web Audio API)
   function playScanSound(type = 'success') {
@@ -707,10 +891,96 @@
     const el = document.getElementById('posScanFeedbackWrap');
     if (!el || !lastPOSScanInfo) return;
     if (lastPOSScanInfo.error) {
-      el.innerHTML = `<div class="pos-scanned-error"><span>⚠️ ${lastPOSScanInfo.message}</span><button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer;">✕</button></div>`;
+      el.innerHTML = `<div class="pos-scanned-error" style="background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span>⚠️ ${lastPOSScanInfo.message}</span><button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-weight:bold;">✕</button></div>`;
     } else {
-      el.innerHTML = `<div class="pos-scanned-feedback"><span>✅ ${lastPOSScanInfo.message}</span><small style="color: #2E7D32;">Available: ${lastPOSScanInfo.stock} pcs</small></div>`;
+      el.innerHTML = `<div class="pos-scanned-feedback" style="background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span>✅ ${lastPOSScanInfo.message}</span><small style="color: #2E7D32; font-weight: 700;">Available: ${lastPOSScanInfo.stock} pcs</small></div>`;
     }
+  }
+
+  function checkPOSCurrentBarcodeInput() {
+    const input = document.getElementById('posBarcodeInput');
+    if (!input) return;
+    const val = input.value.trim();
+    if (!val) {
+      alert('Please enter or scan a Saree Barcode or SKU first.');
+      input.focus();
+      return;
+    }
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const prod = db.getProductBySkuOrBarcode(val);
+    if (prod) {
+      playScanSound('success');
+      openPOSProductCheckModal(prod.id);
+      input.value = '';
+    } else {
+      playScanSound('error');
+      lastPOSScanInfo = { error: true, message: `No saree found matching barcode/SKU "${val}".` };
+      renderPOSFeedback();
+      input.select();
+    }
+  }
+
+  function openPOSProductCheckModal(productId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const p = db.getProduct(productId) || db.getProductBySkuOrBarcode(productId);
+    if (!p) {
+      alert('Saree not found.');
+      return;
+    }
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    const isOut = (p.stock_qty || 0) <= 0;
+    const isLow = !isOut && (p.stock_qty || 0) <= (p.low_stock_threshold || 2);
+    const stockBadgeClass = isOut ? 'stock-zero' : (isLow ? 'stock-low' : 'stock-ok');
+    const stockText = isOut ? '❌ Sold Out (0 in Stock)' : (isLow ? `⚠️ Low Stock (${p.stock_qty} Drapes Left)` : `✅ In Stock (${p.stock_qty} Drapes Available)`);
+
+    container.innerHTML = `
+      <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
+        <div class="sf-modal-card sf-modal-md pos-check-modal" style="max-width: 620px;">
+          <div class="sf-modal-header">
+            <div>
+              <span class="sf-cat-eyebrow" style="font-size: 11px; text-transform: uppercase; color: #A77950; font-weight: 700; letter-spacing: 1px;">Saree Purity & Stock Check</span>
+              <h3 style="margin: 2px 0 0; font-family: 'Playfair Display', Georgia, serif; font-size: 20px; color: #3B2B25;">${p.name}</h3>
+            </div>
+            <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
+          </div>
+
+          <div class="pos-check-grid" style="display: grid; grid-template-columns: 190px 1fr; gap: 18px; padding: 16px 0;">
+            <div class="pos-check-media">
+              <img src="${p.img || (p.images && p.images[0]) || 'assets/kanchipuram-loom.jpg'}" alt="${p.name}" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 4px; border: 1px solid #E5D7C5;">
+              <div style="margin-top: 10px; text-align: center;">
+                <span class="pos-item-stock ${stockBadgeClass}" style="display: inline-block; padding: 5px 12px; font-size: 12px; font-weight: 700; border-radius: 4px;">
+                  ${stockText}
+                </span>
+              </div>
+            </div>
+
+            <div class="pos-check-details">
+              <table class="sf-table" style="font-size: 12.5px; border: 1px solid #E5D7C5; border-radius: 4px; overflow: hidden; width: 100%;">
+                <tbody>
+                  <tr><th style="width: 110px; background: #FAF7F2; padding: 6px 10px;">SKU</th><td style="padding: 6px 10px;"><b>${p.sku || '—'}</b></td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Barcode</th><td style="padding: 6px 10px;"><code>${p.barcode || '—'}</code></td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Category</th><td style="padding: 6px 10px;">${p.category || 'Handloom'}</td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Fabric</th><td style="padding: 6px 10px;">${p.fabric || p.material || 'Pure Mulberry Silk'}</td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Weave</th><td style="padding: 6px 10px;">${p.weave || 'Traditional Handloom'}</td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Selling Price</th><td style="padding: 6px 10px;"><b style="font-size: 16px; color: #3B2B25;">${formatMoney(p.price)}</b> ${p.old_price && p.old_price > p.price ? `<del style="color: #888; font-size: 12px; margin-left: 6px;">${formatMoney(p.old_price)}</del>` : ''}</td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Purchase Cost</th><td style="padding: 6px 10px;">${p.purchase_cost ? formatMoney(p.purchase_cost) : '—'}</td></tr>
+                  <tr><th style="background: #FAF7F2; padding: 6px 10px;">Certification</th><td style="padding: 6px 10px;"><span style="color: #2E7D32; font-weight: 600;">Silk Mark Certified 100% Pure Handloom</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sf-modal-actions" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #E5D7C5; padding-top: 14px; margin-top: 6px;">
+            <button type="button" class="sf-btn-outline" onclick="SFAdmin.closeModal(); SFAdmin.openBarcodePrinterModal(${p.id});">🏷️ Print Barcode Label</button>
+            <button type="button" class="sf-btn-primary" onclick="SFAdmin.addPOStoCart(${p.id}); SFAdmin.closeModal();" ${isOut ? 'disabled style="opacity: 0.5;"' : ''}>
+              ${isOut ? 'Sold Out' : '+ Add to Current Bill'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function handlePOSBarcodeKeyDown(e) {
@@ -722,6 +992,14 @@
       const prod = db.getProductBySkuOrBarcode(val);
 
       if (prod) {
+        if (posScanMode === 'CHECK') {
+          playScanSound('success');
+          openPOSProductCheckModal(prod.id);
+          e.target.value = '';
+          return;
+        }
+
+        // posScanMode === 'BILL'
         if ((prod.stock_qty || 0) <= 0) {
           playScanSound('error');
           lastPOSScanInfo = { error: true, message: `"${prod.name}" (${prod.sku}) is SOLD OUT (0 in stock).` };
@@ -734,7 +1012,7 @@
         addPOStoCart(prod.id);
         lastPOSScanInfo = {
           success: true,
-          message: `Scanned: ${prod.name} (${prod.sku}) — ₹${Number(prod.price).toLocaleString('en-IN')}`,
+          message: `Scanned: ${prod.name} (${prod.sku}) — ${formatMoney(prod.price)}`,
           stock: prod.stock_qty
         };
         renderPOSFeedback();
@@ -804,6 +1082,7 @@
   function clearPOSCart() {
     posCart = [];
     posDiscount = 0;
+    posCashTendered = 0;
     render();
   }
 
@@ -811,46 +1090,292 @@
     posCustomer[field] = val;
   }
 
+  function updatePOSCustomerField(field, val) {
+    posCustomer[field] = val;
+  }
+
+  function handlePOSCustomerSearch(query) {
+    const q = (query || '').trim().toLowerCase();
+    const resultsContainer = document.getElementById('posCustomerSearchResults');
+    if (!resultsContainer) return;
+
+    if (!q || q.length < 2) {
+      resultsContainer.style.display = 'none';
+      resultsContainer.innerHTML = '';
+      return;
+    }
+
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const customers = db.getCustomers() || [];
+    const matches = customers.filter(c =>
+      (c.name && c.name.toLowerCase().includes(q)) ||
+      (c.phone && c.phone.includes(q)) ||
+      (c.email && c.email.toLowerCase().includes(q))
+    ).slice(0, 5);
+
+    if (matches.length === 0) {
+      resultsContainer.style.display = 'block';
+      resultsContainer.innerHTML = `
+        <div class="pos-search-no-match" style="padding: 8px 12px; font-size: 12px; color: #76675D;">
+          New Patron detected. Details will be saved upon checkout.
+        </div>
+      `;
+      return;
+    }
+
+    resultsContainer.style.display = 'block';
+    resultsContainer.innerHTML = matches.map(c => `
+      <div class="pos-customer-match-item" onclick="SFAdmin.selectPOSCustomer('${c.id}')" style="padding: 8px 12px; border-bottom: 1px solid #E5D7C5; cursor: pointer; transition: background 0.15s;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b style="color: #3B2B25; font-size: 13px;">${c.name}</b>
+          <span style="font-size: 11px; background: #F5EBDD; padding: 2px 6px; border-radius: 3px; color: #A77950; font-weight: 600;">
+            ${c.total_orders || 1} Orders • ${formatMoney(c.total_spent || 0)}
+          </span>
+        </div>
+        <div style="font-size: 11.5px; color: #666; margin-top: 2px;">
+          📞 ${c.phone || 'No phone'} ${c.city ? `• 📍 ${c.city}` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function selectPOSCustomer(custId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const c = db.getCustomers().find(x => x.id === custId);
+    if (!c) return;
+
+    posCustomer = {
+      id: c.id,
+      name: c.name || 'Walk-in Patron',
+      phone: c.phone || '',
+      email: c.email || '',
+      city: c.city || 'Hyderabad',
+      address: c.street || ''
+    };
+
+    const nameInput = document.getElementById('posCustName');
+    const phoneInput = document.getElementById('posCustPhone');
+    const emailInput = document.getElementById('posCustEmail');
+    const cityInput = document.getElementById('posCustCity');
+    const searchInput = document.getElementById('posCustomerSearchInput');
+    const badgeWrap = document.getElementById('posCustomerBadgeWrap');
+    const resultsContainer = document.getElementById('posCustomerSearchResults');
+
+    if (nameInput) nameInput.value = posCustomer.name;
+    if (phoneInput) phoneInput.value = posCustomer.phone;
+    if (emailInput) emailInput.value = posCustomer.email;
+    if (cityInput) cityInput.value = posCustomer.city;
+    if (searchInput) searchInput.value = '';
+    if (resultsContainer) {
+      resultsContainer.style.display = 'none';
+      resultsContainer.innerHTML = '';
+    }
+    if (badgeWrap) {
+      badgeWrap.innerHTML = `
+        <div class="pos-patron-badge" style="display: flex; align-items: center; justify-content: space-between; background: #E8F5E9; border: 1px solid #C8E6C9; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; color: #1B5E20; margin-bottom: 8px;">
+          <span>⭐ Verified Patron: <b>${c.name}</b> (${c.phone || 'No phone'}) • ${c.total_orders || 1} Prev. Orders</span>
+          <button type="button" onclick="SFAdmin.resetPOSCustomer()" style="background: none; border: none; color: #C62828; cursor: pointer; font-size: 13px; font-weight: bold;">✕</button>
+        </div>
+      `;
+    }
+  }
+
+  function resetPOSCustomer() {
+    posCustomer = {
+      id: null,
+      name: 'Walk-in Patron',
+      phone: '',
+      email: '',
+      city: 'Hyderabad',
+      address: ''
+    };
+    const nameInput = document.getElementById('posCustName');
+    const phoneInput = document.getElementById('posCustPhone');
+    const emailInput = document.getElementById('posCustEmail');
+    const cityInput = document.getElementById('posCustCity');
+    const searchInput = document.getElementById('posCustomerSearchInput');
+    const badgeWrap = document.getElementById('posCustomerBadgeWrap');
+    const resultsContainer = document.getElementById('posCustomerSearchResults');
+
+    if (nameInput) nameInput.value = 'Walk-in Patron';
+    if (phoneInput) phoneInput.value = '';
+    if (emailInput) emailInput.value = '';
+    if (cityInput) cityInput.value = 'Hyderabad';
+    if (searchInput) searchInput.value = '';
+    if (badgeWrap) badgeWrap.innerHTML = '';
+    if (resultsContainer) {
+      resultsContainer.style.display = 'none';
+      resultsContainer.innerHTML = '';
+    }
+  }
+
   function updatePOSDiscount(val) {
     posDiscount = Math.max(0, parseInt(val, 10) || 0);
-    render();
+    updatePOSPaymentCalculations();
   }
 
   function setPOSPaymentMethod(mode) {
     posPaymentMethod = mode;
-    render();
+    if (typeof document !== 'undefined') {
+      const calcBox = document.getElementById('posCashCalculatorBox');
+      if (calcBox) {
+        const subtotal = posCart.reduce((sum, it) => sum + (it.price * it.qty), 0);
+        const discountVal = parseInt(posDiscount || 0, 10);
+        const taxable = Math.max(0, subtotal - discountVal);
+        const netTotal = taxable + Math.round(taxable * 0.05);
+        calcBox.style.display = (mode === 'CASH' && netTotal > 0) ? 'block' : 'none';
+      }
+      // Update active state of mode buttons
+      document.querySelectorAll('.pos-mode-btn').forEach(btn => {
+        const input = btn.querySelector('input');
+        if (input && input.value === mode) {
+          btn.classList.add('active');
+          input.checked = true;
+        } else {
+          btn.classList.remove('active');
+          if (input) input.checked = false;
+        }
+      });
+    }
+    return updatePOSPaymentCalculations();
   }
 
   function updatePOSCashTendered(val) {
-    posCashTendered = parseInt(val, 10) || 0;
-    const changeBox = document.querySelector('.pos-cash-helper div:last-child');
-    // Fast re-render of helper
-    render();
+    posCashTendered = parseFloat(val) || 0;
+    return updatePOSPaymentCalculations();
+  }
+
+  function setPOSQuickCash(amount) {
+    posCashTendered = Math.max(0, amount);
+    if (typeof document !== 'undefined') {
+      const input = document.getElementById('posCashTenderedInput');
+      if (input) input.value = posCashTendered > 0 ? posCashTendered : '';
+    }
+    return updatePOSPaymentCalculations();
+  }
+
+  function addPOSQuickCash(delta) {
+    posCashTendered = (posCashTendered || 0) + delta;
+    if (typeof document !== 'undefined') {
+      const input = document.getElementById('posCashTenderedInput');
+      if (input) input.value = posCashTendered > 0 ? posCashTendered : '';
+    }
+    return updatePOSPaymentCalculations();
+  }
+
+  function updatePOSPaymentCalculations() {
+    const subtotal = posCart.reduce((sum, it) => sum + (it.price * it.qty), 0);
+    const discountVal = parseInt(posDiscount || 0, 10);
+    const taxable = Math.max(0, subtotal - discountVal);
+    const taxAmount = Math.round(taxable * 0.05);
+    const netTotal = taxable + taxAmount;
+
+    if (typeof document !== 'undefined') {
+      const subtotalEl = document.getElementById('posGrossSubtotalDisplay');
+      if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
+
+      const taxEl = document.getElementById('posTaxAmountDisplay');
+      if (taxEl) taxEl.textContent = formatMoney(taxAmount);
+
+      const netEl = document.getElementById('posNetTotalDisplay');
+      if (netEl) netEl.textContent = formatMoney(netTotal);
+
+      const exactBtn = document.getElementById('posExactDenomBtn');
+      if (exactBtn) {
+        exactBtn.textContent = `Exact: ${formatMoney(netTotal)}`;
+        exactBtn.setAttribute('onclick', `SFAdmin.setPOSQuickCash(${netTotal})`);
+      }
+
+      const statusBox = document.getElementById('posCashStatusBox');
+      if (statusBox) {
+        statusBox.innerHTML = renderCashStatusHTML(posCashTendered, netTotal);
+      }
+
+      const calcBox = document.getElementById('posCashCalculatorBox');
+      if (calcBox) {
+        calcBox.style.display = (posPaymentMethod === 'CASH' && netTotal > 0) ? 'block' : 'none';
+      }
+
+      const completeBtn = document.getElementById('posCompleteSaleBtn');
+      if (completeBtn) {
+        completeBtn.disabled = posCart.length === 0;
+      }
+    }
+
+    return {
+      subtotal,
+      discountVal,
+      taxable,
+      taxAmount,
+      netTotal,
+      cashTendered: posCashTendered,
+      changeDue: Math.max(0, posCashTendered - netTotal),
+      pendingAmount: Math.max(0, netTotal - posCashTendered),
+      statusHTML: renderCashStatusHTML(posCashTendered, netTotal)
+    };
   }
 
   function completePOSSale() {
     if (posCart.length === 0) return;
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
 
+    // Calculate totals
+    const subtotal = posCart.reduce((sum, it) => sum + (it.price * it.qty), 0);
+    const discountVal = parseInt(posDiscount || 0, 10);
+    const taxable = Math.max(0, subtotal - discountVal);
+    const taxAmount = Math.round(taxable * 0.05);
+    const netTotal = taxable + taxAmount;
+
+    const amountReceived = posPaymentMethod === 'CASH' ? (posCashTendered || netTotal) : netTotal;
+    const changeDue = Math.max(0, amountReceived - netTotal);
+    const pendingAmount = Math.max(0, netTotal - amountReceived);
+    const paymentStatus = (posPaymentMethod !== 'CASH' || amountReceived >= netTotal) ? 'PAID' : (amountReceived > 0 ? 'PARTIAL' : 'PENDING');
+
     try {
       const order = db.processSaleTransaction({
         channel: 'POS',
-        customer_name: posCustomer.name || 'Walk-in Patron',
-        customer_phone: posCustomer.phone || '',
+        customer_name: (posCustomer.name || '').trim() || 'Walk-in Patron',
+        customer_phone: (posCustomer.phone || '').trim(),
+        customer_email: (posCustomer.email || '').trim(),
+        customer_city: (posCustomer.city || '').trim() || 'Hyderabad',
+        customer_id: posCustomer.id || null,
         items: posCart,
         discount: posDiscount,
         payment_method: posPaymentMethod,
-        payment_status: 'PAID',
+        payment_status: paymentStatus,
+        amount_received: amountReceived,
+        change_due: changeDue,
+        pending_amount: pendingAmount,
         admin_user: 'Bhanu (Owner)'
       });
 
-      // Clear Cart
-      const completedCart = [...posCart];
+      // Synchronize in-memory window.products if running in storefront
+      if (typeof window !== 'undefined' && Array.isArray(window.products)) {
+        posCart.forEach(ci => {
+          const sp = window.products.find(p => p.id === ci.product_id || String(p.id) === String(ci.product_id));
+          if (sp) {
+            const up = db.getProduct(ci.product_id);
+            if (up) {
+              sp.stock_qty = up.stock_qty;
+              sp.stock = up.stock;
+            } else {
+              sp.stock_qty = Math.max(0, (sp.stock_qty || 1) - ci.qty);
+              sp.stock = sp.stock_qty <= 0 ? 'Sold Out' : (sp.stock_qty <= 2 ? 'Low Stock' : 'In Stock');
+            }
+          }
+        });
+      }
+
+      // Clear Cart, Cash, and reset Patron
       posCart = [];
       posDiscount = 0;
       posCashTendered = 0;
+      posCustomer = { name: 'Walk-in Patron', phone: '', email: '', city: 'Hyderabad', id: null };
 
-      // Show Invoice Modal
+      // Re-render POS
+      render();
+
+      // Show Printable Invoice Modal
       openInvoicePrintModal(order.id);
     } catch (err) {
       alert('Sale Transaction Aborted: ' + err.message);
@@ -4587,6 +5112,24 @@
                   <span>Grand Total:</span>
                   <span style="color: #3B2B25;">${formatMoney(order.total)}</span>
                 </div>
+                ${order.amount_received !== undefined && order.amount_received > 0 ? `
+                  <div style="display: flex; justify-content: space-between; margin-top: 4px; color: #2E7D32;">
+                    <span>Amount Received:</span>
+                    <b>${formatMoney(order.amount_received)}</b>
+                  </div>
+                  ${order.change_due > 0 ? `
+                    <div style="display: flex; justify-content: space-between; color: #1B5E20;">
+                      <span>Change Returned:</span>
+                      <b>${formatMoney(order.change_due)}</b>
+                    </div>
+                  ` : ''}
+                  ${order.pending_amount > 0 ? `
+                    <div style="display: flex; justify-content: space-between; color: #C62828;">
+                      <span>Balance Due:</span>
+                      <b>${formatMoney(order.pending_amount)}</b>
+                    </div>
+                  ` : ''}
+                ` : ''}
               </div>
             </div>
 
@@ -5300,9 +5843,21 @@
     removePOSItem,
     clearPOSCart,
     updatePOSCustomer,
+    updatePOSCustomerField,
+    handlePOSCustomerSearch,
+    selectPOSCustomer,
+    resetPOSCustomer,
     updatePOSDiscount,
     setPOSPaymentMethod,
     updatePOSCashTendered,
+    setPOSQuickCash,
+    addPOSQuickCash,
+    updatePOSPaymentCalculations,
+    setPOSScanMode,
+    checkPOSCurrentBarcodeInput,
+    openPOSProductCheckModal,
+    handlePOSCardClick,
+    handlePOSCatalogSearch,
     completePOSSale,
     filterProductsTable,
     openAddProductModal,
