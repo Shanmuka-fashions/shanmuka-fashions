@@ -814,3 +814,86 @@
   font-weight: 700;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS ADAPTATIONS (#/account & auth views)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sf-portal-wrapper {
+    padding: 16px 12px 60px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sf-portal-header-banner {
+    padding: 20px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    border-radius: 4px;
+  }
+
+  .sf-patron-profile-meta {
+    gap: 12px;
+  }
+
+  .sf-patron-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .sf-patron-name {
+    font-size: 20px;
+  }
+
+  .sf-portal-nav-bar {
+    gap: 4px;
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sf-portal-tab-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .sf-portal-card {
+    padding: 20px 14px;
+  }
+
+  .sf-addresses-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .sf-address-card {
+    padding: 16px 14px;
+  }
+
+  .sf-order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .sf-order-body {
+    padding: 16px 14px;
+  }
+
+  .sf-auth-card {
+    padding: 24px 16px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sf-stepper-tracker {
+    padding: 10px 0 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+
