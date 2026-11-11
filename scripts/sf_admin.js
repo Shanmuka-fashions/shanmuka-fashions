@@ -1464,9 +1464,10 @@
     };
 
     try {
-      db.saveProduct(data);
+      const saved = db.saveProduct(data);
       closeModal();
       render();
+      toast(`Saved saree "${saved.name}" (${saved.sku}) to central catalogue.`);
     } catch (e) {
       alert('Error saving saree: ' + e.message);
     }

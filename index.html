@@ -3830,8 +3830,12 @@
             images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
           }));
 
-          // Sync into SFDatabase
+          // Sync into SFDatabase preserving any local pending items
           if (typeof SFDatabase !== 'undefined') {
+            const cloudIds = new Set(products.map(p => String(p.id)));
+            const cloudSkus = new Set(products.map(p => String(p.sku || '').toUpperCase()));
+            const localPending = (SFDatabase.getProducts() || []).filter(p => !cloudIds.has(String(p.id)) && !cloudSkus.has(String(p.sku || '').toUpperCase()));
+            products = [...products, ...localPending];
             SFDatabase.state.products = products;
             SFDatabase.commit();
           }

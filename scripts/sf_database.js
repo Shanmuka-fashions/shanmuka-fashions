@@ -1529,7 +1529,7 @@
         const rawProds = await sb.fetchProducts({ publishedOnly: false });
         const cloudProds = Array.isArray(rawProds) ? rawProds : (rawProds && Array.isArray(rawProds.data) ? rawProds.data : []);
         
-        this.state.products = cloudProds.map(p => ({
+        const cloudProdsMapped = cloudProds.map(p => ({
           ...p,
           id: typeof p.id === 'string' && /^\d+$/.test(p.id) ? parseInt(p.id, 10) : p.id,
           price: Number(p.price) || 0,
@@ -1540,9 +1540,18 @@
           images: Array.isArray(p.images) && p.images.length ? p.images : (p.img ? [p.img] : [])
         }));
 
+        // Preserve any locally created products that aren't yet in the cloud
+        const cloudIds = new Set(cloudProdsMapped.map(p => String(p.id)));
+        const cloudSkus = new Set(cloudProdsMapped.map(p => String(p.sku || '').toUpperCase()));
+        const localPending = (this.state.products || []).filter(p => !cloudIds.has(String(p.id)) && !cloudSkus.has(String(p.sku || '').toUpperCase()));
+
+        this.state.products = [...cloudProdsMapped, ...localPending];
+
         const rawOrders = await sb.fetchOrders();
         const cloudOrders = Array.isArray(rawOrders) ? rawOrders : (rawOrders && Array.isArray(rawOrders.data) ? rawOrders.data : []);
-        this.state.orders = cloudOrders;
+        const cloudOrderIds = new Set(cloudOrders.map(o => String(o.order_number || o.id)));
+        const localOrdersPending = (this.state.orders || []).filter(o => !cloudOrderIds.has(String(o.order_number || o.id)));
+        this.state.orders = [...cloudOrders, ...localOrdersPending];
 
         this._sanitize(this.state);
         this.commit();
