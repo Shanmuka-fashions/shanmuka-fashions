@@ -218,3 +218,4 @@ CREATE INDEX IF NOT EXISTS idx_customers_status ON customers(account_status);
 CREATE INDEX IF NOT EXISTS idx_customer_addresses_cust_id ON customer_addresses(customer_id);
 CREATE INDEX IF NOT EXISTS idx_customer_notes_cust_id ON customer_notes(customer_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity, entity_id);
+
