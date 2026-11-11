@@ -607,7 +607,7 @@
       ];
 
       container.innerHTML = `
-        <div class="sf-auth-split-wrapper" style="min-height: 100vh; background: #F5EBDD;">
+        <div class="sf-auth-split-wrapper" style="background: #F5EBDD;">
           <!-- Left Visual Pane -->
           <div class="sf-auth-visual-pane" style="background-image: url('assets/kanchipuram-loom.jpg');">
             <div class="sf-auth-visual-overlay"></div>
@@ -623,7 +623,7 @@
           </div>
 
           <!-- Right Form Pane -->
-          <div class="sf-auth-form-pane" style="padding: 40px 24px; overflow-y: auto;">
+          <div class="sf-auth-form-pane" style="padding: 40px 24px;">
             <div class="sf-auth-card" style="max-width: 620px;">
               <div class="sf-auth-brand-header" style="text-align: left; margin-bottom: 24px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
