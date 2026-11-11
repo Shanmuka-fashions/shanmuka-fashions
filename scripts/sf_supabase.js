@@ -173,7 +173,156 @@
       }
     },
 
-    // ── 2. REAL-TIME DATABASE: PRODUCTS CRUD ──
+    /**
+     * Uploads a cinematic hero video file to Supabase Storage bucket
+     * @param {File|Blob} file 
+     * @param {Function} onProgress 
+     * @returns {Promise<{success: boolean, publicUrl?: string, path?: string, name?: string, size?: string, error?: string}>}
+     */
+    uploadHeroVideo: async function (file, onProgress) {
+      if (!file) return { success: false, error: 'No video file provided' };
+
+      const formatSize = (bytes) => {
+        if (!bytes) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      };
+
+      const fileName = file.name || 'campaign-video.mp4';
+      const fileExt = fileName.split('.').pop().toLowerCase();
+      const allowedExts = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
+      
+      if (!allowedExts.includes(fileExt) && !file.type.startsWith('video/')) {
+        return { success: false, error: 'Unsupported video format. Please upload an MP4, WebM, or QuickTime MOV video.' };
+      }
+
+      // Max size: 100MB
+      const maxSize = 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        return { success: false, error: 'Video file exceeds 100MB size limit. Please upload an optimized video.' };
+      }
+
+      const sb = this.getClient();
+      if (!sb || !sb.storage) {
+        if (typeof onProgress === 'function') onProgress(100);
+        let objectUrl = '';
+        if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+          objectUrl = URL.createObjectURL(file);
+        }
+        return {
+          success: true,
+          publicUrl: objectUrl || `assets/${fileName}`,
+          path: `hero-videos/${Date.now()}-${fileName}`,
+          name: fileName,
+          size: formatSize(file.size),
+          fallback: true
+        };
+      }
+
+      try {
+        if (typeof onProgress === 'function') onProgress(10);
+
+        const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+        const storagePath = `hero-videos/${uniqueId}.${fileExt || 'mp4'}`;
+
+        if (typeof onProgress === 'function') onProgress(35);
+
+        const { data, error } = await sb.storage
+          .from(CONFIG.storageBucket)
+          .upload(storagePath, file, {
+            cacheControl: '86400',
+            upsert: true
+          });
+
+        if (error) {
+          console.warn('Supabase video upload note:', error.message);
+          let localFallbackUrl = '';
+          if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+            localFallbackUrl = URL.createObjectURL(file);
+          }
+          return {
+            success: true,
+            publicUrl: localFallbackUrl || `assets/${fileName}`,
+            path: storagePath,
+            name: fileName,
+            size: formatSize(file.size),
+            fallback: true,
+            note: 'Loaded via local stream (' + error.message + ')'
+          };
+        }
+
+        if (typeof onProgress === 'function') onProgress(85);
+
+        const { data: urlData } = sb.storage
+          .from(CONFIG.storageBucket)
+          .getPublicUrl(storagePath);
+
+        const publicUrl = urlData?.publicUrl || `${CONFIG.url}/storage/v1/object/public/${CONFIG.storageBucket}/${storagePath}`;
+
+        if (typeof onProgress === 'function') onProgress(100);
+
+        return {
+          success: true,
+          publicUrl: publicUrl,
+          path: storagePath,
+          name: fileName,
+          size: formatSize(file.size)
+        };
+      } catch (err) {
+        console.error('Video upload exception:', err);
+        return { success: false, error: err.message || 'Video upload failed' };
+      }
+    },
+
+    // ── 2. REAL-TIME DATABASE: CMS & HERO VIDEO ──
+    fetchCMSFromCloud: async function () {
+      const sb = this.getClient();
+      if (!sb) return null;
+      try {
+        const { data, error } = await sb.from('cms_content').select('*').eq('id', 'primary').single();
+        if (error) return null;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    saveCMSToCloud: async function (cmsData) {
+      const sb = this.getClient();
+      if (!sb) return { success: false, error: 'Database disconnected' };
+      try {
+        const payload = {
+          id: 'primary',
+          announcement_bar: cmsData.announcement_bar,
+          hero_eyebrow: cmsData.hero_eyebrow,
+          hero_heading: cmsData.hero_heading,
+          hero_tagline: cmsData.hero_tagline,
+          hero_narrative: cmsData.hero_narrative,
+          hero_video: cmsData.hero_video,
+          story_heading: cmsData.story_heading,
+          story_narrative_1: cmsData.story_narrative_1,
+          story_narrative_2: cmsData.story_narrative_2,
+          whatsapp_number: cmsData.whatsapp_number,
+          phone_display: cmsData.phone_display,
+          showroom_address: cmsData.showroom_address,
+          video_history: cmsData.video_history || [],
+          updated_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('cms_content').upsert(payload, { onConflict: 'id' }).select();
+        if (error) {
+          console.warn('Supabase CMS save warning:', error.message);
+          return { success: false, error: error.message };
+        }
+        return { success: true, data: data ? data[0] : payload };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+
+    // ── 3. REAL-TIME DATABASE: PRODUCTS CRUD ──
     fetchProducts: async function (options = {}) {
       const sb = this.getClient();
       if (!sb) {

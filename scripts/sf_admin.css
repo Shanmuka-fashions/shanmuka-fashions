@@ -1517,3 +1517,124 @@
   margin: 0 auto 20px auto;
   line-height: 1.5;
 }
+
+/* ── Cinematic Video Manager & History ── */
+.sf-video-live-preview {
+  position: relative;
+  background: #000000;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #3B2B25;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  margin-bottom: 16px;
+}
+.sf-video-live-preview video {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+.sf-video-live-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sf-video-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(46, 125, 50, 0.9);
+  color: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+}
+.sf-video-dropzone {
+  border: 2px dashed #D8C3A5;
+  background: #FAF7F2;
+  border-radius: 6px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+.sf-video-dropzone:hover {
+  border-color: #A77950;
+  background: #F5EBDD;
+}
+.sf-video-dropzone-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+.sf-video-dropzone-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3B2B25;
+  margin-bottom: 4px;
+}
+.sf-video-dropzone-subtitle {
+  font-size: 12px;
+  color: #7A695E;
+}
+.sf-video-history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+.sf-video-history-card {
+  background: #FFFFFF;
+  border: 1px solid #E5D7C5;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+.sf-video-history-card.active-card {
+  border-color: #A77950;
+  box-shadow: 0 0 0 2px rgba(167, 121, 80, 0.25);
+}
+.sf-video-history-card video {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  background: #000;
+}
+.sf-video-history-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+.sf-video-history-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3B2B25;
+  margin-bottom: 4px;
+  line-height: 1.3;
+  word-break: break-all;
+}
+.sf-video-history-meta {
+  font-size: 11px;
+  color: #7A695E;
+  margin-bottom: 12px;
+}
+.sf-video-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #F0E6D8;
+}

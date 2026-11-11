@@ -2919,6 +2919,54 @@
   // ═══════════════════════════════════════════════════════════════════════════
   function renderCMSTab(db) {
     const cms = db.getCMS();
+    const activeVideo = cms.hero_video || 'gemini_generated_video_e8550a2b.mp4';
+    const videoHistory = db.getVideoHistory ? db.getVideoHistory() : (cms.video_history || []);
+
+    const historyCardsHtml = videoHistory.length === 0 ? `
+      <div style="grid-column: 1 / -1; padding: 24px; text-align: center; color: #7A695E; background: #FAF6F0; border-radius: 6px; border: 1px dashed #D8C3A5;">
+        No video history yet. Upload your first campaign video above!
+      </div>
+    ` : videoHistory.map(v => {
+      const isActive = v.url === activeVideo || v.is_active;
+      const formattedDate = v.uploaded_at ? new Date(v.uploaded_at).toLocaleString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      }) : 'Campaign Asset';
+      const sizeStr = v.size ? `${(v.size / (1024 * 1024)).toFixed(1)} MB` : '';
+
+      return `
+        <div class="sf-video-history-card ${isActive ? 'active-card' : ''}">
+          <div style="position: relative;">
+            <video src="${v.url}" muted playsinline preload="metadata" onmouseover="this.play()" onmouseout="this.pause()"></video>
+            ${isActive ? `<span class="sf-video-live-pill">● LIVE ON HOMEPAGE</span>` : ''}
+          </div>
+          <div class="sf-video-history-body">
+            <div>
+              <div class="sf-video-history-title" title="${v.name || 'Campaign Video'}">${v.name || 'Campaign Video'}</div>
+              <div class="sf-video-history-meta">
+                <span>${formattedDate}</span>
+                ${sizeStr ? `<span> • ${sizeStr}</span>` : ''}
+              </div>
+            </div>
+            <div class="sf-video-history-actions">
+              ${isActive ? `
+                <span style="font-size: 11px; font-weight: 700; color: #2E7D32; display: flex; align-items: center; gap: 4px;">
+                  ✓ Current Live Hero
+                </span>
+              ` : `
+                <button type="button" class="sf-btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="SFAdmin.setActiveHeroVideo('${v.id}')">
+                  ⚡ Set as Live Hero
+                </button>
+              `}
+              ${!isActive ? `
+                <button type="button" class="sf-btn-outline" style="font-size: 11px; padding: 4px 8px; color: #A94442; border-color: #E0C0C0;" onclick="SFAdmin.deleteHeroVideo('${v.id}')" title="Delete from archive">
+                  🗑 Delete
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
 
     return `
       <div class="sf-view-container">
@@ -2938,17 +2986,76 @@
           </div>
         </div>
 
+        <!-- Cinematic Video Asset Upload, Live Preview & Version History -->
         <div class="sf-card" style="margin-bottom: 24px;">
-          <h3>Campaign Hero Video & Headlines</h3>
-          <div class="sf-form-grid-2" style="margin-top: 12px;">
-            <div class="sf-form-group">
-              <label>Hero Eyebrow Text</label>
-              <input type="text" id="cmsHeroEyebrow" value="${cms.hero_eyebrow || ''}">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <h3 style="margin: 0;">Homepage Cinematic Campaign Video</h3>
+              <p style="font-size: 13px; color: #7A695E; margin: 4px 0 0 0;">Upload high-definition campaign videos (MP4, WebM up to 100MB), switch instantly between new and previous campaign drapes, or provide a direct video URL.</p>
             </div>
-            <div class="sf-form-group">
-              <label>Cinematic Video Asset Path</label>
-              <input type="text" id="cmsHeroVideo" value="${cms.hero_video || ''}">
+          </div>
+
+          <!-- Live Active Video Preview Banner -->
+          <div class="sf-video-live-preview" style="margin-top: 16px;">
+            <div style="position: relative; max-width: 640px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.25); background: #000;">
+              <video id="cmsLiveVideoElement" src="${activeVideo}" autoplay muted loop playsinline controls style="width: 100%; display: block; aspect-ratio: 21/9; object-fit: cover;"></video>
+              <span class="sf-video-live-pill" style="top: 12px; left: 12px;">● LIVE ON STOREFRONT</span>
             </div>
+            <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #3B2B25; font-weight: 600;">
+              Active Source: <code style="background: #EFE4D6; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${activeVideo}</code>
+            </div>
+          </div>
+
+          <!-- Video Upload Dropzone -->
+          <div style="margin-top: 20px;">
+            <div class="sf-video-dropzone" onclick="document.getElementById('cmsVideoFileInput').click()">
+              <input type="file" id="cmsVideoFileInput" accept="video/mp4,video/webm,video/quicktime" style="display: none;" onchange="SFAdmin.handleHeroVideoFileSelect(event)">
+              <div class="sf-video-dropzone-icon">📹</div>
+              <div class="sf-video-dropzone-title">Click to Upload New Campaign Video or Drag & Drop Here</div>
+              <div class="sf-video-dropzone-subtitle">Supports MP4, WebM, MOV files up to 100MB • Automatically optimized & saved to Central Cloud Storage</div>
+            </div>
+
+            <!-- Upload Progress Indicator -->
+            <div id="cmsVideoUploadProgress" style="display: none; margin-top: 14px; background: #FAF6F0; border: 1px solid #D8C3A5; border-radius: 6px; padding: 12px 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: #3B2B25;">
+                <span id="cmsVideoProgressLabel">Uploading campaign video to cloud...</span>
+                <span id="cmsVideoProgressPercent">0%</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: #E5D7C5; border-radius: 4px; overflow: hidden;">
+                <div id="cmsVideoProgressBar" style="width: 0%; height: 100%; background: #A77950; transition: width 0.2s ease;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct URL Asset Path Input -->
+          <div class="sf-form-group" style="margin-top: 20px;">
+            <label style="font-weight: 600; font-size: 12px;">Direct Video Asset Path or Cloud URL</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="cmsHeroVideo" value="${activeVideo}" placeholder="e.g. gemini_generated_video_e8550a2b.mp4 or https://..." style="flex: 1;">
+              <button type="button" class="sf-btn-secondary" onclick="SFAdmin.handleManualVideoApply()" style="white-space: nowrap; padding: 8px 16px;">Set as Hero & Archive</button>
+            </div>
+          </div>
+
+          <!-- Video Version History / Archive ("Change New to Old") -->
+          <div style="margin-top: 28px; border-top: 1px solid #E5D7C5; padding-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="margin: 0; color: #3B2B25; font-size: 15px;">Campaign Video Version History & Archive</h4>
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #7A695E;">All uploaded and past campaign videos are preserved here. Click "Set as Live Hero" to instantly restore any previous video to the storefront.</p>
+              </div>
+              <span style="font-size: 12px; color: #7A695E; font-weight: 600;">${videoHistory.length} Video${videoHistory.length === 1 ? '' : 's'} in Vault</span>
+            </div>
+            <div class="sf-video-history-grid">
+              ${historyCardsHtml}
+            </div>
+          </div>
+        </div>
+
+        <div class="sf-card" style="margin-bottom: 24px;">
+          <h3>Campaign Hero Headlines & Story Narrative</h3>
+          <div class="sf-form-group" style="margin-top: 12px;">
+            <label>Hero Eyebrow Text</label>
+            <input type="text" id="cmsHeroEyebrow" value="${cms.hero_eyebrow || ''}">
           </div>
 
           <div class="sf-form-group">
@@ -2994,6 +3101,137 @@
     `;
   }
 
+  async function handleHeroVideoFileSelect(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    // Validate video type
+    const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'];
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(mp4|webm|mov|m4v)$/i)) {
+      alert('Please upload a valid MP4, WebM, or MOV video file.');
+      return;
+    }
+
+    // Validate size (100MB limit)
+    const maxSize = 100 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('Video file size exceeds the 100MB limit. Please upload a compressed campaign video.');
+      return;
+    }
+
+    const progressContainer = document.getElementById('cmsVideoUploadProgress');
+    const progressBar = document.getElementById('cmsVideoProgressBar');
+    const progressPercent = document.getElementById('cmsVideoProgressPercent');
+    const progressLabel = document.getElementById('cmsVideoProgressLabel');
+
+    if (progressContainer) progressContainer.style.display = 'block';
+
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+
+    try {
+      let videoUrl = '';
+      let storagePath = '';
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.uploadHeroVideo === 'function') {
+        const uploadRes = await SFSupabase.uploadHeroVideo(file, (pct) => {
+          if (progressBar) progressBar.style.width = pct + '%';
+          if (progressPercent) progressPercent.textContent = pct + '%';
+        });
+        if (uploadRes && uploadRes.url) {
+          videoUrl = uploadRes.url;
+          storagePath = uploadRes.path;
+        }
+      }
+
+      // Fallback to local object URL or file reference if cloud unreachable
+      if (!videoUrl) {
+        videoUrl = URL.createObjectURL(file);
+      }
+
+      const videoRecord = {
+        id: 'vid_' + Date.now(),
+        name: file.name,
+        url: videoUrl,
+        storage_path: storagePath,
+        size: file.size,
+        uploaded_at: new Date().toISOString(),
+        is_active: true
+      };
+
+      db.addVideoToHistory(videoRecord);
+      db.saveCMS({ hero_video: videoUrl });
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCMSToCloud === 'function') {
+        await SFSupabase.saveCMSToCloud(db.getCMS());
+      }
+
+      alert(`Cinematic video "${file.name}" uploaded successfully and set live on storefront!`);
+      render('appRoot', 'cms');
+    } catch (err) {
+      console.error('Error uploading video:', err);
+      alert('Failed to upload video: ' + (err.message || err));
+      if (progressContainer) progressContainer.style.display = 'none';
+    }
+  }
+
+  function setActiveHeroVideo(videoId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const updatedCMS = db.setActiveVideo(videoId);
+    if (updatedCMS) {
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCMSToCloud === 'function') {
+        SFSupabase.saveCMSToCloud(updatedCMS).catch(e => console.warn('Cloud CMS sync error:', e));
+      }
+      alert('Switched active storefront hero video! Live on homepage.');
+      render('appRoot', 'cms');
+    }
+  }
+
+  function deleteHeroVideo(videoId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const video = (db.getVideoHistory() || []).find(v => v.id === videoId);
+    if (video && (video.is_active || video.url === db.getCMS().hero_video)) {
+      alert('Cannot delete the currently active hero video. Please set another video live first.');
+      return;
+    }
+    if (confirm(`Are you sure you want to remove "${video ? video.name : 'this video'}" from the archive?`)) {
+      db.deleteVideoFromHistory(videoId);
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCMSToCloud === 'function') {
+        SFSupabase.saveCMSToCloud(db.getCMS()).catch(e => console.warn('Cloud CMS sync error:', e));
+      }
+      render('appRoot', 'cms');
+    }
+  }
+
+  function handleManualVideoApply() {
+    const input = document.getElementById('cmsHeroVideo');
+    if (!input || !input.value.trim()) {
+      alert('Please enter a video filename or URL.');
+      return;
+    }
+    const url = input.value.trim();
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+
+    const videoRecord = {
+      id: 'vid_' + Date.now(),
+      name: url.split('/').pop() || 'Campaign Video',
+      url: url,
+      storage_path: '',
+      size: null,
+      uploaded_at: new Date().toISOString(),
+      is_active: true
+    };
+
+    db.addVideoToHistory(videoRecord);
+    db.saveCMS({ hero_video: url });
+
+    if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCMSToCloud === 'function') {
+      SFSupabase.saveCMSToCloud(db.getCMS()).catch(e => console.warn('Cloud CMS sync error:', e));
+    }
+
+    alert('Hero video updated and added to archive!');
+    render('appRoot', 'cms');
+  }
+
   function saveCMSChanges() {
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
     const update = {
@@ -3010,8 +3248,11 @@
     };
 
     db.saveCMS(update);
+    if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCMSToCloud === 'function') {
+      SFSupabase.saveCMSToCloud(db.getCMS()).catch(e => console.warn('Cloud CMS sync error:', e));
+    }
     alert('Website content successfully published! Changes are live on the storefront.');
-    render();
+    render('appRoot', 'cms');
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -4182,6 +4423,10 @@
     handleSaveCoupon,
     handleDeleteCoupon,
     saveCMSChanges,
+    handleHeroVideoFileSelect,
+    setActiveHeroVideo,
+    deleteHeroVideo,
+    handleManualVideoApply,
     handleEnquiryStatusChange,
     saveStoreSettings,
     exportDatabaseBackup,

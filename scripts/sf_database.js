@@ -56,7 +56,17 @@
       story_narrative_2: 'Each drape represents painstaking devotion—from the spinning of pure mulberry silk yarns to the hand-setting of Jacquard punch cards and tested gold zari borders. We honor these timeless weaving traditions by curating authentic heirloom sarees for celebrations that last a lifetime.',
       whatsapp_number: '9542156929',
       phone_display: '+91 95421 56929',
-      showroom_address: 'Road No. 36, Jubilee Hills, Hyderabad, Telangana 500033'
+      showroom_address: 'Road No. 36, Jubilee Hills, Hyderabad, Telangana 500033',
+      video_history: [
+        {
+          id: 'VID-ORIGINAL-01',
+          name: 'Royal Atelier Loom Weaving (Original Cinematic Drape)',
+          url: 'gemini_generated_video_e8550a2b.mp4',
+          size: '14.8 MB',
+          uploaded_at: '2026-11-08T10:00:00Z',
+          is_active: true
+        }
+      ]
     },
     coupons: [
       {
@@ -1253,16 +1263,84 @@
       };
     }
 
-    // ── WEBSITE CONTENT MANAGEMENT (CMS) ──
+    // ── WEBSITE CONTENT MANAGEMENT (CMS) & CINEMATIC VIDEO ARCHIVE ──
     getCMS() {
-      return this.state.cms || {};
+      const cms = this.state.cms || {};
+      if (!Array.isArray(cms.video_history) || cms.video_history.length === 0) {
+        cms.video_history = [
+          {
+            id: 'VID-ORIGINAL-01',
+            name: 'Royal Atelier Loom Weaving (Original Cinematic Drape)',
+            url: cms.hero_video || 'gemini_generated_video_e8550a2b.mp4',
+            size: '14.8 MB',
+            uploaded_at: '2026-11-08T10:00:00Z',
+            is_active: true
+          }
+        ];
+        this.state.cms = cms;
+      }
+      return cms;
     }
 
     saveCMS(cmsData, adminUser = 'Bhanu (Owner)') {
       this.state.cms = { ...this.state.cms, ...cmsData };
-      this.logAudit('CMS_UPDATE', 'WEBSITE_CONTENT', 'ALL', 'Updated public website content & banners', adminUser);
+      this.logAudit('CMS_UPDATE', 'WEBSITE_CONTENT', 'ALL', 'Updated public website content & hero video', adminUser);
       this.commit();
+      
+      const sb = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
+      if (sb && typeof sb.saveCMSToCloud === 'function') {
+        sb.saveCMSToCloud(this.state.cms).catch(e => console.warn('Supabase CMS cloud sync note:', e));
+      }
       return this.state.cms;
+    }
+
+    getVideoHistory() {
+      return this.getCMS().video_history || [];
+    }
+
+    addVideoToHistory(videoRecord, adminUser = 'Bhanu (Owner)') {
+      const cms = this.getCMS();
+      const history = cms.video_history || [];
+      history.forEach(v => { v.is_active = false; });
+      const newEntry = {
+        id: videoRecord.id || ('VID-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4)),
+        name: videoRecord.name || 'Custom Cinematic Hero Video',
+        url: videoRecord.url,
+        size: videoRecord.size || 'Web Video',
+        uploaded_at: new Date().toISOString(),
+        is_active: true
+      };
+      history.unshift(newEntry);
+      cms.video_history = history;
+      cms.hero_video = videoRecord.url;
+      this.saveCMS(cms, adminUser);
+      this.logAudit('HERO_VIDEO_UPLOAD', 'CMS', newEntry.id, `Uploaded new hero video: "${newEntry.name}"`, adminUser);
+      return newEntry;
+    }
+
+    setActiveVideo(videoId, adminUser = 'Bhanu (Owner)') {
+      const cms = this.getCMS();
+      const history = cms.video_history || [];
+      const target = history.find(v => v.id === videoId);
+      if (!target) throw new Error('Video record not found in archive history.');
+      history.forEach(v => { v.is_active = (v.id === videoId); });
+      cms.hero_video = target.url;
+      cms.video_history = history;
+      this.saveCMS(cms, adminUser);
+      this.logAudit('HERO_VIDEO_RESTORE', 'CMS', videoId, `Switched hero video to "${target.name}" (${target.url})`, adminUser);
+      return target;
+    }
+
+    deleteVideoFromHistory(videoId, adminUser = 'Bhanu (Owner)') {
+      const cms = this.getCMS();
+      const history = cms.video_history || [];
+      const target = history.find(v => v.id === videoId);
+      if (!target) return false;
+      if (target.is_active) throw new Error('Cannot delete the currently active hero video. Switch to another video first.');
+      cms.video_history = history.filter(v => v.id !== videoId);
+      this.saveCMS(cms, adminUser);
+      this.logAudit('HERO_VIDEO_DELETE', 'CMS', videoId, `Removed video "${target.name}" from archive`, adminUser);
+      return true;
     }
 
     // ── STORE SETTINGS ──
@@ -1552,6 +1630,34 @@
         const cloudOrderIds = new Set(cloudOrders.map(o => String(o.order_number || o.id)));
         const localOrdersPending = (this.state.orders || []).filter(o => !cloudOrderIds.has(String(o.order_number || o.id)));
         this.state.orders = [...cloudOrders, ...localOrdersPending];
+
+        // Sync CMS content & video history from cloud
+        if (typeof sb.fetchCMSFromCloud === 'function') {
+          try {
+            const cloudCMS = await sb.fetchCMSFromCloud();
+            if (cloudCMS && cloudCMS.hero_video) {
+              const currentHistory = this.getVideoHistory();
+              const cloudHistory = Array.isArray(cloudCMS.video_history) ? cloudCMS.video_history : [];
+              // Merge video histories by URL
+              const existingUrls = new Set(currentHistory.map(v => v.url));
+              const newFromCloud = cloudHistory.filter(v => !existingUrls.has(v.url));
+              const mergedHistory = [...currentHistory, ...newFromCloud];
+
+              this.state.cms = {
+                ...this.state.cms,
+                hero_video: cloudCMS.hero_video || this.state.cms.hero_video,
+                announcement_bar: cloudCMS.announcement_bar || this.state.cms.announcement_bar,
+                hero_eyebrow: cloudCMS.hero_eyebrow || this.state.cms.hero_eyebrow,
+                hero_heading: cloudCMS.hero_heading || this.state.cms.hero_heading,
+                hero_tagline: cloudCMS.hero_tagline || this.state.cms.hero_tagline,
+                hero_narrative: cloudCMS.hero_narrative || this.state.cms.hero_narrative,
+                video_history: mergedHistory
+              };
+            }
+          } catch (cmsErr) {
+            console.warn('CMS cloud fetch notice:', cmsErr);
+          }
+        }
 
         this._sanitize(this.state);
         this.commit();

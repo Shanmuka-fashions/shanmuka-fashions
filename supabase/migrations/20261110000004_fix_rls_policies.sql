@@ -140,3 +140,4 @@ CREATE POLICY "Public full access audit_logs"
     TO public
     USING (true)
     WITH CHECK (true);
+
