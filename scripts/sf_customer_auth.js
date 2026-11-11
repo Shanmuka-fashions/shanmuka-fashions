@@ -228,6 +228,10 @@
       return !!(currentCustomer && currentCustomer.id && currentCustomer.email);
     },
 
+    isLoggedIn: function () {
+      return this.isAuthenticated();
+    },
+
     isEmailVerified: function () {
       if (!this.isAuthenticated()) return false;
       return currentCustomer.email_verified !== false;
@@ -606,35 +610,188 @@
       return { success: true, customer: currentCustomer };
     },
 
+    _isProcessingCallback: false,
+
     handleOAuthCallback: async function () {
-      if (typeof SFSupabase !== 'undefined') {
+      if (this._isProcessingCallback) return true;
+      this._isProcessingCallback = true;
+
+      // 1. Render immediate luxury loading indicator in appRoot so page is NEVER blank
+      if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthCallbackLoading === 'function') {
+        SFCustomerViews.renderAuthCallbackLoading('appRoot', 'Authenticating with Google...');
+      }
+
+      try {
+        const hash = (typeof window !== 'undefined' && window.location.hash) ? window.location.hash : '';
+        const search = (typeof window !== 'undefined' && window.location.search) ? window.location.search : '';
+
+        // 2. Check for OAuth errors (user cancellation, access denied, expired auth)
+        let errorDesc = null;
+        if (search) {
+          const sp = new URLSearchParams(search);
+          errorDesc = sp.get('error_description') || sp.get('error');
+        }
+        if (!errorDesc && hash) {
+          // Parse hash even if prefixed with #/auth-callback# or #/auth-callback&
+          const cleanHash = hash.replace(/^#\/?auth-callback[#&]?/, '').replace(/^#/, '');
+          const hp = new URLSearchParams(cleanHash);
+          errorDesc = hp.get('error_description') || hp.get('error');
+        }
+
+        if (errorDesc) {
+          this._isProcessingCallback = false;
+          this._cleanAuthUrl();
+          const readableError = decodeURIComponent(errorDesc).replace(/\+/g, ' ');
+          if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthError === 'function') {
+            SFCustomerViews.renderAuthError('appRoot', readableError);
+          }
+          return false;
+        }
+
+        // 3. Connect with Supabase client
+        if (typeof SFSupabase === 'undefined') {
+          throw new Error('Supabase client module is not loaded.');
+        }
         const sb = SFSupabase.getClient();
-        if (sb && sb.auth) {
+        if (!sb || !sb.auth) {
+          throw new Error('Supabase authentication service is unavailable.');
+        }
+
+        // 4. Extract access_token and refresh_token from URL if present (supports implicit flow and legacy callback URLs)
+        let accessToken = null;
+        let refreshToken = null;
+        if (hash) {
+          const atMatch = hash.match(/access_token=([^&]+)/);
+          const rtMatch = hash.match(/refresh_token=([^&]+)/);
+          if (atMatch) accessToken = decodeURIComponent(atMatch[1]);
+          if (rtMatch) refreshToken = decodeURIComponent(rtMatch[1]);
+        }
+
+        // If tokens found in URL fragment, establish the Supabase session explicitly
+        if (accessToken && refreshToken) {
+          if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthCallbackLoading === 'function') {
+            SFCustomerViews.renderAuthCallbackLoading('appRoot', 'Securing verified patron session...');
+          }
           try {
-            const { data } = await sb.auth.getSession();
-            if (data && data.session && data.session.user) {
-              await this._syncUserFromSession(data.session.user);
-              if (currentCustomer && currentCustomer.profile_completed === false) {
-                if (typeof window !== 'undefined') window.location.hash = '#/complete-profile';
-              } else {
-                if (typeof window !== 'undefined') window.location.hash = '#/account';
-              }
-              return true;
-            }
+            await sb.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
           } catch (e) {
-            console.warn('OAuth callback session note:', e);
+            console.warn('OAuth setSession note:', e.message);
           }
         }
+
+        // 5. Retrieve verified session from Supabase
+        let { data: sessionData, error: sessionErr } = await sb.auth.getSession();
+
+        // If session is still propagating, debounce 400ms and retry once
+        if ((!sessionData || !sessionData.session) && !sessionErr) {
+          await new Promise(r => setTimeout(r, 400));
+          const retry = await sb.auth.getSession();
+          sessionData = retry.data;
+          sessionErr = retry.error;
+        }
+
+        if (sessionErr || !sessionData || !sessionData.session || !sessionData.session.user) {
+          this._isProcessingCallback = false;
+          this._cleanAuthUrl();
+          const errDetail = sessionErr ? sessionErr.message : 'No active session was returned by Google. Please try signing in again.';
+          if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthError === 'function') {
+            SFCustomerViews.renderAuthError('appRoot', errDetail);
+          }
+          return false;
+        }
+
+        const authUser = sessionData.session.user;
+        const authUserId = authUser.id;
+        const verifiedEmail = (authUser.email || '').toLowerCase().trim();
+
+        // 6. Clean the URL immediately to remove access tokens from the browser address bar & history
+        this._cleanAuthUrl();
+
+        if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthCallbackLoading === 'function') {
+          SFCustomerViews.renderAuthCallbackLoading('appRoot', 'Synchronizing patron atelier account...');
+        }
+
+        // 7. Step B: Query existing customer table using authenticated Supabase user ID & email
+        let cloudCustomer = null;
+        if (typeof SFSupabase.fetchCustomerByAuthId === 'function') {
+          cloudCustomer = await SFSupabase.fetchCustomerByAuthId(authUserId, verifiedEmail);
+        }
+
+        // Query existing addresses from customer_addresses
+        let cloudAddresses = [];
+        if (cloudCustomer && cloudCustomer.id && typeof SFSupabase.fetchCustomerAddresses === 'function') {
+          cloudAddresses = await SFSupabase.fetchCustomerAddresses(cloudCustomer.id);
+        }
+
+        // 8. Synchronize customer profile into application state & local database
+        await this._syncUserFromSession(authUser, cloudCustomer, cloudAddresses);
+
+        this._isProcessingCallback = false;
+
+        // 9. Step C: Check profile completion and safely redirect
+        const isComplete = this.isProfileComplete();
+        const targetHash = isComplete ? '#/account' : '#/account/complete-profile';
+        if (typeof window !== 'undefined') {
+          window.location.hash = targetHash;
+          if (typeof navigate === 'function') {
+            navigate();
+          }
+        }
+
+        return true;
+      } catch (err) {
+        console.error('OAuth Callback processing failure:', err);
+        this._isProcessingCallback = false;
+        this._cleanAuthUrl();
+        if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthError === 'function') {
+          SFCustomerViews.renderAuthError('appRoot', err.message || 'An unexpected authentication error occurred.');
+        }
+        return false;
       }
-      return false;
+    },
+
+    _cleanAuthUrl: function () {
+      if (typeof window !== 'undefined' && window.history && typeof window.history.replaceState === 'function') {
+        try {
+          window.history.replaceState(null, document.title, window.location.pathname);
+        } catch (e) {
+          console.warn('cleanAuthUrl note:', e);
+        }
+      }
     },
 
     isProfileComplete: function () {
       if (!this.isAuthenticated()) return false;
-      return currentCustomer.profile_completed === true;
+      if (currentCustomer.profile_completed === true) return true;
+
+      // Verify mandatory required fields
+      const hasPersonal = !!(
+        currentCustomer.full_name &&
+        currentCustomer.full_name.trim().length >= 2 &&
+        currentCustomer.mobile_number &&
+        Validation.isValidIndianPhone(currentCustomer.mobile_number)
+      );
+
+      const addrs = currentCustomer.addresses || [];
+      const hasAddress = addrs.length > 0 && addrs.some(a =>
+        a.house_number && a.house_number.trim() &&
+        a.street && a.street.trim() &&
+        a.city && a.city.trim() &&
+        a.state && a.state.trim() &&
+        a.pincode && Validation.isValidIndianPincode(a.pincode)
+      );
+
+      if (hasPersonal && hasAddress) {
+        currentCustomer.profile_completed = true;
+        return true;
+      }
+      return false;
     },
 
-    _syncUserFromSession: async function (user) {
+    _syncUserFromSession: async function (user, cloudCustomer = null, cloudAddresses = []) {
       if (!user) return;
       const cleanEmail = (user.email || '').toLowerCase().trim();
       const profiles = getLocalProfiles();
@@ -648,34 +805,49 @@
       }
 
       const isGoogle = user.app_metadata?.provider === 'google' || user.identities?.some(i => i.provider === 'google') || user.id?.startsWith('goog_');
-      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || existingInDb?.full_name || existingInDb?.name || local.full_name || cleanEmail.split('@')[0];
-      const avatarUrl = user.user_metadata?.avatar_url || existingInDb?.avatar_url || local.avatar_url || null;
+      const fullName = (cloudCustomer && (cloudCustomer.full_name || cloudCustomer.name)) ||
+        user.user_metadata?.full_name || user.user_metadata?.name ||
+        existingInDb?.full_name || existingInDb?.name ||
+        local.full_name || cleanEmail.split('@')[0];
+
+      const avatarUrl = (cloudCustomer && cloudCustomer.avatar_url) || user.user_metadata?.avatar_url || existingInDb?.avatar_url || local.avatar_url || null;
 
       // Determine profile completion status:
-      // If customer has already saved complete mobile, house, street, city, pincode
-      const profileCompleted = !!(existingInDb?.profile_completed || local.profile_completed || false);
+      // If customer has already saved complete mobile, house, street, city, pincode in cloud or local
+      const profileCompleted = !!(
+        (cloudCustomer && cloudCustomer.profile_completed === true) ||
+        existingInDb?.profile_completed ||
+        local.profile_completed ||
+        false
+      );
+
+      const savedAddresses = (cloudAddresses && cloudAddresses.length) ? cloudAddresses :
+        ((cloudCustomer && cloudCustomer.addresses) ? cloudCustomer.addresses : (existingInDb?.addresses || local.addresses || []));
+
+      // Use persistent customer ID from cloud if available, otherwise existing in DB, otherwise generate once
+      const targetId = (cloudCustomer && cloudCustomer.id) || existingInDb?.id || ('CUST-' + Math.floor(100000 + Math.random() * 900000));
 
       const cust = {
-        id: existingInDb?.id || ('CUST-' + Math.floor(100000 + Math.random() * 900000)),
+        id: targetId,
         auth_user_id: user.id,
         email: cleanEmail,
         full_name: fullName,
         name: fullName,
-        phone: existingInDb?.phone || existingInDb?.mobile_number || local.phone || '',
-        mobile_number: existingInDb?.mobile_number || existingInDb?.phone || local.mobile_number || '',
-        alternate_mobile: existingInDb?.alternate_mobile || local.alternate_mobile || null,
-        date_of_birth: existingInDb?.date_of_birth || local.date_of_birth || null,
-        gender: existingInDb?.gender || local.gender || null,
+        phone: (cloudCustomer && (cloudCustomer.mobile_number || cloudCustomer.phone)) || existingInDb?.phone || existingInDb?.mobile_number || local.phone || '',
+        mobile_number: (cloudCustomer && (cloudCustomer.mobile_number || cloudCustomer.phone)) || existingInDb?.mobile_number || existingInDb?.phone || local.mobile_number || '',
+        alternate_mobile: (cloudCustomer && cloudCustomer.alternate_mobile) || existingInDb?.alternate_mobile || local.alternate_mobile || null,
+        date_of_birth: (cloudCustomer && cloudCustomer.date_of_birth) || existingInDb?.date_of_birth || local.date_of_birth || null,
+        gender: (cloudCustomer && cloudCustomer.gender) || existingInDb?.gender || local.gender || null,
         profile_completed: profileCompleted,
-        account_status: existingInDb?.account_status || local.account_status || 'Active',
-        preferred_contact: existingInDb?.preferred_contact || local.preferred_contact || 'WhatsApp',
-        whatsapp_opt_in: existingInDb?.whatsapp_opt_in !== false && local.whatsapp_opt_in !== false,
-        marketing_consent: !!(existingInDb?.marketing_consent || local.marketing_consent),
+        account_status: (cloudCustomer && cloudCustomer.account_status) || existingInDb?.account_status || local.account_status || 'Active',
+        preferred_contact: (cloudCustomer && cloudCustomer.preferred_contact) || existingInDb?.preferred_contact || local.preferred_contact || 'WhatsApp',
+        whatsapp_opt_in: (cloudCustomer && cloudCustomer.whatsapp_opt_in !== false) && existingInDb?.whatsapp_opt_in !== false && local.whatsapp_opt_in !== false,
+        marketing_consent: !!((cloudCustomer && cloudCustomer.marketing_consent) || existingInDb?.marketing_consent || local.marketing_consent),
         avatar_url: avatarUrl,
-        addresses: existingInDb?.addresses || local.addresses || [],
-        default_address_id: existingInDb?.default_address_id || local.default_address_id || null,
+        addresses: savedAddresses,
+        default_address_id: (cloudCustomer && cloudCustomer.default_address_id) || existingInDb?.default_address_id || (savedAddresses.find(a => a.is_default)?.id) || null,
         is_google_auth: isGoogle,
-        created_at: existingInDb?.created_at || local.created_at || user.created_at || new Date().toISOString(),
+        created_at: (cloudCustomer && cloudCustomer.created_at) || existingInDb?.created_at || local.created_at || user.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
@@ -688,12 +860,12 @@
         db.saveCustomer(cust);
       }
 
-      this.notifyListeners('SESSION_SYNC', cust);
-
-      // If user came via Google and profile is incomplete, navigate to complete-profile
-      if (isGoogle && !profileCompleted && typeof window !== 'undefined' && !window.location.hash.includes('complete-profile')) {
-        window.location.hash = '#/complete-profile';
+      // Persist/Sync into Supabase Cloud if new record or needs auth_user_id link
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerToCloud === 'function') {
+        SFSupabase.saveCustomerToCloud(cust).catch(e => console.warn('Cloud customer sync:', e));
       }
+
+      this.notifyListeners('SESSION_SYNC', cust);
     },
 
     // ── COMPLETE MANDATORY PROFILE ──

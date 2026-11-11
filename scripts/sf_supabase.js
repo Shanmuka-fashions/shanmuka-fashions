@@ -31,8 +31,16 @@
     if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
       try {
         if (!client) {
-          client = window.supabase.createClient(CONFIG.url, CONFIG.anonKey);
-          console.log('✅ Shanmuka Fashions: Supabase client connected.');
+          client = window.supabase.createClient(CONFIG.url, CONFIG.anonKey, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: true,
+              flowType: 'implicit',
+              storage: window.localStorage
+            }
+          });
+          console.log('✅ Shanmuka Fashions: Supabase client connected (implicit OAuth flow).');
         }
       } catch (err) {
         console.warn('⚠️ Supabase client initialization error:', err);
@@ -516,7 +524,8 @@
         return { success: false, error: 'Supabase authentication is not initialized' };
       }
       try {
-        const redirectUrl = window.location.origin + window.location.pathname + '#/auth-callback';
+        // Clean origin + pathname (no hash) ensures Supabase returns #access_token=... at root
+        const redirectUrl = window.location.origin + window.location.pathname;
         const { data, error } = await sb.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -550,12 +559,48 @@
       }
     },
 
+    fetchCustomerByAuthId: async function (authUserId, email = null) {
+      const sb = this.getClient();
+      if (!sb || !authUserId) return null;
+      try {
+        let query = sb.from('customers').select('*');
+        if (email) {
+          const cleanEmail = email.toLowerCase().trim();
+          query = query.or(`auth_user_id.eq.${authUserId},email.eq.${cleanEmail}`);
+        } else {
+          query = query.eq('auth_user_id', authUserId);
+        }
+        const { data, error } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
+        if (error) {
+          console.warn('fetchCustomerByAuthId note:', error.message);
+          return null;
+        }
+        return data || null;
+      } catch (e) {
+        console.warn('fetchCustomerByAuthId exception:', e);
+        return null;
+      }
+    },
+
     saveCustomerToCloud: async function (cust) {
       const sb = this.getClient();
       if (!sb) return null;
       try {
+        let targetId = String(cust.id);
+        // If auth_user_id is present, check if a row already exists to avoid unique constraint collisions
+        if (cust.auth_user_id) {
+          const { data: existing } = await sb.from('customers')
+            .select('id, profile_completed')
+            .or(`auth_user_id.eq.${cust.auth_user_id},id.eq.${cust.id}`)
+            .limit(1)
+            .maybeSingle();
+          if (existing && existing.id) {
+            targetId = existing.id;
+          }
+        }
+
         const payload = {
-          id: String(cust.id),
+          id: targetId,
           auth_user_id: cust.auth_user_id || null,
           name: cust.name || cust.full_name,
           full_name: cust.full_name || cust.name,
@@ -565,7 +610,7 @@
           alternate_mobile: cust.alternate_mobile || null,
           date_of_birth: cust.date_of_birth || null,
           gender: cust.gender || null,
-          profile_completed: cust.profile_completed !== false,
+          profile_completed: cust.profile_completed === true,
           account_status: cust.account_status || 'Active',
           preferred_contact: cust.preferred_contact || 'WhatsApp',
           whatsapp_opt_in: cust.whatsapp_opt_in !== false,
@@ -583,7 +628,7 @@
         };
         const { data, error } = await sb.from('customers').upsert(payload, { onConflict: 'id' });
         if (error) console.warn('saveCustomerToCloud error:', error.message);
-        return data;
+        return data || payload;
       } catch (e) {
         console.warn('saveCustomerToCloud exception:', e);
         return null;

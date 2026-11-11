@@ -4347,7 +4347,7 @@
         isProductsLoading = false;
         if (notifyUI) {
           const hash = window.location.hash || '#/';
-          if (!hash.startsWith('#/admin') && !hash.startsWith('#/login') && !hash.startsWith('#/register') && !hash.startsWith('#/forgot-password') && !hash.startsWith('#/account')) {
+          if (!hash.startsWith('#/admin') && !hash.startsWith('#/login') && !hash.startsWith('#/register') && !hash.startsWith('#/forgot-password') && !hash.startsWith('#/account') && !hash.startsWith('#/complete-profile') && !hash.includes('access_token=') && !hash.includes('error=') && !hash.startsWith('#/auth-callback')) {
             navigate();
           }
         }
@@ -4431,6 +4431,22 @@
       // Update navigation link active state
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
+      // ── Handle Supabase Google OAuth Callback (Implicit fragment, Query code/error, or #/auth-callback) ──
+      const hasOAuthToken = hash.includes('access_token=') || hash.includes('token_type=');
+      const hasOAuthError = hash.includes('error=') || (window.location.search && window.location.search.includes('error='));
+      const hasOAuthCode = window.location.search && window.location.search.includes('code=');
+      const isCallbackRoute = hash.startsWith('#/auth-callback');
+
+      if (hasOAuthToken || hasOAuthError || hasOAuthCode || isCallbackRoute) {
+        if (typeof SFCustomerViews !== 'undefined' && typeof SFCustomerViews.renderAuthCallbackLoading === 'function') {
+          SFCustomerViews.renderAuthCallbackLoading('appRoot', hasOAuthError ? 'Reviewing authentication response...' : 'Securing patron session...');
+        }
+        if (typeof SFCustomerAuth !== 'undefined' && typeof SFCustomerAuth.handleOAuthCallback === 'function') {
+          SFCustomerAuth.handleOAuthCallback();
+        }
+        return;
+      }
+
       if (hash.startsWith('#/product/')) {
         const id = parseInt(hash.replace('#/product/', ''), 10);
         renderPDPView(id);
@@ -4445,18 +4461,50 @@
       } else if (hash === '#/contact') {
         renderContactView();
       } else if (hash.startsWith('#/login')) {
+        if (typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated()) {
+          if (SFCustomerAuth.isProfileComplete()) {
+            window.location.hash = '#/account';
+            return;
+          } else {
+            window.location.hash = '#/account/complete-profile';
+            return;
+          }
+        }
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderLogin('appRoot');
       } else if (hash.startsWith('#/register')) {
+        if (typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated()) {
+          if (SFCustomerAuth.isProfileComplete()) {
+            window.location.hash = '#/account';
+            return;
+          } else {
+            window.location.hash = '#/account/complete-profile';
+            return;
+          }
+        }
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderRegister('appRoot');
       } else if (hash.startsWith('#/forgot-password')) {
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderForgotPassword('appRoot');
       } else if (hash.startsWith('#/reset-password')) {
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderResetPassword('appRoot');
-      } else if (hash.startsWith('#/complete-profile')) {
+      } else if (hash.startsWith('#/account/complete-profile') || hash.startsWith('#/complete-profile')) {
+        // Guard: Customer must be logged in to complete profile
+        if (typeof SFCustomerAuth !== 'undefined' && !SFCustomerAuth.isAuthenticated()) {
+          window.location.hash = '#/login';
+          return;
+        }
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderCompleteProfile('appRoot');
-      } else if (hash.startsWith('#/auth-callback')) {
-        if (typeof SFCustomerAuth !== 'undefined') SFCustomerAuth.handleOAuthCallback();
       } else if (hash.startsWith('#/account')) {
+        // Guard: Customer must be logged in and profile must be completed to access account portal
+        if (typeof SFCustomerAuth !== 'undefined') {
+          if (!SFCustomerAuth.isAuthenticated()) {
+            window.location.hash = '#/login';
+            return;
+          }
+          if (!SFCustomerAuth.isProfileComplete()) {
+            window.location.hash = '#/account/complete-profile';
+            return;
+          }
+        }
         const orderDetailMatch = hash.match(/#\/account\/orders\/([a-z0-9_-]+)/i);
         if (orderDetailMatch) {
           if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderOrderDetail(orderDetailMatch[1], 'appRoot');

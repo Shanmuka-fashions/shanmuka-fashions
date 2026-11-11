@@ -839,6 +839,70 @@
       }
     },
 
+    // ── 5C. OAUTH CALLBACK LOADING VIEW ──
+    renderAuthCallbackLoading: function (containerId = 'appRoot', statusMessage = 'Authenticating with Google...') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="sf-auth-split-wrapper" style="min-height: 85vh; background: #F5EBDD; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+          <div class="sf-auth-card" style="max-width: 480px; width: 100%; text-align: center; padding: 48px 32px; box-shadow: 0 16px 40px rgba(59, 43, 37, 0.12); border: 1px solid #D8C3A5; border-radius: 6px; background: #FFFFFF;">
+            <div style="margin-bottom: 24px;">
+              <img src="logo.png" alt="Shanmuka Fashions Emblem" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid #B58A45; padding: 4px; background: #3B2B25; display: inline-block;">
+            </div>
+            
+            <div class="sf-auth-spinner"></div>
+
+            <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #3B2B25; margin-bottom: 8px; font-weight: 600;">Authenticating Patron Session</h2>
+            <p style="color: #76675D; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Securing your connection with Shanmuka Fashions Atelier.</p>
+
+            <div style="background: #FDFBF8; border: 1px solid #EFE4D6; border-radius: 4px; padding: 12px 16px; font-size: 13px; color: #8C6239; font-weight: 500;">
+              ✨ ${statusMessage}
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    // ── 5D. OAUTH CALLBACK ERROR VIEW ──
+    renderAuthError: function (containerId = 'appRoot', errorMessage = 'Authentication could not be completed.') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="sf-auth-split-wrapper" style="min-height: 85vh; background: #F5EBDD; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+          <div class="sf-auth-card" style="max-width: 500px; width: 100%; text-align: center; padding: 44px 32px; box-shadow: 0 16px 40px rgba(59, 43, 37, 0.12); border: 1px solid #FFDCD4; border-radius: 6px; background: #FFFFFF;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #FFEBEE; color: #C62828; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 18px; border: 1px solid #FFCDD2;">
+              ⚠️
+            </div>
+
+            <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #3B2B25; margin-bottom: 8px; font-weight: 600;">Google Sign-In Notice</h2>
+            <p style="color: #76675D; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">${errorMessage}</p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 24px;">
+              <button onclick="SFCustomerAuth.continueWithGoogle()" class="sf-auth-btn-google" style="margin-bottom: 0;">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                  <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+                  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+                </svg>
+                <span>Try Google Sign-In Again</span>
+              </button>
+
+              <a href="#/login" class="sf-auth-btn-primary" style="display: block; text-decoration: none; padding: 12px; font-size: 13.5px;">
+                Sign In with Email & Password
+              </a>
+
+              <a href="#/" class="sf-auth-btn-outline" style="display: block; text-decoration: none; padding: 10px; font-size: 13px; color: #76675D; border-color: #D8C3A5;">
+                &larr; Return to Boutique Home
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
     // ── 6. CUSTOMER ACCOUNT PORTAL VIEW (#/account/*) ──
     renderAccountPortal: function (subtab = 'profile', containerId = 'appRoot') {
       const container = document.getElementById(containerId);
@@ -847,6 +911,12 @@
       // Route Guard: Require Customer Authentication
       if (!SFCustomerAuth.isAuthenticated()) {
         window.location.hash = `#/login?redirect=${encodeURIComponent(window.location.hash || '#/account')}`;
+        return;
+      }
+
+      // Route Guard: Require Mandatory Profile Completion for Incomplete Accounts
+      if (!SFCustomerAuth.isProfileComplete()) {
+        window.location.hash = '#/account/complete-profile';
         return;
       }
 
