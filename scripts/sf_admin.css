@@ -1638,3 +1638,43 @@
   padding-top: 8px;
   border-top: 1px solid #F0E6D8;
 }
+
+/* ── Admin Customer Management Styles ── */
+.sf-select-sm {
+  background: #FFFFFF;
+  border: 1px solid #D8C3A5;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: #3B2B25;
+  outline: none;
+  cursor: pointer;
+}
+.sf-select-sm:focus {
+  border-color: #A77950;
+}
+
+.sf-tab-pill {
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  padding: 8px 14px 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7A695E;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.sf-tab-pill:hover {
+  color: #3B2B25;
+}
+.sf-tab-pill.active {
+  color: #3B2B25;
+  border-bottom-color: #A77950;
+}
+
+.sf-modal-xl {
+  width: 900px !important;
+  max-width: 95vw !important;
+}

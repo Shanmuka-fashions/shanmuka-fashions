@@ -2051,73 +2051,846 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 6. CUSTOMER PROFILES TAB
+  // 6. CUSTOMER PROFILES & ATELIER PATRON DIRECTORY
   // ═══════════════════════════════════════════════════════════════════════════
+  let adminCustSearch = '';
+  let adminCustDateFilter = 'ALL';
+  let adminCustStatusFilter = 'ALL';
+  let adminCustActivityFilter = 'ALL';
+  let adminCustSort = 'NEWEST';
+  let adminCustPage = 1;
+  const adminCustPageSize = 10;
+  let adminCustActiveDetailTab = 'personal';
+  let adminCustOrderSubFilter = 'ALL';
+
   function renderCustomersTab(db) {
-    const customers = db.getCustomers();
+    const rawCustomers = db.getCustomers();
+
+    // 1. Filter by Search Query
+    const q = adminCustSearch.toLowerCase().trim();
+    let filtered = rawCustomers.filter(c => {
+      if (!q) return true;
+      const idStr = String(c.id || '').toLowerCase();
+      const nameStr = String(c.full_name || c.name || '').toLowerCase();
+      const emailStr = String(c.email || '').toLowerCase();
+      const phoneStr = String(c.mobile_number || c.phone || '').replace(/[^0-9]/g, '');
+      return idStr.includes(q) || nameStr.includes(q) || emailStr.includes(q) || phoneStr.includes(q.replace(/[^0-9]/g, ''));
+    });
+
+    // 2. Filter by Registration Date
+    const now = new Date();
+    if (adminCustDateFilter !== 'ALL') {
+      filtered = filtered.filter(c => {
+        if (!c.created_at) return false;
+        const d = new Date(c.created_at);
+        const diffDays = (now - d) / (1000 * 60 * 60 * 24);
+        if (adminCustDateFilter === 'TODAY') return diffDays <= 1;
+        if (adminCustDateFilter === '7DAYS') return diffDays <= 7;
+        if (adminCustDateFilter === '30DAYS') return diffDays <= 30;
+        if (adminCustDateFilter === 'YEAR') return d.getFullYear() === now.getFullYear();
+        return true;
+      });
+    }
+
+    // 3. Filter by Customer Status
+    if (adminCustStatusFilter !== 'ALL') {
+      filtered = filtered.filter(c => {
+        const st = (c.account_status || 'Active').toUpperCase();
+        if (adminCustStatusFilter === 'ACTIVE') return st === 'ACTIVE';
+        if (adminCustStatusFilter === 'INACTIVE') return st === 'INACTIVE';
+        if (adminCustStatusFilter === 'INCOMPLETE') return c.profile_completed === false;
+        return true;
+      });
+    }
+
+    // 4. Filter by Order Activity
+    if (adminCustActivityFilter !== 'ALL') {
+      filtered = filtered.filter(c => {
+        const ordersCount = Number(c.total_orders || 0);
+        const spent = Number(c.total_spent || 0);
+        if (adminCustActivityFilter === 'HAS_ORDERS') return ordersCount > 0;
+        if (adminCustActivityFilter === 'ZERO_ORDERS') return ordersCount === 0;
+        if (adminCustActivityFilter === 'VIP') return spent >= 20000;
+        return true;
+      });
+    }
+
+    // 5. Sorting
+    filtered.sort((a, b) => {
+      if (adminCustSort === 'NEWEST') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      if (adminCustSort === 'OLDEST') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      if (adminCustSort === 'SPEND') return (Number(b.total_spent) || 0) - (Number(a.total_spent) || 0);
+      if (adminCustSort === 'ORDERS') return (Number(b.total_orders) || 0) - (Number(a.total_orders) || 0);
+      return 0;
+    });
+
+    // 6. Pagination
+    const totalCount = filtered.length;
+    const totalPages = Math.ceil(totalCount / adminCustPageSize) || 1;
+    if (adminCustPage > totalPages) adminCustPage = totalPages;
+    const startIndex = (adminCustPage - 1) * adminCustPageSize;
+    const paginatedCustomers = filtered.slice(startIndex, startIndex + adminCustPageSize);
+
+    // Summary KPIs
+    const googleCount = rawCustomers.filter(c => c.auth_user_id || c.is_google_auth).length;
+    const activeCount = rawCustomers.filter(c => (c.account_status || 'Active').toLowerCase() === 'active').length;
+    const netPatronSpend = rawCustomers.reduce((sum, c) => sum + (Number(c.total_spent) || 0), 0);
 
     return `
       <div class="sf-view-container">
         <div class="sf-view-header">
           <div>
-            <h1>Patron & Customer Profiles</h1>
-            <p>Lifetime purchase tracking, wedding trousseau notes, and contact directory.</p>
+            <h1>Customer Management & Patron Directory</h1>
+            <p>Google authenticated accounts, profile completion tracking, lifetime order ledger, and concierge notes.</p>
           </div>
-          <button class="sf-btn-primary" onclick="SFAdmin.openAddCustomerModal(false)">+ Add Customer</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="sf-btn-outline" onclick="SFAdmin.exportCustomersCSV()">📥 Export Customers CSV</button>
+            <button class="sf-btn-primary" onclick="SFAdmin.openAddCustomerModal(false)">+ Add Customer</button>
+          </div>
         </div>
 
+        <!-- Top Patron Metrics Cards -->
+        <div class="sf-grid-4col" style="margin-bottom: 24px;">
+          <div class="sf-card sf-kpi-card">
+            <span class="sf-kpi-num">${rawCustomers.length}</span>
+            <span class="sf-kpi-label">Registered Customers</span>
+          </div>
+          <div class="sf-card sf-kpi-card">
+            <span class="sf-kpi-num" style="color: #1565C0;">${googleCount}</span>
+            <span class="sf-kpi-label">Google Verified Patrons</span>
+          </div>
+          <div class="sf-card sf-kpi-card">
+            <span class="sf-kpi-num" style="color: #2E7D32;">${activeCount}</span>
+            <span class="sf-kpi-label">Active Patron Accounts</span>
+          </div>
+          <div class="sf-card sf-kpi-card">
+            <span class="sf-kpi-num" style="color: #A77950;">${formatMoney(netPatronSpend)}</span>
+            <span class="sf-kpi-label">Completed Purchase Volume</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="sf-card" style="margin-bottom: 20px; padding: 16px 20px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="flex: 1; min-width: 260px;">
+              <input type="text" id="adminCustSearchInput" class="sf-search-input" placeholder="Search by name, email, mobile, or customer ID..." value="${adminCustSearch}" oninput="SFAdmin.handleCustomerSearch(this.value)">
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <!-- Registration Date Filter -->
+              <select class="sf-select-sm" onchange="SFAdmin.handleCustomerDateFilter(this.value)" title="Registration Date">
+                <option value="ALL" ${adminCustDateFilter === 'ALL' ? 'selected' : ''}>All Dates</option>
+                <option value="TODAY" ${adminCustDateFilter === 'TODAY' ? 'selected' : ''}>Today</option>
+                <option value="7DAYS" ${adminCustDateFilter === '7DAYS' ? 'selected' : ''}>Last 7 Days</option>
+                <option value="30DAYS" ${adminCustDateFilter === '30DAYS' ? 'selected' : ''}>Last 30 Days</option>
+                <option value="YEAR" ${adminCustDateFilter === 'YEAR' ? 'selected' : ''}>This Year</option>
+              </select>
+
+              <!-- Account Status Filter -->
+              <select class="sf-select-sm" onchange="SFAdmin.handleCustomerStatusFilter(this.value)" title="Account Status">
+                <option value="ALL" ${adminCustStatusFilter === 'ALL' ? 'selected' : ''}>All Statuses</option>
+                <option value="ACTIVE" ${adminCustStatusFilter === 'ACTIVE' ? 'selected' : ''}>Active</option>
+                <option value="INACTIVE" ${adminCustStatusFilter === 'INACTIVE' ? 'selected' : ''}>Inactive</option>
+                <option value="INCOMPLETE" ${adminCustStatusFilter === 'INCOMPLETE' ? 'selected' : ''}>Profile Incomplete</option>
+              </select>
+
+              <!-- Order Activity Filter -->
+              <select class="sf-select-sm" onchange="SFAdmin.handleCustomerActivityFilter(this.value)" title="Order Activity">
+                <option value="ALL" ${adminCustActivityFilter === 'ALL' ? 'selected' : ''}>All Activity</option>
+                <option value="HAS_ORDERS" ${adminCustActivityFilter === 'HAS_ORDERS' ? 'selected' : ''}>Has Orders</option>
+                <option value="VIP" ${adminCustActivityFilter === 'VIP' ? 'selected' : ''}>VIP Spenders (>₹20k)</option>
+                <option value="ZERO_ORDERS" ${adminCustActivityFilter === 'ZERO_ORDERS' ? 'selected' : ''}>Zero Orders</option>
+              </select>
+
+              <!-- Sort Filter -->
+              <select class="sf-select-sm" onchange="SFAdmin.handleCustomerSort(this.value)" title="Sort Order">
+                <option value="NEWEST" ${adminCustSort === 'NEWEST' ? 'selected' : ''}>Newest First</option>
+                <option value="OLDEST" ${adminCustSort === 'OLDEST' ? 'selected' : ''}>Oldest First</option>
+                <option value="SPEND" ${adminCustSort === 'SPEND' ? 'selected' : ''}>Highest Spending</option>
+                <option value="ORDERS" ${adminCustSort === 'ORDERS' ? 'selected' : ''}>Most Orders</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Listing Table -->
         <div class="sf-card">
           <div class="sf-table-responsive">
             <table class="sf-table">
               <thead>
                 <tr>
-                  <th>Patron Name</th>
-                  <th>Contact Details</th>
-                  <th>Location</th>
-                  <th>Total Orders</th>
-                  <th>Lifetime Spend</th>
-                  <th>Patron Notes</th>
-                  <th>Actions</th>
+                  <th>Customer ID</th>
+                  <th>Customer Name</th>
+                  <th>Email Address</th>
+                  <th>Mobile Number</th>
+                  <th>City</th>
+                  <th>State</th>
+                  <th>Registration Date</th>
+                  <th style="text-align: center;">Total Orders</th>
+                  <th style="text-align: right;">Total Purchase Value</th>
+                  <th>Last Order Date</th>
+                  <th>Customer Status</th>
+                  <th style="text-align: center;">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                ${customers.map(c => `
+                ${paginatedCustomers.length === 0 ? `
                   <tr>
-                    <td><b>${c.name}</b></td>
-                    <td>
-                      <a href="tel:${c.phone}">${c.phone}</a>
-                      <small style="display:block; color: var(--secondary-text);">${c.email || ''}</small>
-                    </td>
-                    <td>${c.city || '—'}, ${c.state || ''}</td>
-                    <td><b>${c.total_orders || 0}</b></td>
-                    <td><b>${formatMoney(c.total_spent)}</b></td>
-                    <td style="max-width: 250px;"><small>${c.notes || '—'}</small></td>
-                    <td>
-                      <a href="https://wa.me/${(c.phone || '').replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(c.name)}!%20Greeting%20from%20Shanmuka%20Fashions." target="_blank" class="sf-btn-sm" style="text-decoration:none;">💬 WhatsApp</a>
+                    <td colspan="12" style="text-align: center; padding: 48px 20px; color: #7A695E;">
+                      No customer records found matching your filters.
                     </td>
                   </tr>
-                `).join('')}
+                ` : paginatedCustomers.map(c => {
+                  const regDate = c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+                  const lastOrder = c.last_order_date ? new Date(c.last_order_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Never';
+                  const isGoogle = !!(c.auth_user_id || c.is_google_auth);
+                  const status = (c.account_status || 'Active').toLowerCase();
+                  const isIncomplete = c.profile_completed === false;
+
+                  return `
+                    <tr style="cursor: pointer;" onclick="if(!event.target.closest('button,a')) SFAdmin.openCustomerDetailsModal('${c.id}')">
+                      <td><code style="font-weight: 700; color: #3B2B25;">#${c.id}</code></td>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <b>${c.full_name || c.name || 'Patron'}</b>
+                          ${isGoogle ? `<span title="Google Authenticated" style="font-size: 11px; background: #E8F0FE; color: #1967D2; padding: 2px 6px; border-radius: 4px; font-weight: 600;">G</span>` : ''}
+                        </div>
+                      </td>
+                      <td>
+                        <a href="mailto:${c.email}" style="color: #7A695E; text-decoration: none;">${c.email || '—'}</a>
+                      </td>
+                      <td>
+                        <a href="tel:${c.mobile_number || c.phone}" style="color: #3B2B25; font-weight: 600; text-decoration: none;">
+                          ${c.mobile_number || c.phone || '—'}
+                        </a>
+                      </td>
+                      <td>${c.city || '—'}</td>
+                      <td>${c.state || '—'}</td>
+                      <td style="white-space: nowrap; font-size: 12.5px; color: #7A695E;">${regDate}</td>
+                      <td style="text-align: center;"><b>${c.total_orders || 0}</b></td>
+                      <td style="text-align: right; font-weight: 700; color: #672D46;">
+                        ${formatMoney(c.total_spent || 0)}
+                      </td>
+                      <td style="white-space: nowrap; font-size: 12.5px; color: #7A695E;">${lastOrder}</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                          <span class="sf-status-badge ${status}">${c.account_status || 'Active'}</span>
+                          ${isIncomplete ? `<span style="font-size: 10px; color: #E65100; font-weight: 600;">⚠️ Incomplete</span>` : ''}
+                        </div>
+                      </td>
+                      <td style="text-align: center; white-space: nowrap;">
+                        <button class="sf-btn-outline" style="font-size: 11px; padding: 4px 10px;" onclick="SFAdmin.openCustomerDetailsModal('${c.id}')">
+                          View Profile &rarr;
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
               </tbody>
             </table>
           </div>
-        </div>
 
-        <!-- Sticky Bulk Selection Actions Bar -->
-        ${selectedProductIds.size > 0 ? `
-          <div class="sf-bulk-actions-bar">
+          <!-- Pagination Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid #F0E6D8; font-size: 13px; color: #7A695E; flex-wrap: wrap; gap: 10px;">
             <div>
-              <b>${selectedProductIds.size}</b> saree(s) selected for batch printing.
+              Showing <b>${totalCount ? startIndex + 1 : 0}</b> to <b>${Math.min(startIndex + adminCustPageSize, totalCount)}</b> of <b>${totalCount}</b> patrons
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button class="sf-btn-outline" style="border-color: #F5EBDD; color: #F5EBDD; padding: 6px 12px; font-size: 12px;" onclick="SFAdmin.clearProductSelection()">Deselect All</button>
-              <button class="sf-btn-primary" style="background: var(--antique-gold); color: #FFF; padding: 8px 16px; font-size: 13px;" onclick="SFAdmin.printSelectedProductLabels()">
-                🏷️ Print Stickers for Selected (${selectedProductIds.size}) &rarr;
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="sf-btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="SFAdmin.changeCustomerPage(${adminCustPage - 1})" ${adminCustPage <= 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                &larr; Previous
+              </button>
+              <span>Page <b>${adminCustPage}</b> of <b>${totalPages}</b></span>
+              <button class="sf-btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="SFAdmin.changeCustomerPage(${adminCustPage + 1})" ${adminCustPage >= totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                Next &rarr;
               </button>
             </div>
           </div>
-        ` : ''}
+        </div>
       </div>
     `;
+  }
+
+  function handleCustomerSearch(val) {
+    adminCustSearch = val;
+    adminCustPage = 1;
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const root = document.getElementById('appRoot');
+    if (root) root.innerHTML = renderCustomersTab(db);
+  }
+
+  function handleCustomerDateFilter(val) {
+    adminCustDateFilter = val;
+    adminCustPage = 1;
+    render('appRoot', 'customers');
+  }
+
+  function handleCustomerStatusFilter(val) {
+    adminCustStatusFilter = val;
+    adminCustPage = 1;
+    render('appRoot', 'customers');
+  }
+
+  function handleCustomerActivityFilter(val) {
+    adminCustActivityFilter = val;
+    adminCustPage = 1;
+    render('appRoot', 'customers');
+  }
+
+  function handleCustomerSort(val) {
+    adminCustSort = val;
+    adminCustPage = 1;
+    render('appRoot', 'customers');
+  }
+
+  function changeCustomerPage(p) {
+    adminCustPage = p;
+    render('appRoot', 'customers');
+  }
+
+  function exportCustomersCSV() {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const customers = db.getCustomers();
+
+    const headers = [
+      'Customer ID', 'Full Name', 'Email', 'Mobile Number', 'City', 'State', 'District', 'PIN Code',
+      'Registration Date', 'Total Orders', 'Total Spent INR', 'Last Order Date', 'Account Status',
+      'Profile Completed', 'Google Auth', 'Preferred Contact'
+    ];
+
+    const rows = customers.map(c => [
+      c.id,
+      `"${(c.full_name || c.name || '').replace(/"/g, '""')}"`,
+      c.email || '',
+      c.mobile_number || c.phone || '',
+      `"${(c.city || '').replace(/"/g, '""')}"`,
+      `"${(c.state || '').replace(/"/g, '""')}"`,
+      `"${(c.district || '').replace(/"/g, '""')}"`,
+      c.pincode || '',
+      c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : '',
+      c.total_orders || 0,
+      c.total_spent || 0,
+      c.last_order_date ? new Date(c.last_order_date).toISOString().split('T')[0] : '',
+      c.account_status || 'Active',
+      c.profile_completed !== false ? 'Yes' : 'No',
+      c.auth_user_id || c.is_google_auth ? 'Yes' : 'No',
+      c.preferred_contact || 'WhatsApp'
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Shanmuka_Patrons_Directory_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 6B. DETAILED CUSTOMER PROFILE MODAL (ADMIN VIEW)
+  // ═══════════════════════════════════════════════════════════════════════════
+  function openCustomerDetailsModal(customerId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const summary = db.getCustomerSummary(customerId);
+    if (!summary || !summary.customer) {
+      alert('Could not locate customer dossier.');
+      return;
+    }
+
+    const c = summary.customer;
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    adminCustActiveDetailTab = 'personal';
+    adminCustOrderSubFilter = 'ALL';
+
+    renderCustomerDetailsModalHTML(customerId);
+  }
+
+  function renderCustomerDetailsModalHTML(customerId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const summary = db.getCustomerSummary(customerId);
+    if (!summary || !summary.customer) return;
+
+    const c = summary.customer;
+    const container = document.getElementById('sfModalContainer');
+    if (!container) return;
+
+    const addresses = db.getCustomerAddresses(c.id);
+    const notes = db.getCustomerNotes(c.id);
+    const isGoogle = !!(c.auth_user_id || c.is_google_auth);
+    const isActive = (c.account_status || 'Active').toLowerCase() === 'active';
+
+    // Orders filtered by sub-tab
+    let ordersToShow = summary.orders || [];
+    if (adminCustOrderSubFilter === 'DELIVERED') {
+      ordersToShow = ordersToShow.filter(o => (o.order_status || '').toLowerCase() === 'delivered');
+    } else if (adminCustOrderSubFilter === 'ACTIVE') {
+      ordersToShow = ordersToShow.filter(o => ['pending', 'processing', 'confirmed', 'packed', 'shipped', 'dispatched', 'out for delivery'].includes((o.order_status || '').toLowerCase()));
+    } else if (adminCustOrderSubFilter === 'CANCELLED') {
+      ordersToShow = ordersToShow.filter(o => (o.order_status || '').toLowerCase() === 'cancelled');
+    } else if (adminCustOrderSubFilter === 'RETURNED') {
+      ordersToShow = ordersToShow.filter(o => ['returned', 'return requested'].includes((o.order_status || '').toLowerCase()));
+    } else if (adminCustOrderSubFilter === 'REFUNDED') {
+      ordersToShow = ordersToShow.filter(o => (o.order_status || '').toLowerCase().includes('refund'));
+    }
+
+    container.innerHTML = `
+      <div class="sf-modal-backdrop" onclick="if(event.target===this) SFAdmin.closeModal()">
+        <div class="sf-modal-card sf-modal-xl" style="max-width: 900px; max-height: 90vh; display: flex; flex-direction: column;">
+          <!-- Modal Top Header -->
+          <div class="sf-modal-header" style="padding: 20px 24px; border-bottom: 1px solid #E5D7C5; background: #FAF6F0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: #3B2B25; color: #F5EBDD; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; font-family: 'Playfair Display', serif;">
+                  ${(c.full_name || c.name || 'P').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #3B2B25; margin: 0;">
+                      ${c.full_name || c.name}
+                    </h2>
+                    ${isGoogle ? `<span style="font-size: 11px; background: #E8F0FE; color: #1967D2; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #C2E7FF;">✓ Google Verified</span>` : ''}
+                    <span class="sf-status-badge ${isActive ? 'active' : 'inactive'}">${c.account_status || 'Active'}</span>
+                    ${c.profile_completed !== false ? `
+                      <span style="font-size: 11px; background: #E8F5E9; color: #2E7D32; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Profile 100% Complete</span>
+                    ` : `
+                      <span style="font-size: 11px; background: #FFF3E0; color: #E65100; font-weight: 700; padding: 2px 8px; border-radius: 4px;">⚠️ Profile Incomplete</span>
+                    `}
+                  </div>
+                  <div style="font-size: 12.5px; color: #7A695E; margin-top: 3px;">
+                    Patron ID: <b>#${c.id}</b> &bull; Email: <b>${c.email || '—'}</b> &bull; Phone: <b>${c.mobile_number || c.phone || '—'}</b>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="sf-btn-outline" style="font-size: 11.5px; padding: 6px 12px;" onclick="SFAdmin.toggleCustomerStatus('${c.id}')">
+                  ${isActive ? 'Mark Inactive' : 'Mark Active'}
+                </button>
+                <button type="button" class="sf-btn-outline" style="font-size: 11.5px; padding: 6px 12px;" onclick="SFAdmin.exportSingleCustomerCSV('${c.id}')">
+                  📥 Export Dossier
+                </button>
+                <button class="sf-modal-close" onclick="SFAdmin.closeModal()">×</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Navigation Tabs -->
+          <div style="display: flex; gap: 12px; padding: 12px 24px 0 24px; border-bottom: 1px solid #E5D7C5; background: #FFFFFF; overflow-x: auto;">
+            <button class="sf-tab-pill ${adminCustActiveDetailTab === 'personal' ? 'active' : ''}" onclick="SFAdmin.switchCustomerDetailTab('${c.id}', 'personal')">
+              A. Personal Details
+            </button>
+            <button class="sf-tab-pill ${adminCustActiveDetailTab === 'addresses' ? 'active' : ''}" onclick="SFAdmin.switchCustomerDetailTab('${c.id}', 'addresses')">
+              B. Saved Addresses (${addresses.length})
+            </button>
+            <button class="sf-tab-pill ${adminCustActiveDetailTab === 'summary' ? 'active' : ''}" onclick="SFAdmin.switchCustomerDetailTab('${c.id}', 'summary')">
+              C. Purchase Summary
+            </button>
+            <button class="sf-tab-pill ${adminCustActiveDetailTab === 'orders' ? 'active' : ''}" onclick="SFAdmin.switchCustomerDetailTab('${c.id}', 'orders')">
+              D. Complete Order History (${summary.total_orders})
+            </button>
+            <button class="sf-tab-pill ${adminCustActiveDetailTab === 'notes' ? 'active' : ''}" onclick="SFAdmin.switchCustomerDetailTab('${c.id}', 'notes')">
+              E. Internal Notes (${notes.length})
+            </button>
+          </div>
+
+          <!-- Modal Scrollable Body -->
+          <div style="padding: 24px; overflow-y: auto; flex: 1;">
+            ${adminCustActiveDetailTab === 'personal' ? `
+              <!-- SECTION A: Personal Details -->
+              <div class="sf-form-grid-2" style="margin-bottom: 24px;">
+                <div class="sf-form-group">
+                  <label>Customer ID</label>
+                  <input type="text" value="${c.id}" disabled style="background: #FAF6F0;">
+                </div>
+                <div class="sf-form-group">
+                  <label>Supabase Auth User ID</label>
+                  <input type="text" value="${c.auth_user_id || 'Not registered via Supabase Auth'}" disabled style="background: #FAF6F0;">
+                </div>
+              </div>
+
+              <div class="sf-form-grid-2">
+                <div class="sf-form-group">
+                  <label>Full Legal Name</label>
+                  <input type="text" id="dtCustName" value="${c.full_name || c.name || ''}">
+                </div>
+                <div class="sf-form-group">
+                  <label>Email Address (Verified)</label>
+                  <input type="email" value="${c.email || ''}" disabled style="background: #FAF6F0; cursor: not-allowed;">
+                </div>
+              </div>
+
+              <div class="sf-form-grid-2">
+                <div class="sf-form-group">
+                  <label>Primary Mobile Number</label>
+                  <input type="tel" id="dtCustMobile" value="${c.mobile_number || c.phone || ''}">
+                </div>
+                <div class="sf-form-group">
+                  <label>Alternate Mobile Number</label>
+                  <input type="tel" id="dtCustAltMobile" value="${c.alternate_mobile || ''}">
+                </div>
+              </div>
+
+              <div class="sf-form-grid-2">
+                <div class="sf-form-group">
+                  <label>Date of Birth</label>
+                  <input type="date" id="dtCustDOB" value="${c.date_of_birth || ''}">
+                </div>
+                <div class="sf-form-group">
+                  <label>Gender</label>
+                  <select id="dtCustGender">
+                    <option value="">Select Gender</option>
+                    <option value="Female" ${c.gender === 'Female' ? 'selected' : ''}>Female</option>
+                    <option value="Male" ${c.gender === 'Male' ? 'selected' : ''}>Male</option>
+                    <option value="Non-binary / Other" ${c.gender === 'Non-binary / Other' ? 'selected' : ''}>Non-binary / Other</option>
+                    <option value="Prefer not to say" ${c.gender === 'Prefer not to say' ? 'selected' : ''}>Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="sf-form-grid-2">
+                <div class="sf-form-group">
+                  <label>Registration Date</label>
+                  <input type="text" value="${c.created_at ? new Date(c.created_at).toLocaleString('en-IN') : '—'}" disabled style="background: #FAF6F0;">
+                </div>
+                <div class="sf-form-group">
+                  <label>Last Login Date</label>
+                  <input type="text" value="${c.last_login_at ? new Date(c.last_login_at).toLocaleString('en-IN') : '—'}" disabled style="background: #FAF6F0;">
+                </div>
+              </div>
+
+              <div class="sf-form-group" style="margin-top: 14px;">
+                <button type="button" class="sf-btn-primary" onclick="SFAdmin.saveCustomerProfileUpdates('${c.id}')">
+                  Save Permitted Profile Updates
+                </button>
+              </div>
+            ` : adminCustActiveDetailTab === 'addresses' ? `
+              <!-- SECTION B: Address Details -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: 'Playfair Display', serif; color: #3B2B25;">Saved Delivery Addresses</h3>
+                <span style="font-size: 12px; color: #7A695E;">${addresses.length} Address(es) on Record</span>
+              </div>
+
+              ${addresses.length === 0 ? `
+                <div style="padding: 32px; text-align: center; color: #7A695E; background: #FAF6F0; border-radius: 6px; border: 1px dashed #D8C3A5;">
+                  No delivery addresses saved for this customer yet.
+                </div>
+              ` : `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                  ${addresses.map(a => `
+                    <div style="background: #FFFFFF; border: 1.5px solid ${a.is_default ? '#A77950' : '#E5D7C5'}; border-radius: 6px; padding: 16px; position: relative;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-weight: 700; color: #3B2B25; font-size: 13.5px;">${a.address_type || 'Home'}</span>
+                        ${a.is_default ? `<span style="background: #E8F5E9; color: #2E7D32; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Default Address</span>` : ''}
+                      </div>
+                      <div style="font-size: 13px; color: #5D4037; line-height: 1.5;">
+                        <strong>${a.full_name || c.full_name || 'Recipient'}</strong><br>
+                        ${a.house_number ? `${a.house_number}, ` : ''}${a.street}<br>
+                        ${a.landmark ? `Landmark: ${a.landmark}<br>` : ''}
+                        ${a.city}${a.district ? `, ${a.district}` : ''}<br>
+                        ${a.state} - <b>${a.pincode}</b><br>
+                        ${a.country || 'India'}<br>
+                        Contact: ${a.phone || c.phone || '—'}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            ` : adminCustActiveDetailTab === 'summary' ? `
+              <!-- SECTION C: Purchase Summary & Real-Time Financial Analytics -->
+              <div style="margin-bottom: 20px;">
+                <h3 style="margin-top: 0; margin-bottom: 4px; font-family: 'Playfair Display', serif; color: #3B2B25;">
+                  Purchase Summary & Financial Analytics
+                </h3>
+                <p style="font-size: 12.5px; color: #7A695E; margin: 0;">
+                  Live metrics calculated strictly from actual order records. Cancelled and returned orders are isolated.
+                </p>
+              </div>
+
+              <!-- Metrics Grid -->
+              <div class="sf-grid-3col" style="gap: 14px; margin-bottom: 20px;">
+                <div class="sf-card" style="padding: 16px; background: #FAF6F0; border-color: #E5D7C5;">
+                  <span style="font-size: 26px; font-weight: 700; color: #3B2B25; display: block;">${summary.total_orders}</span>
+                  <span style="font-size: 12px; color: #7A695E;">Total Orders Placed</span>
+                </div>
+                <div class="sf-card" style="padding: 16px; background: #E8F5E9; border-color: #C8E6C9;">
+                  <span style="font-size: 26px; font-weight: 700; color: #2E7D32; display: block;">${summary.delivered_orders}</span>
+                  <span style="font-size: 12px; color: #2E7D32;">Successfully Delivered Orders</span>
+                </div>
+                <div class="sf-card" style="padding: 16px; background: #F3E5F5; border-color: #E1BEE7;">
+                  <span style="font-size: 26px; font-weight: 700; color: #672D46; display: block;">${formatMoney(summary.completed_spend)}</span>
+                  <span style="font-size: 12px; color: #672D46;">Total Completed Purchases Spend</span>
+                </div>
+              </div>
+
+              <div class="sf-grid-4col" style="gap: 12px; margin-bottom: 20px;">
+                <div class="sf-card" style="padding: 14px; text-align: center;">
+                  <span style="font-size: 20px; font-weight: 700; color: #B58A45; display: block;">${summary.pending_orders}</span>
+                  <span style="font-size: 11px; color: #7A695E;">Pending Orders</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center;">
+                  <span style="font-size: 20px; font-weight: 700; color: #1976D2; display: block;">${summary.processing_orders}</span>
+                  <span style="font-size: 11px; color: #7A695E;">Processing / Loom QC</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center;">
+                  <span style="font-size: 20px; font-weight: 700; color: #00796B; display: block;">${summary.shipped_orders}</span>
+                  <span style="font-size: 11px; color: #7A695E;">In-Transit / Shipped</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center;">
+                  <span style="font-size: 20px; font-weight: 700; color: #2E7D32; display: block;">${summary.delivered_orders}</span>
+                  <span style="font-size: 11px; color: #7A695E;">Delivered</span>
+                </div>
+              </div>
+
+              <div class="sf-grid-4col" style="gap: 12px;">
+                <div class="sf-card" style="padding: 14px; text-align: center; background: #FFEBEE; border-color: #FFCDD2;">
+                  <span style="font-size: 20px; font-weight: 700; color: #C25E5E; display: block;">${summary.cancelled_orders}</span>
+                  <span style="font-size: 11px; color: #C25E5E;">Cancelled Orders</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center; background: #FFF3E0; border-color: #FFE0B2;">
+                  <span style="font-size: 20px; font-weight: 700; color: #E65100; display: block;">${summary.return_requested_orders}</span>
+                  <span style="font-size: 11px; color: #E65100;">Return Requests</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center; background: #ECEFF1; border-color: #CFD8DC;">
+                  <span style="font-size: 20px; font-weight: 700; color: #455A64; display: block;">${summary.returned_orders}</span>
+                  <span style="font-size: 11px; color: #455A64;">Returned Orders</span>
+                </div>
+                <div class="sf-card" style="padding: 14px; text-align: center; background: #EDE7F6; border-color: #D1C4E9;">
+                  <span style="font-size: 20px; font-weight: 700; color: #512DA8; display: block;">${summary.refunded_orders}</span>
+                  <span style="font-size: 11px; color: #512DA8;">Refunded Orders</span>
+                </div>
+              </div>
+            ` : adminCustActiveDetailTab === 'orders' ? `
+              <!-- SECTION D: Complete Order History with Item Snapshots -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h3 style="margin: 0; font-family: 'Playfair Display', serif; color: #3B2B25;">Complete Patron Order History</h3>
+                  <p style="font-size: 12px; color: #7A695E; margin: 2px 0 0 0;">Historical purchases preserve the product name, SKU, price, and delivery snapshot at time of checkout.</p>
+                </div>
+              </div>
+
+              <!-- Sub-Filters for Orders -->
+              <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; border-bottom: 1px solid #F0E6D8;">
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'ALL' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'ALL')">
+                  All (${summary.orders.length})
+                </button>
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'DELIVERED' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'DELIVERED')">
+                  Delivered (${summary.delivered_orders})
+                </button>
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'ACTIVE' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'ACTIVE')">
+                  Active In-Transit (${summary.processing_orders + summary.shipped_orders + summary.pending_orders})
+                </button>
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'CANCELLED' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'CANCELLED')">
+                  Cancelled (${summary.cancelled_orders})
+                </button>
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'RETURNED' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'RETURNED')">
+                  Returns (${summary.returned_orders + summary.return_requested_orders})
+                </button>
+                <button class="sf-filter-pill ${adminCustOrderSubFilter === 'REFUNDED' ? 'active' : ''}" onclick="SFAdmin.setCustomerOrderSubFilter('${c.id}', 'REFUNDED')">
+                  Refunds (${summary.refunded_orders})
+                </button>
+              </div>
+
+              ${ordersToShow.length === 0 ? `
+                <div style="padding: 32px; text-align: center; color: #7A695E; background: #FAF6F0; border-radius: 6px; border: 1px dashed #D8C3A5;">
+                  No orders found in this category.
+                </div>
+              ` : `
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  ${ordersToShow.map(o => {
+                    const st = o.order_status || 'Pending';
+                    const stClass = st.toLowerCase().replace(/\s+/g, '-');
+                    return `
+                      <div class="sf-card" style="padding: 16px; border: 1px solid #E5D7C5;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F0E6D8; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                          <div>
+                            <strong style="font-size: 14px; color: #3B2B25;">Order #${o.order_number || o.id}</strong>
+                            <span style="font-size: 12px; color: #7A695E; margin-left: 10px;">
+                              ${o.created_at ? new Date(o.created_at).toLocaleString('en-IN') : (o.date || '—')} &bull; Channel: <b>${o.channel || 'ONLINE'}</b>
+                            </span>
+                          </div>
+                          <div>
+                            <span class="sf-status-badge ${stClass}">${st}</span>
+                          </div>
+                        </div>
+
+                        <!-- Item Snapshots -->
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                          ${(o.items || []).map(it => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${it.img || it.image || 'assets/kanchipuram-loom.jpg'}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid #D8C3A5;">
+                                <div>
+                                  <b>${it.name || it.product_name || 'Handloom Silk Saree'}</b>
+                                  <span style="font-size: 11px; color: #7A695E; margin-left: 6px;">[${it.sku || 'SKU'}] &times; ${it.qty || 1}</span>
+                                </div>
+                              </div>
+                              <div style="font-weight: 700; color: #672D46;">
+                                ₹${((it.price || it.unit_price || 0) * (it.qty || 1)).toLocaleString('en-IN')}
+                              </div>
+                            </div>
+                          `).join('')}
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed #D8C3A5; font-size: 12px; color: #7A695E; flex-wrap: wrap; gap: 8px;">
+                          <div>
+                            Payment: <b>${(o.payment_method || 'UPI').toUpperCase()}</b> (${o.payment_status || 'Completed'})
+                            ${o.tracking_number ? ` &bull; AWB: <b>${o.tracking_number}</b> (${o.courier || 'Express'})` : ''}
+                          </div>
+                          <div style="font-size: 14px; font-weight: 700; color: #3B2B25;">
+                            Grand Total: ₹${(o.total || 0).toLocaleString('en-IN')}
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            ` : `
+              <!-- SECTION E: Internal Notes -->
+              <div style="margin-bottom: 20px;">
+                <h3 style="margin-top: 0; margin-bottom: 4px; font-family: 'Playfair Display', serif; color: #3B2B25;">
+                  Internal Patron Notes & Sizing Preferences
+                </h3>
+                <p style="font-size: 12px; color: #7A695E; margin: 0;">
+                  Private concierge notes for wedding trousseaus, blouse stitching measurements, and weave preferences.
+                </p>
+              </div>
+
+              <!-- Add Note Form -->
+              <form onsubmit="event.preventDefault(); SFAdmin.handleAddCustomerNote('${c.id}')" style="margin-bottom: 24px;">
+                <div class="sf-form-group">
+                  <label>Add New Internal Atelier Note</label>
+                  <textarea id="dtNewCustNote" rows="2" placeholder="e.g. Patron prefers Kadwa Banarasi weaves; daughter wedding scheduled for Dec 2026..." required></textarea>
+                </div>
+                <button type="submit" class="sf-btn-primary" style="padding: 8px 18px; font-size: 12px;">+ Save Atelier Note</button>
+              </form>
+
+              <!-- Previous Notes List -->
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${notes.length === 0 ? `
+                  <div style="padding: 24px; text-align: center; color: #7A695E; background: #FAF6F0; border-radius: 6px;">
+                    No internal notes recorded for this patron yet.
+                  </div>
+                ` : notes.map(n => `
+                  <div style="background: #FAF6F0; border: 1px solid #E5D7C5; border-radius: 6px; padding: 14px;">
+                    <div style="font-size: 13.5px; color: #3B2B25; margin-bottom: 6px; white-space: pre-wrap;">${n.note}</div>
+                    <div style="font-size: 11px; color: #7A695E; display: flex; justify-content: space-between;">
+                      <span>Author: <b>${n.admin_user || 'Admin'}</b></span>
+                      <span>${n.created_at ? new Date(n.created_at).toLocaleString('en-IN') : ''}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function switchCustomerDetailTab(customerId, tab) {
+    adminCustActiveDetailTab = tab;
+    renderCustomerDetailsModalHTML(customerId);
+  }
+
+  function setCustomerOrderSubFilter(customerId, subFilter) {
+    adminCustOrderSubFilter = subFilter;
+    renderCustomerDetailsModalHTML(customerId);
+  }
+
+  function toggleCustomerStatus(customerId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const cust = db.getCustomer(customerId);
+    if (!cust) return;
+
+    const newStatus = (cust.account_status || 'Active').toLowerCase() === 'active' ? 'Inactive' : 'Active';
+    if (!confirm(`Are you sure you want to change patron #${customerId} status to "${newStatus}"?`)) return;
+
+    db.updateCustomerStatus(customerId, newStatus);
+    alert(`Patron #${customerId} account status updated to "${newStatus}".`);
+    renderCustomerDetailsModalHTML(customerId);
+    const root = document.getElementById('appRoot');
+    if (root) root.innerHTML = renderCustomersTab(db);
+  }
+
+  function saveCustomerProfileUpdates(customerId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const fullName = document.getElementById('dtCustName').value.trim();
+    const mobile = document.getElementById('dtCustMobile').value.trim();
+    const altMobile = document.getElementById('dtCustAltMobile').value.trim();
+    const dob = document.getElementById('dtCustDOB').value;
+    const gender = document.getElementById('dtCustGender').value;
+
+    if (!fullName) {
+      alert('Please enter a valid customer name.');
+      return;
+    }
+
+    db.saveCustomer({
+      id: customerId,
+      full_name: fullName,
+      name: fullName,
+      phone: mobile,
+      mobile_number: mobile,
+      alternate_mobile: altMobile || null,
+      date_of_birth: dob || null,
+      gender: gender || null
+    });
+
+    db.logAudit('Admin', 'CUSTOMER_PROFILE_UPDATED', 'customers', customerId, { fullName, mobile });
+    alert('Customer profile details updated successfully.');
+    renderCustomerDetailsModalHTML(customerId);
+    const root = document.getElementById('appRoot');
+    if (root) root.innerHTML = renderCustomersTab(db);
+  }
+
+  function handleAddCustomerNote(customerId) {
+    const noteEl = document.getElementById('dtNewCustNote');
+    if (!noteEl || !noteEl.value.trim()) return;
+
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    db.addCustomerNote(customerId, noteEl.value.trim(), 'Bhanu Prakash Reddy');
+    renderCustomerDetailsModalHTML(customerId);
+  }
+
+  function exportSingleCustomerCSV(customerId) {
+    const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
+    const summary = db.getCustomerSummary(customerId);
+    if (!summary || !summary.customer) return;
+
+    const c = summary.customer;
+    const orders = summary.orders || [];
+
+    const lines = [
+      `SHANMUKA FASHIONS — PATRON DOSSIER`,
+      `Customer ID,${c.id}`,
+      `Full Name,"${c.full_name || c.name || ''}"`,
+      `Email,${c.email || ''}`,
+      `Mobile Number,${c.mobile_number || c.phone || ''}`,
+      `Registration Date,${c.created_at || ''}`,
+      `Account Status,${c.account_status || 'Active'}`,
+      `Total Orders,${summary.total_orders}`,
+      `Delivered Orders,${summary.delivered_orders}`,
+      `Net Completed Spend INR,${summary.completed_spend}`,
+      ``,
+      `ORDER HISTORY LEDGER`,
+      `Order #,Date,Channel,Status,Payment Method,Payment Status,Total Amount INR`
+    ];
+
+    orders.forEach(o => {
+      lines.push(`${o.order_number || o.id},${o.created_at || o.date || ''},${o.channel || 'ONLINE'},${o.order_status || ''},${o.payment_method || ''},${o.payment_status || ''},${o.total || 0}`);
+    });
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Patron_Dossier_${c.id}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   function openAddCustomerModal(forPOS = false) {
@@ -4410,6 +5183,20 @@
     saveOrderLogistics,
     openAddCustomerModal,
     handleSaveCustomer,
+    handleCustomerSearch,
+    handleCustomerDateFilter,
+    handleCustomerStatusFilter,
+    handleCustomerActivityFilter,
+    handleCustomerSort,
+    changeCustomerPage,
+    exportCustomersCSV,
+    openCustomerDetailsModal,
+    switchCustomerDetailTab,
+    setCustomerOrderSubFilter,
+    toggleCustomerStatus,
+    saveCustomerProfileUpdates,
+    handleAddCustomerNote,
+    exportSingleCustomerCSV,
     openAddSupplierModal,
     handleSaveSupplier,
     openNewPurchaseModal,

@@ -38,6 +38,12 @@
       return false;
     },
 
+    isValidIndianPincode: function (pincode) {
+      if (!pincode || typeof pincode !== 'string') return false;
+      const clean = pincode.replace(/[^0-9]/g, '');
+      return clean.length === 6 && /^[1-9][0-9]{5}$/.test(clean);
+    },
+
     formatIndianPhone: function (phone) {
       if (!phone) return '';
       const clean = phone.replace(/[^0-9]/g, '');
@@ -568,36 +574,259 @@
       }
     },
 
+    // ── GOOGLE OAUTH AUTHENTICATION ──
+    continueWithGoogle: async function () {
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.signInWithGoogle === 'function') {
+        const res = await SFSupabase.signInWithGoogle();
+        if (!res.success) {
+          alert('Google Sign-In Error: ' + (res.error || 'Unable to connect to Google authentication service.'));
+          return { success: false, message: res.error };
+        }
+        return { success: true };
+      } else {
+        return this._simulateGoogleSignIn();
+      }
+    },
+
+    _simulateGoogleSignIn: async function (mockEmail = null, mockName = null) {
+      const email = mockEmail || 'bhanuprakashreddy.patron@gmail.com';
+      const name = mockName || 'Bhanu Prakash Reddy';
+      const mockGoogleUser = {
+        id: 'goog_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 100000),
+        email: email,
+        app_metadata: { provider: 'google' },
+        user_metadata: {
+          full_name: name,
+          name: name,
+          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
+        },
+        created_at: new Date().toISOString()
+      };
+      await this._syncUserFromSession(mockGoogleUser);
+      return { success: true, customer: currentCustomer };
+    },
+
+    handleOAuthCallback: async function () {
+      if (typeof SFSupabase !== 'undefined') {
+        const sb = SFSupabase.getClient();
+        if (sb && sb.auth) {
+          try {
+            const { data } = await sb.auth.getSession();
+            if (data && data.session && data.session.user) {
+              await this._syncUserFromSession(data.session.user);
+              if (currentCustomer && currentCustomer.profile_completed === false) {
+                if (typeof window !== 'undefined') window.location.hash = '#/complete-profile';
+              } else {
+                if (typeof window !== 'undefined') window.location.hash = '#/account';
+              }
+              return true;
+            }
+          } catch (e) {
+            console.warn('OAuth callback session note:', e);
+          }
+        }
+      }
+      return false;
+    },
+
+    isProfileComplete: function () {
+      if (!this.isAuthenticated()) return false;
+      return currentCustomer.profile_completed === true;
+    },
+
     _syncUserFromSession: async function (user) {
       if (!user) return;
-      const cleanEmail = (user.email || '').toLowerCase();
+      const cleanEmail = (user.email || '').toLowerCase().trim();
       const profiles = getLocalProfiles();
-      const local = profiles[cleanEmail] || {};
+      let local = profiles[cleanEmail] || {};
+
+      // Check central database for an existing customer record
+      const db = typeof SFDatabase !== 'undefined' ? SFDatabase : (typeof require !== 'undefined' ? require('./sf_database') : null);
+      let existingInDb = db ? db.getCustomer(cleanEmail) : null;
+      if (!existingInDb && db && user.id) {
+        existingInDb = db.getCustomer(user.id);
+      }
+
+      const isGoogle = user.app_metadata?.provider === 'google' || user.identities?.some(i => i.provider === 'google') || user.id?.startsWith('goog_');
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || existingInDb?.full_name || existingInDb?.name || local.full_name || cleanEmail.split('@')[0];
+      const avatarUrl = user.user_metadata?.avatar_url || existingInDb?.avatar_url || local.avatar_url || null;
+
+      // Determine profile completion status:
+      // If customer has already saved complete mobile, house, street, city, pincode
+      const profileCompleted = !!(existingInDb?.profile_completed || local.profile_completed || false);
 
       const cust = {
-        id: user.id,
+        id: existingInDb?.id || ('CUST-' + Math.floor(100000 + Math.random() * 900000)),
+        auth_user_id: user.id,
         email: cleanEmail,
-        full_name: user.user_metadata?.full_name || local.full_name || cleanEmail.split('@')[0],
-        phone: user.user_metadata?.phone || local.phone || '',
-        avatar_url: local.avatar_url || null,
-        addresses: local.addresses || [],
-        default_address_id: local.default_address_id || null,
-        created_at: local.created_at || user.created_at || new Date().toISOString(),
+        full_name: fullName,
+        name: fullName,
+        phone: existingInDb?.phone || existingInDb?.mobile_number || local.phone || '',
+        mobile_number: existingInDb?.mobile_number || existingInDb?.phone || local.mobile_number || '',
+        alternate_mobile: existingInDb?.alternate_mobile || local.alternate_mobile || null,
+        date_of_birth: existingInDb?.date_of_birth || local.date_of_birth || null,
+        gender: existingInDb?.gender || local.gender || null,
+        profile_completed: profileCompleted,
+        account_status: existingInDb?.account_status || local.account_status || 'Active',
+        preferred_contact: existingInDb?.preferred_contact || local.preferred_contact || 'WhatsApp',
+        whatsapp_opt_in: existingInDb?.whatsapp_opt_in !== false && local.whatsapp_opt_in !== false,
+        marketing_consent: !!(existingInDb?.marketing_consent || local.marketing_consent),
+        avatar_url: avatarUrl,
+        addresses: existingInDb?.addresses || local.addresses || [],
+        default_address_id: existingInDb?.default_address_id || local.default_address_id || null,
+        is_google_auth: isGoogle,
+        created_at: existingInDb?.created_at || local.created_at || user.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
       currentCustomer = cust;
       saveSessionToStorage(cust);
       saveLocalProfile(cust);
+
+      // Persist in central database
+      if (db && typeof db.saveCustomer === 'function') {
+        db.saveCustomer(cust);
+      }
+
       this.notifyListeners('SESSION_SYNC', cust);
+
+      // If user came via Google and profile is incomplete, navigate to complete-profile
+      if (isGoogle && !profileCompleted && typeof window !== 'undefined' && !window.location.hash.includes('complete-profile')) {
+        window.location.hash = '#/complete-profile';
+      }
+    },
+
+    // ── COMPLETE MANDATORY PROFILE ──
+    completeProfile: async function (formData) {
+      if (!this.isAuthenticated()) {
+        return { success: false, message: 'Please sign in with Google or your email first.' };
+      }
+
+      const {
+        fullName,
+        mobileNumber,
+        alternateMobile,
+        dateOfBirth,
+        gender,
+        houseNumber,
+        street,
+        landmark,
+        city,
+        district,
+        state,
+        pincode,
+        country = 'India',
+        preferredContact = 'WhatsApp',
+        whatsappOptIn = true,
+        marketingConsent = false
+      } = formData;
+
+      // 1. Personal validations
+      const cleanName = (fullName || '').trim();
+      const cleanMobile = (mobileNumber || '').trim();
+      const cleanAltMobile = (alternateMobile || '').trim();
+
+      if (!cleanName || cleanName.length < 2) {
+        return { success: false, message: 'Please provide your full legal name.' };
+      }
+      if (!Validation.isValidIndianPhone(cleanMobile)) {
+        return { success: false, message: 'Please provide a valid 10-digit Indian mobile number.' };
+      }
+      if (cleanAltMobile && !Validation.isValidIndianPhone(cleanAltMobile)) {
+        return { success: false, message: 'Alternate mobile number is invalid. Must be a 10-digit Indian number.' };
+      }
+
+      // 2. Address validations
+      const cleanHouse = (houseNumber || '').trim();
+      const cleanStreet = (street || '').trim();
+      const cleanCity = (city || '').trim();
+      const cleanDistrict = (district || '').trim();
+      const cleanState = (state || '').trim();
+      const cleanPin = (pincode || '').trim();
+
+      if (!cleanHouse) return { success: false, message: 'Please enter House / Flat / Suite number.' };
+      if (!cleanStreet) return { success: false, message: 'Please enter Street, Road, or Area name.' };
+      if (!cleanCity) return { success: false, message: 'Please enter Village, Town, or City name.' };
+      if (!cleanDistrict) return { success: false, message: 'Please enter District name.' };
+      if (!cleanState) return { success: false, message: 'Please select your State or Union Territory.' };
+      if (!Validation.isValidIndianPincode(cleanPin)) {
+        return { success: false, message: 'Please enter a valid 6-digit Indian Postal PIN code (e.g. 500001).' };
+      }
+
+      const addrId = 'addr_' + Date.now();
+      const primaryAddress = {
+        id: addrId,
+        customer_id: currentCustomer.id,
+        auth_user_id: currentCustomer.auth_user_id || null,
+        address_type: 'Home',
+        full_name: cleanName,
+        phone: cleanMobile,
+        house_number: cleanHouse,
+        street: cleanStreet,
+        landmark: (landmark || '').trim(),
+        city: cleanCity,
+        district: cleanDistrict,
+        state: cleanState,
+        pincode: cleanPin,
+        country: country,
+        is_default: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Mutate currentCustomer
+      currentCustomer.full_name = cleanName;
+      currentCustomer.name = cleanName;
+      currentCustomer.phone = cleanMobile;
+      currentCustomer.mobile_number = cleanMobile;
+      currentCustomer.alternate_mobile = cleanAltMobile || null;
+      currentCustomer.date_of_birth = dateOfBirth || null;
+      currentCustomer.gender = gender || null;
+      currentCustomer.preferred_contact = preferredContact;
+      currentCustomer.whatsapp_opt_in = !!whatsappOptIn;
+      currentCustomer.marketing_consent = !!marketingConsent;
+      currentCustomer.street = `${cleanHouse}, ${cleanStreet}`;
+      currentCustomer.city = cleanCity;
+      currentCustomer.district = cleanDistrict;
+      currentCustomer.state = cleanState;
+      currentCustomer.pincode = cleanPin;
+      currentCustomer.country = country;
+      currentCustomer.profile_completed = true;
+      currentCustomer.addresses = [primaryAddress];
+      currentCustomer.default_address_id = addrId;
+      currentCustomer.updated_at = new Date().toISOString();
+
+      saveSessionToStorage(currentCustomer);
+      saveLocalProfile(currentCustomer);
+
+      // Save to central database engine
+      const db = typeof SFDatabase !== 'undefined' ? SFDatabase : (typeof require !== 'undefined' ? require('./sf_database') : null);
+      if (db) {
+        db.saveCustomer(currentCustomer);
+        db.saveCustomerAddress(currentCustomer.id, primaryAddress);
+      }
+
+      // Sync to Supabase Cloud
+      if (typeof SFSupabase !== 'undefined') {
+        if (typeof SFSupabase.saveCustomerToCloud === 'function') {
+          SFSupabase.saveCustomerToCloud(currentCustomer).catch(e => console.warn('Cloud customer sync:', e));
+        }
+        if (typeof SFSupabase.saveCustomerAddress === 'function') {
+          SFSupabase.saveCustomerAddress(primaryAddress).catch(e => console.warn('Cloud address sync:', e));
+        }
+      }
+
+      this.notifyListeners('PROFILE_COMPLETED', currentCustomer);
+      return { success: true, message: 'Your patron profile is complete! Welcome to Shanmuka Fashions.', customer: currentCustomer };
     },
 
     // ── 4. CUSTOMER PROFILE & ADDRESS BOOK MANAGEMENT ──
-    updateProfile: async function ({ fullName, phone }) {
+    updateProfile: async function ({ fullName, phone, alternateMobile, dateOfBirth, gender, preferredContact, whatsappOptIn, marketingConsent }) {
       if (!this.isAuthenticated()) return { success: false, message: 'Unauthorized' };
 
       const cleanName = (fullName || '').trim();
       const cleanPhone = (phone || '').trim();
+      const cleanAlt = (alternateMobile || '').trim();
 
       if (cleanName.length < 2) {
         return { success: false, message: 'Please provide a valid full name.' };
@@ -605,34 +834,34 @@
       if (cleanPhone && !Validation.isValidIndianPhone(cleanPhone)) {
         return { success: false, message: 'Please provide a valid 10-digit Indian mobile number.' };
       }
+      if (cleanAlt && !Validation.isValidIndianPhone(cleanAlt)) {
+        return { success: false, message: 'Please provide a valid 10-digit alternate mobile number.' };
+      }
 
       currentCustomer.full_name = cleanName;
-      if (cleanPhone) currentCustomer.phone = cleanPhone;
+      currentCustomer.name = cleanName;
+      if (cleanPhone) {
+        currentCustomer.phone = cleanPhone;
+        currentCustomer.mobile_number = cleanPhone;
+      }
+      if (alternateMobile !== undefined) currentCustomer.alternate_mobile = cleanAlt || null;
+      if (dateOfBirth !== undefined) currentCustomer.date_of_birth = dateOfBirth || null;
+      if (gender !== undefined) currentCustomer.gender = gender || null;
+      if (preferredContact !== undefined) currentCustomer.preferred_contact = preferredContact;
+      if (whatsappOptIn !== undefined) currentCustomer.whatsapp_opt_in = !!whatsappOptIn;
+      if (marketingConsent !== undefined) currentCustomer.marketing_consent = !!marketingConsent;
       currentCustomer.updated_at = new Date().toISOString();
 
       saveSessionToStorage(currentCustomer);
       saveLocalProfile(currentCustomer);
 
-      // Sync with Supabase Auth and customer_profiles
-      if (typeof SFSupabase !== 'undefined') {
-        const sb = SFSupabase.getClient();
-        if (sb) {
-          try {
-            if (sb.auth) {
-              await sb.auth.updateUser({
-                data: { full_name: cleanName, phone: cleanPhone }
-              });
-            }
-            await sb.from('customer_profiles').upsert({
-              id: currentCustomer.id,
-              full_name: cleanName,
-              phone: cleanPhone,
-              updated_at: new Date().toISOString()
-            });
-          } catch (e) {
-            console.warn('Cloud profile sync note:', e);
-          }
-        }
+      const db = typeof SFDatabase !== 'undefined' ? SFDatabase : (typeof require !== 'undefined' ? require('./sf_database') : null);
+      if (db) {
+        db.saveCustomer(currentCustomer);
+      }
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerToCloud === 'function') {
+        SFSupabase.saveCustomerToCloud(currentCustomer).catch(e => console.warn('Cloud profile sync:', e));
       }
 
       this.notifyListeners('PROFILE_UPDATED', currentCustomer);

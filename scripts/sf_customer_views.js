@@ -69,6 +69,18 @@
 
               <div id="loginAlertBox"></div>
 
+              <!-- Google One-Click OAuth Sign-In -->
+              <button type="button" class="sf-btn-google" onclick="SFCustomerAuth.continueWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                  <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+                  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+                </svg>
+                <span>Continue with Google</span>
+              </button>
+              <div class="sf-auth-divider"><span>or sign in with password</span></div>
+
               <form id="sfLoginForm" onsubmit="SFCustomerViews.handleLoginSubmit(event, '${encodeURIComponent(redirectTarget)}')">
                 <div class="sf-auth-group">
                   <label class="sf-auth-label" for="loginEmail">Email Address *</label>
@@ -174,6 +186,18 @@
               </div>
 
               <div id="registerAlertBox"></div>
+
+              <!-- Google One-Click OAuth Sign-Up -->
+              <button type="button" class="sf-btn-google" onclick="SFCustomerAuth.continueWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                  <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+                  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+                </svg>
+                <span>Sign Up with Google</span>
+              </button>
+              <div class="sf-auth-divider"><span>or register with email</span></div>
 
               <form id="sfRegisterForm" onsubmit="SFCustomerViews.handleRegisterSubmit(event, '${encodeURIComponent(redirectTarget)}')">
                 <div class="sf-auth-group">
@@ -561,6 +585,260 @@
       }
     },
 
+    // ── 5B. MANDATORY CUSTOMER PROFILE COMPLETION VIEW (#/complete-profile) ──
+    renderCompleteProfile: function (containerId = 'appRoot') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      // Route Guard: Require Customer Authentication
+      if (!SFCustomerAuth.isAuthenticated()) {
+        window.location.hash = '#/login?redirect=' + encodeURIComponent('#/complete-profile');
+        return;
+      }
+
+      const customer = SFCustomerAuth.getCurrentCustomer();
+
+      const indianStates = [
+        'Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu', 'Kerala',
+        'Maharashtra', 'Gujarat', 'Rajasthan', 'Uttar Pradesh', 'West Bengal',
+        'Madhya Pradesh', 'Bihar', 'Odisha', 'Punjab', 'Haryana',
+        'Assam', 'Jharkhand', 'Chhattisgarh', 'Uttarakhand', 'Himachal Pradesh',
+        'Goa', 'Jammu & Kashmir', 'Delhi (NCT)', 'Puducherry', 'Chandigarh'
+      ];
+
+      container.innerHTML = `
+        <div class="sf-auth-split-wrapper" style="min-height: 100vh; background: #F5EBDD;">
+          <!-- Left Visual Pane -->
+          <div class="sf-auth-visual-pane" style="background-image: url('assets/kanchipuram-loom.jpg');">
+            <div class="sf-auth-visual-overlay"></div>
+            <div class="sf-auth-visual-content">
+              <span class="sf-auth-visual-badge">✨ Bespoke Atelier Onboarding</span>
+            </div>
+            <div class="sf-auth-visual-content">
+              <blockquote class="sf-auth-visual-quote">
+                &ldquo;Every drape at Shanmuka Fashions is insured, certified for silk purity, and tailored to your doorstep.&rdquo;
+              </blockquote>
+              <div class="sf-auth-visual-subquote">Step 2 of 2 &bull; Atelier Profile & Insured Shipping Destination</div>
+            </div>
+          </div>
+
+          <!-- Right Form Pane -->
+          <div class="sf-auth-form-pane" style="padding: 40px 24px; overflow-y: auto;">
+            <div class="sf-auth-card" style="max-width: 620px;">
+              <div class="sf-auth-brand-header" style="text-align: left; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <img src="logo.png" alt="Shanmuka Fashions Emblem" class="sf-auth-logo" style="margin: 0;">
+                  <span class="sf-step-badge">Step 2 of 2: Profile Details</span>
+                </div>
+                <h1 class="sf-auth-title" style="font-size: 26px;">Complete Your Atelier Profile</h1>
+                <p class="sf-auth-subtitle">Welcome! Before proceeding to checkout or private saree edits, please finalize your patron contact and delivery address.</p>
+              </div>
+
+              <div id="completeProfileAlertBox"></div>
+
+              <form id="sfCompleteProfileForm" onsubmit="SFCustomerViews.handleCompleteProfileSubmit(event)">
+                <!-- SECTION 1: Personal Details -->
+                <div style="background: #FFFFFF; border: 1px solid #D8C3A5; border-radius: 6px; padding: 20px; margin-bottom: 20px;">
+                  <h3 style="font-family: 'Playfair Display', serif; font-size: 17px; color: #3B2B25; margin-top: 0; margin-bottom: 14px; border-bottom: 1px solid #F0E6D8; padding-bottom: 8px;">
+                    1. Personal Information
+                  </h3>
+
+                  <div class="sf-auth-group">
+                    <label class="sf-auth-label">Verified Email Address</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <input type="email" class="sf-auth-input" value="${customer.email || ''}" disabled style="background: #F5EBDD; cursor: not-allowed; color: #76675D; flex: 1;">
+                      <span style="background: #E8F5E9; color: #2E7D32; font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; white-space: nowrap; border: 1px solid #C8E6C9;">
+                        ✓ Google Verified
+                      </span>
+                    </div>
+                    <span style="font-size: 11px; color: #76675D; display: block; margin-top: 4px;">Email cannot be modified directly to preserve authentication security.</span>
+                  </div>
+
+                  <div class="sf-auth-group">
+                    <label class="sf-auth-label" for="cpFullName">Full Name *</label>
+                    <input type="text" id="cpFullName" class="sf-auth-input" value="${customer.full_name || ''}" placeholder="e.g. Sravani Rao" required>
+                  </div>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpMobile">Mobile Number *</label>
+                      <div class="sf-auth-input-wrap">
+                        <span class="sf-auth-prefix">+91</span>
+                        <input type="tel" id="cpMobile" class="sf-auth-input has-prefix" value="${(customer.phone || customer.mobile_number || '').replace(/[^0-9]/g, '').slice(-10)}" placeholder="98765 43210" required maxlength="10">
+                      </div>
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpAltMobile">Alternate Mobile (Optional)</label>
+                      <div class="sf-auth-input-wrap">
+                        <span class="sf-auth-prefix">+91</span>
+                        <input type="tel" id="cpAltMobile" class="sf-auth-input has-prefix" value="${(customer.alternate_mobile || '').replace(/[^0-9]/g, '').slice(-10)}" placeholder="Optional backup" maxlength="10">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpDOB">Date of Birth (Optional)</label>
+                      <input type="date" id="cpDOB" class="sf-auth-input" value="${customer.date_of_birth || ''}">
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpGender">Gender (Optional)</label>
+                      <select id="cpGender" class="sf-auth-input">
+                        <option value="">Select Gender</option>
+                        <option value="Female" ${customer.gender === 'Female' ? 'selected' : ''}>Female</option>
+                        <option value="Male" ${customer.gender === 'Male' ? 'selected' : ''}>Male</option>
+                        <option value="Non-binary / Other" ${customer.gender === 'Non-binary / Other' ? 'selected' : ''}>Non-binary / Other</option>
+                        <option value="Prefer not to say" ${customer.gender === 'Prefer not to say' ? 'selected' : ''}>Prefer not to say</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SECTION 2: Primary Delivery Address -->
+                <div style="background: #FFFFFF; border: 1px solid #D8C3A5; border-radius: 6px; padding: 20px; margin-bottom: 20px;">
+                  <h3 style="font-family: 'Playfair Display', serif; font-size: 17px; color: #3B2B25; margin-top: 0; margin-bottom: 14px; border-bottom: 1px solid #F0E6D8; padding-bottom: 8px;">
+                    2. Primary Delivery Address (For Insured Handloom Shipments)
+                  </h3>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpHouse">House / Flat / Door Number *</label>
+                      <input type="text" id="cpHouse" class="sf-auth-input" placeholder="e.g. Flat 402, Royal Residency" required>
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpStreet">Street / Area / Road *</label>
+                      <input type="text" id="cpStreet" class="sf-auth-input" placeholder="e.g. Road No. 10, Banjara Hills" required>
+                    </div>
+                  </div>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpLandmark">Landmark (Optional)</label>
+                      <input type="text" id="cpLandmark" class="sf-auth-input" placeholder="e.g. Opposite City Center Mall">
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpCity">Village / Town / City *</label>
+                      <input type="text" id="cpCity" class="sf-auth-input" value="${customer.city || 'Hyderabad'}" placeholder="e.g. Hyderabad" required>
+                    </div>
+                  </div>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpDistrict">District *</label>
+                      <input type="text" id="cpDistrict" class="sf-auth-input" value="${customer.district || 'Hyderabad'}" placeholder="e.g. Hyderabad" required>
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpState">State *</label>
+                      <select id="cpState" class="sf-auth-input" required>
+                        <option value="">Select State</option>
+                        ${indianStates.map(st => `
+                          <option value="${st}" ${st === (customer.state || 'Telangana') ? 'selected' : ''}>${st}</option>
+                        `).join('')}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="sf-form-grid-2">
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpPincode">Postal PIN Code * (6 digits)</label>
+                      <input type="text" id="cpPincode" class="sf-auth-input" value="${customer.pincode || ''}" placeholder="e.g. 500034" required maxlength="6" pattern="[1-9][0-9]{5}">
+                    </div>
+                    <div class="sf-auth-group">
+                      <label class="sf-auth-label" for="cpCountry">Country</label>
+                      <input type="text" id="cpCountry" class="sf-auth-input" value="India" disabled style="background: #F5EBDD; cursor: not-allowed; color: #76675D;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SECTION 3: Additional & Concierge Preferences -->
+                <div style="background: #FFFFFF; border: 1px solid #D8C3A5; border-radius: 6px; padding: 20px; margin-bottom: 24px;">
+                  <h3 style="font-family: 'Playfair Display', serif; font-size: 17px; color: #3B2B25; margin-top: 0; margin-bottom: 14px; border-bottom: 1px solid #F0E6D8; padding-bottom: 8px;">
+                    3. Concierge & Communication Preferences
+                  </h3>
+
+                  <div class="sf-auth-group">
+                    <label class="sf-auth-label" for="cpContactMethod">Preferred Contact Method</label>
+                    <select id="cpContactMethod" class="sf-auth-input">
+                      <option value="WhatsApp" selected>WhatsApp (Direct dispatch alerts & weave video previews)</option>
+                      <option value="Phone Call">Phone Call (Concierge telephone support)</option>
+                      <option value="Email">Email Only</option>
+                    </select>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+                    <label class="sf-auth-checkbox-label" style="font-size: 13px;">
+                      <input type="checkbox" id="cpWaOptIn" checked>
+                      <span>Receive real-time order dispatch notifications & courier tracking updates via WhatsApp</span>
+                    </label>
+                    <label class="sf-auth-checkbox-label" style="font-size: 13px;">
+                      <input type="checkbox" id="cpMarketingConsent">
+                      <span>Receive exclusive private invitations to festive bridal handloom drops and seasonal preview edits</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button type="submit" id="completeProfileSubmitBtn" class="sf-auth-btn-primary" style="width: 100%; padding: 14px;">
+                  <span>Save Profile & Enter Shanmuka Atelier &rarr;</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    handleCompleteProfileSubmit: async function (e) {
+      e.preventDefault();
+      const alertBox = document.getElementById('completeProfileAlertBox');
+      const submitBtn = document.getElementById('completeProfileSubmitBtn');
+
+      alertBox.innerHTML = '';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Persisting Profile to Central Database...</span>';
+
+      const formData = {
+        fullName: document.getElementById('cpFullName').value.trim(),
+        mobileNumber: document.getElementById('cpMobile').value.trim(),
+        alternateMobile: document.getElementById('cpAltMobile').value.trim(),
+        dateOfBirth: document.getElementById('cpDOB').value,
+        gender: document.getElementById('cpGender').value,
+        houseNumber: document.getElementById('cpHouse').value.trim(),
+        street: document.getElementById('cpStreet').value.trim(),
+        landmark: document.getElementById('cpLandmark').value.trim(),
+        city: document.getElementById('cpCity').value.trim(),
+        district: document.getElementById('cpDistrict').value.trim(),
+        state: document.getElementById('cpState').value,
+        pincode: document.getElementById('cpPincode').value.trim(),
+        country: 'India',
+        preferredContact: document.getElementById('cpContactMethod').value,
+        whatsappOptIn: document.getElementById('cpWaOptIn').checked,
+        marketingConsent: document.getElementById('cpMarketingConsent').checked
+      };
+
+      const res = await SFCustomerAuth.completeProfile(formData);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Save Profile & Enter Shanmuka Atelier &rarr;</span>';
+
+      if (res.success) {
+        alertBox.innerHTML = `
+          <div class="sf-auth-success-alert">
+            <span>✓</span>
+            <span>${res.message}</span>
+          </div>
+        `;
+        setTimeout(() => {
+          window.location.hash = '#/account';
+        }, 1200);
+      } else {
+        alertBox.innerHTML = `
+          <div class="sf-auth-error-alert">
+            <span>⚠️</span>
+            <span>${res.message}</span>
+          </div>
+        `;
+      }
+    },
+
     // ── 6. CUSTOMER ACCOUNT PORTAL VIEW (#/account/*) ──
     renderAccountPortal: function (subtab = 'profile', containerId = 'appRoot') {
       const container = document.getElementById(containerId);
@@ -588,8 +866,20 @@
               <div class="sf-patron-avatar">${initials}</div>
               <div>
                 <h1 class="sf-patron-name">Namaste, ${customer.full_name}</h1>
-                <div class="sf-patron-email">${customer.email} &bull; ${customer.phone ? SFCustomerAuth.validation.formatIndianPhone(customer.phone) : 'Mobile not set'}</div>
-                <span class="sf-patron-badge">Verified Atelier Patron</span>
+                <div class="sf-patron-email">
+                  ${customer.email} &bull; ${customer.phone ? SFCustomerAuth.validation.formatIndianPhone(customer.phone) : 'Mobile not set'}
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+                  <span class="sf-patron-badge">Verified Atelier Patron</span>
+                  ${customer.profile_completed !== false ? `
+                    <span class="sf-patron-badge" style="background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9;">✓ Profile 100% Completed</span>
+                  ` : `
+                    <span class="sf-patron-badge" style="background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2;">⚠️ Profile Incomplete</span>
+                  `}
+                  ${customer.is_google_auth ? `
+                    <span class="sf-patron-badge" style="background: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB;">Google Connected</span>
+                  ` : ''}
+                </div>
               </div>
             </div>
             <div>
@@ -598,6 +888,18 @@
               </button>
             </div>
           </div>
+
+          ${customer.profile_completed === false ? `
+            <div class="sf-profile-incomplete-banner" style="background: #FFF8E1; border: 1.5px solid #FFE082; color: #5D4037; padding: 16px 22px; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div>
+                <strong style="font-size: 14.5px; color: #E65100; display: block; margin-bottom: 3px;">⚠️ Atelier Profile Incomplete</strong>
+                <span style="font-size: 13px; color: #5D4037;">Your personal information and delivery address have not been finalized yet. Please complete them to enable shopping, insured express dispatch, and checkout.</span>
+              </div>
+              <a href="#/complete-profile" class="sf-auth-btn-primary" style="width: auto; padding: 9px 20px; font-size: 12.5px; text-decoration: none;">
+                Complete Profile &rarr;
+              </a>
+            </div>
+          ` : ''}
 
           <!-- Navigation Pills Bar -->
           <nav class="sf-portal-nav-bar">
@@ -707,10 +1009,38 @@
     },
 
     // Subtab: Orders
-    renderOrdersTabHTML: function () {
-      const orders = SFCustomerAuth.getCustomerOrders();
+    customerOrderTabFilter: 'ALL',
 
-      if (!orders || orders.length === 0) {
+    setOrderTabFilter: function (filter) {
+      this.customerOrderTabFilter = filter;
+      const contentEl = document.getElementById('portalTabContent');
+      if (contentEl) {
+        contentEl.innerHTML = this.renderOrdersTabHTML();
+      }
+    },
+
+    renderOrdersTabHTML: function () {
+      const allOrders = SFCustomerAuth.getCustomerOrders();
+      const currentFilter = this.customerOrderTabFilter || 'ALL';
+
+      // Categorize orders
+      const filteredOrders = allOrders.filter(o => {
+        const st = (o.order_status || o.status || 'Pending').toLowerCase();
+        if (currentFilter === 'DELIVERED') {
+          return st === 'delivered';
+        } else if (currentFilter === 'ACTIVE') {
+          return ['pending', 'processing', 'confirmed', 'packed', 'shipped', 'dispatched', 'out for delivery'].includes(st);
+        } else if (currentFilter === 'CANCELLED') {
+          return st === 'cancelled';
+        } else if (currentFilter === 'RETURNED') {
+          return st === 'returned' || st === 'return requested';
+        } else if (currentFilter === 'REFUNDED') {
+          return st.includes('refund');
+        }
+        return true; // 'ALL'
+      });
+
+      if (!allOrders || allOrders.length === 0) {
         return `
           <div class="sf-portal-card" style="text-align: center; padding: 60px 20px;">
             <div style="font-size: 44px; margin-bottom: 12px;">🛍️</div>
@@ -727,56 +1057,367 @@
 
       return `
         <div class="sf-portal-card">
-          <h2 class="sf-portal-card-title">Order History (${orders.length})</h2>
-          <p class="sf-portal-card-subtitle">Review real-time dispatch progress, carrier tracking, and tax invoices.</p>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 class="sf-portal-card-title" style="margin-bottom: 4px;">Order History (${allOrders.length})</h2>
+              <p class="sf-portal-card-subtitle" style="margin: 0;">Review real-time dispatch progress, carrier tracking, and tax invoices.</p>
+            </div>
+          </div>
 
-          <div style="display: flex; flex-direction: column; gap: 18px;">
-            ${orders.map(o => {
-              const statusClass = (o.order_status || o.status || 'Pending').toLowerCase();
-              return `
-                <div class="sf-order-item-card">
-                  <div class="sf-order-header">
-                    <div>
-                      <strong style="color: #3B2B25; font-size: 14px;">Order #${o.order_number || o.id}</strong>
-                      <span style="color: #76675D; margin-left: 10px;">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : (o.date || '—')}</span>
+          <!-- Order Status Sub-Filter Tabs -->
+          <div class="sf-order-status-tabs" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px solid #F0E6D8;">
+            <button class="sf-filter-pill ${currentFilter === 'ALL' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('ALL')">
+              All Orders (${allOrders.length})
+            </button>
+            <button class="sf-filter-pill ${currentFilter === 'DELIVERED' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('DELIVERED')">
+              Delivered (${allOrders.filter(o => (o.order_status||'').toLowerCase() === 'delivered').length})
+            </button>
+            <button class="sf-filter-pill ${currentFilter === 'ACTIVE' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('ACTIVE')">
+              Active In-Transit (${allOrders.filter(o => ['pending', 'processing', 'confirmed', 'packed', 'shipped', 'dispatched', 'out for delivery'].includes((o.order_status||'').toLowerCase())).length})
+            </button>
+            <button class="sf-filter-pill ${currentFilter === 'CANCELLED' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('CANCELLED')">
+              Cancelled (${allOrders.filter(o => (o.order_status||'').toLowerCase() === 'cancelled').length})
+            </button>
+            <button class="sf-filter-pill ${currentFilter === 'RETURNED' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('RETURNED')">
+              Returns (${allOrders.filter(o => ['returned', 'return requested'].includes((o.order_status||'').toLowerCase())).length})
+            </button>
+            <button class="sf-filter-pill ${currentFilter === 'REFUNDED' ? 'active' : ''}" onclick="SFCustomerViews.setOrderTabFilter('REFUNDED')">
+              Refunds (${allOrders.filter(o => (o.order_status||'').toLowerCase().includes('refund')).length})
+            </button>
+          </div>
+
+          ${filteredOrders.length === 0 ? `
+            <div style="padding: 40px; text-align: center; color: #76675D; background: #FAF6F0; border-radius: 6px; border: 1px dashed #D8C3A5;">
+              No orders found matching the "${currentFilter}" filter.
+            </div>
+          ` : `
+            <div style="display: flex; flex-direction: column; gap: 18px;">
+              ${filteredOrders.map(o => {
+                const statusStr = o.order_status || o.status || 'Pending';
+                const statusClass = statusStr.toLowerCase().replace(/\s+/g, '-');
+                const canCancel = ['pending', 'confirmed'].includes(statusStr.toLowerCase());
+                const canReturn = statusStr.toLowerCase() === 'delivered';
+
+                return `
+                  <div class="sf-order-item-card">
+                    <div class="sf-order-header">
+                      <div>
+                        <strong style="color: #3B2B25; font-size: 14.5px;">Order #${o.order_number || o.id}</strong>
+                        <span style="color: #76675D; margin-left: 10px; font-size: 12.5px;">
+                          ${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : (o.date || '—')}
+                        </span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="sf-status-badge ${statusClass}">${statusStr}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span class="sf-status-badge ${statusClass}">${o.order_status || o.status || 'Pending'}</span>
+
+                    <div class="sf-order-body">
+                      <!-- Order Item Snapshots -->
+                      <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
+                        ${(o.items || []).map(it => `
+                          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13.5px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                              <img src="${it.img || it.image || 'assets/kanchipuram-loom.jpg'}" alt="${it.name || 'Saree'}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #D8C3A5;">
+                              <div>
+                                <div style="font-weight: 600; color: #3B2B25;">${it.name || it.product_name || 'Handloom Silk Saree'}</div>
+                                <div style="color: #76675D; font-size: 11.5px;">
+                                  ${it.sku ? `SKU: ${it.sku} &bull; ` : ''} Qty: ${it.qty || 1} &times; ₹${(it.price || it.unit_price || 0).toLocaleString('en-IN')}
+                                </div>
+                              </div>
+                            </div>
+                            <div style="font-weight: 700; color: #672D46;">
+                              ₹${((it.price || it.unit_price || 0) * (it.qty || 1)).toLocaleString('en-IN')}
+                            </div>
+                          </div>
+                        `).join('')}
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px dashed #D8C3A5; flex-wrap: wrap; gap: 12px;">
+                        <div style="font-size: 12.5px; color: #76675D;">
+                          Payment: <b>${(o.payment_method || o.payment || 'UPI').toUpperCase()}</b> &bull; Status: <b>${o.payment_status || 'Completed'}</b>
+                          ${o.tracking_number ? `<br>Tracking AWB: <strong style="color: #3B2B25;">${o.tracking_number}</strong> (${o.courier || 'Blue Dart Express'})` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="text-align: right; margin-right: 8px;">
+                            <span style="font-size: 11.5px; color: #76675D;">Total Order Value:</span>
+                            <div style="font-size: 17px; font-weight: 700; color: #3B2B25;">₹${(o.total || 0).toLocaleString('en-IN')}</div>
+                          </div>
+                          <a href="#/account/orders/${o.order_number || o.id}" class="sf-btn-outline" style="font-size: 11.5px; padding: 6px 12px; text-decoration: none;">
+                            View Details &rarr;
+                          </a>
+                          ${canCancel ? `
+                            <button type="button" onclick="SFCustomerViews.handleCancelOrder('${o.id || o.order_number}')" class="sf-btn-outline" style="font-size: 11.5px; padding: 6px 10px; color: #C25E5E; border-color: #E0C0C0;">
+                              Cancel
+                            </button>
+                          ` : ''}
+                          ${canReturn ? `
+                            <button type="button" onclick="SFCustomerViews.handleRequestReturn('${o.id || o.order_number}')" class="sf-btn-outline" style="font-size: 11.5px; padding: 6px 10px; color: #B58A45; border-color: #D8C3A5;">
+                              Request Return
+                            </button>
+                          ` : ''}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+      `;
+    },
 
-                  <div class="sf-order-body">
-                    <div style="margin-bottom: 16px;">
-                      ${(o.items || []).map(it => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13.5px;">
+    // ── 7. DETAILED SINGLE ORDER VIEW (#/account/orders/:orderId) ──
+    renderOrderDetail: function (orderId, containerId = 'appRoot') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (!SFCustomerAuth.isAuthenticated()) {
+        window.location.hash = '#/login?redirect=' + encodeURIComponent(window.location.hash);
+        return;
+      }
+
+      const allOrders = SFCustomerAuth.getCustomerOrders();
+      const order = allOrders.find(o => String(o.order_number || o.id) === String(orderId));
+
+      if (!order) {
+        container.innerHTML = `
+          <div class="sf-portal-wrapper" style="padding: 60px 20px; text-align: center;">
+            <h2>Order Not Found</h2>
+            <p>Could not locate details for Order #${orderId}.</p>
+            <a href="#/account/orders" class="sf-auth-btn-primary" style="width: auto; padding: 10px 24px; display: inline-flex;">&larr; Back to Orders</a>
+          </div>
+        `;
+        return;
+      }
+
+      const status = (order.order_status || order.status || 'Pending').toLowerCase();
+      const steps = ['placed', 'confirmed', 'processing', 'shipped', 'delivered'];
+      let activeStepIdx = steps.indexOf(status);
+      if (activeStepIdx === -1) {
+        if (status === 'packed' || status === 'dispatched') activeStepIdx = 3;
+        else if (status.includes('out for delivery')) activeStepIdx = 3;
+        else activeStepIdx = 0;
+      }
+
+      const canCancel = ['pending', 'confirmed'].includes(status);
+      const canReturn = status === 'delivered';
+
+      container.innerHTML = `
+        <div class="sf-portal-wrapper">
+          <div style="margin-bottom: 20px;">
+            <a href="#/account/orders" style="color: #A77950; font-size: 13px; text-decoration: none; font-weight: 600;">
+              &larr; Back to All Orders
+            </a>
+          </div>
+
+          <div class="sf-portal-card" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F0E6D8; padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 22px; color: #3B2B25; margin: 0;">
+                  Order #${order.order_number || order.id}
+                </h1>
+                <div style="color: #76675D; font-size: 12.5px; margin-top: 4px;">
+                  Placed on ${order.created_at ? new Date(order.created_at).toLocaleString('en-IN') : (order.date || '—')} &bull; Channel: ${order.channel || 'Online Boutique'}
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="sf-status-badge ${status}">${order.order_status || order.status || 'Pending'}</span>
+                <button onclick="window.print()" class="sf-btn-outline" style="font-size: 12px; padding: 6px 14px;">🖨️ Tax Invoice</button>
+              </div>
+            </div>
+
+            <!-- Visual Progress Stepper (Only for normal flow) -->
+            ${!['cancelled', 'returned'].includes(status) ? `
+              <div class="sf-order-stepper" style="display: flex; justify-content: space-between; position: relative; margin: 24px 0 32px 0;">
+                <div class="sf-stepper-step ${activeStepIdx >= 0 ? 'completed' : ''}">
+                  <div class="sf-stepper-dot">1</div>
+                  <div class="sf-stepper-label">Placed</div>
+                </div>
+                <div class="sf-stepper-step ${activeStepIdx >= 1 ? 'completed' : ''}">
+                  <div class="sf-stepper-dot">2</div>
+                  <div class="sf-stepper-label">Confirmed</div>
+                </div>
+                <div class="sf-stepper-step ${activeStepIdx >= 2 ? 'completed' : ''}">
+                  <div class="sf-stepper-dot">3</div>
+                  <div class="sf-stepper-label">Loom QC / Packing</div>
+                </div>
+                <div class="sf-stepper-step ${activeStepIdx >= 3 ? 'completed' : ''}">
+                  <div class="sf-stepper-dot">4</div>
+                  <div class="sf-stepper-label">Shipped</div>
+                </div>
+                <div class="sf-stepper-step ${activeStepIdx >= 4 ? 'completed' : ''}">
+                  <div class="sf-stepper-dot">5</div>
+                  <div class="sf-stepper-label">Delivered</div>
+                </div>
+              </div>
+            ` : `
+              <div style="padding: 14px 20px; background: ${status === 'cancelled' ? '#FFEBEE' : '#FFF3E0'}; border: 1px solid ${status === 'cancelled' ? '#FFCDD2' : '#FFE0B2'}; border-radius: 6px; margin-bottom: 20px; color: #3B2B25; font-size: 13.5px;">
+                <strong>Order State: ${order.order_status}</strong>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #5D4037;">
+                  ${status === 'cancelled' ? 'This order was cancelled and inventory has been returned to stock.' : 'This order has a return request logged with our styling atelier.'}
+                </p>
+              </div>
+            `}
+
+            <!-- Tracking Information Banner -->
+            ${order.tracking_number ? `
+              <div style="background: #FAF6F0; border: 1px solid #D8C3A5; border-radius: 6px; padding: 14px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <strong style="color: #3B2B25; font-size: 13.5px;">Carrier: ${order.courier || 'Blue Dart Express'}</strong>
+                  <div style="font-size: 12px; color: #76675D;">AWB Air Waybill Number: <b>${order.tracking_number}</b></div>
+                </div>
+                <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20Please%20provide%20live%20dispatch%20status%20for%20AWB%20${order.tracking_number}" target="_blank" class="sf-btn-sm" style="text-decoration: none;">
+                  Track on WhatsApp Concierge &rarr;
+                </a>
+              </div>
+            ` : ''}
+
+            <!-- Items Snapshot Table -->
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 17px; color: #3B2B25; margin-bottom: 12px;">Items in this Order</h3>
+            <div class="sf-table-responsive" style="margin-bottom: 24px;">
+              <table class="sf-table">
+                <thead>
+                  <tr>
+                    <th>Item Snapshot</th>
+                    <th>SKU Snapshot</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th style="text-align: right;">Line Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(order.items || []).map(it => `
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <img src="${it.img || it.image || 'assets/kanchipuram-loom.jpg'}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid #D8C3A5;">
                           <div>
-                            <span style="font-weight: 600; color: #3B2B25;">${it.name || it.product_name || 'Pure Silk Saree'}</span>
-                            <span style="color: #76675D; font-size: 12px; margin-left: 6px;">Qty: ${it.qty || 1}</span>
-                          </div>
-                          <div style="font-weight: 600; color: #672D46;">
-                            ₹${((it.price || it.unit_price || 0) * (it.qty || 1)).toLocaleString('en-IN')}
+                            <div style="font-weight: 600; color: #3B2B25;">${it.name || it.product_name || 'Handloom Silk'}</div>
+                            <div style="font-size: 11px; color: #76675D;">${it.fabric || 'Pure Handloom Silk'}</div>
                           </div>
                         </div>
-                      `).join('')}
-                    </div>
+                      </td>
+                      <td><code>${it.sku || 'SF-SLK-001'}</code></td>
+                      <td>₹${(it.price || it.unit_price || 0).toLocaleString('en-IN')}</td>
+                      <td><b>${it.qty || 1}</b></td>
+                      <td style="text-align: right; font-weight: 700; color: #672D46;">
+                        ₹${((it.price || it.unit_price || 0) * (it.qty || 1)).toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px dashed #D8C3A5; flex-wrap: wrap; gap: 10px;">
-                      <div style="font-size: 12.5px; color: #76675D;">
-                        Payment: <b>${(o.payment_method || o.payment || 'UPI').toUpperCase()}</b> &bull; Status: <b>${o.payment_status || 'Completed'}</b>
-                        ${o.tracking_number ? `<br>Tracking AWB: <strong style="color: #3B2B25;">${o.tracking_number}</strong> (${o.courier || 'Express'})` : ''}
-                      </div>
-                      <div style="text-align: right;">
-                        <span style="font-size: 12px; color: #76675D;">Total Amount:</span>
-                        <div style="font-size: 18px; font-weight: 700; color: #3B2B25;">₹${(o.total || 0).toLocaleString('en-IN')}</div>
-                      </div>
-                    </div>
+            <!-- Financials & Delivery Address Snapshots Grid -->
+            <div class="sf-form-grid-2" style="margin-bottom: 24px;">
+              <div style="background: #FAF6F0; padding: 18px; border-radius: 6px; border: 1px solid #E5D7C5;">
+                <h4 style="margin-top: 0; margin-bottom: 10px; color: #3B2B25; font-size: 14.5px;">Insured Delivery Address</h4>
+                <div style="font-size: 13px; color: #5D4037; line-height: 1.5;">
+                  <strong>${order.customer_name || 'Valued Patron'}</strong><br>
+                  ${order.delivery_address?.street || order.delivery_address || 'Atelier Delivery Address'}<br>
+                  ${order.delivery_address?.city || ''} ${order.delivery_address?.district ? `, ${order.delivery_address.district}` : ''}<br>
+                  ${order.delivery_address?.state || ''} - ${order.delivery_address?.pincode || ''}<br>
+                  Contact: ${order.customer_phone || ''}
+                </div>
+              </div>
+
+              <div style="background: #FAF6F0; padding: 18px; border-radius: 6px; border: 1px solid #E5D7C5;">
+                <h4 style="margin-top: 0; margin-bottom: 10px; color: #3B2B25; font-size: 14.5px;">Payment & Total</h4>
+                <div style="font-size: 13px; color: #5D4037;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Subtotal:</span>
+                    <span>₹${(order.subtotal || order.total || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Discount:</span>
+                    <span style="color: #2E7D32;">-₹${(order.discount || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Insured Shipping:</span>
+                    <span>${order.shipping_charges ? `₹${order.shipping_charges}` : 'Complimentary'}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #D8C3A5; font-size: 16px; font-weight: 700; color: #3B2B25;">
+                    <span>Grand Total:</span>
+                    <span>₹${(order.total || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style="margin-top: 8px; font-size: 11.5px; color: #76675D;">
+                    Payment Method: <b>${(order.payment_method || 'UPI').toUpperCase()}</b> (${order.payment_status || 'Completed'})
                   </div>
                 </div>
-              `;
-            }).join('')}
+              </div>
+            </div>
+
+            <!-- Customer Actions -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #F0E6D8; padding-top: 16px;">
+              ${canCancel ? `
+                <button type="button" onclick="SFCustomerViews.handleCancelOrder('${order.id || order.order_number}')" class="sf-btn-outline" style="color: #C25E5E; border-color: #E0C0C0; padding: 8px 18px;">
+                  Cancel Order
+                </button>
+              ` : ''}
+              ${canReturn ? `
+                <button type="button" onclick="SFCustomerViews.handleRequestReturn('${order.id || order.order_number}')" class="sf-btn-outline" style="color: #B58A45; border-color: #D8C3A5; padding: 8px 18px;">
+                  Request Exchange / Return
+                </button>
+              ` : ''}
+              <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20Need%20assistance%20with%20Order%20${order.order_number}" target="_blank" class="sf-btn-primary" style="text-decoration: none; padding: 8px 18px;">
+                💬 WhatsApp Stylist Concierge
+              </a>
+            </div>
           </div>
         </div>
       `;
+    },
+
+    handleCancelOrder: function (orderId) {
+      if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
+
+      const db = typeof SFDatabase !== 'undefined' ? SFDatabase : (typeof require !== 'undefined' ? require('./sf_database') : null);
+      if (db) {
+        const order = db.getOrder(orderId);
+        if (order) {
+          order.order_status = 'Cancelled';
+          db.commit();
+          db.logAudit('Customer', 'ORDER_CANCELLED', 'orders', orderId, { reason: 'Customer initiated cancellation' });
+          if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.pushOrderToCloud === 'function') {
+            SFSupabase.pushOrderToCloud(order);
+          }
+          alert(`Order #${orderId} has been cancelled successfully.`);
+          if (window.location.hash.includes('orders/')) {
+            SFCustomerViews.renderOrderDetail(orderId);
+          } else {
+            SFCustomerViews.renderAccountPortal('orders');
+          }
+        }
+      }
+    },
+
+    handleRequestReturn: function (orderId) {
+      const reason = prompt('Please let us know the reason for return/exchange (e.g. Color mismatch, Fabric preference, Sizing):', 'Color mismatch');
+      if (reason === null) return;
+
+      const db = typeof SFDatabase !== 'undefined' ? SFDatabase : (typeof require !== 'undefined' ? require('./sf_database') : null);
+      if (db) {
+        const order = db.getOrder(orderId);
+        if (order) {
+          order.order_status = 'Return requested';
+          order.return_reason = reason;
+          order.return_requested_at = new Date().toISOString();
+          db.commit();
+          db.logAudit('Customer', 'RETURN_REQUESTED', 'orders', orderId, { reason });
+          if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.pushOrderToCloud === 'function') {
+            SFSupabase.pushOrderToCloud(order);
+          }
+          alert(`Return request submitted for Order #${orderId}. Our concierge will contact you within 24 hours.`);
+          if (window.location.hash.includes('orders/')) {
+            SFCustomerViews.renderOrderDetail(orderId);
+          } else {
+            SFCustomerViews.renderAccountPortal('orders');
+          }
+        }
+      }
     },
 
     // Subtab: Addresses

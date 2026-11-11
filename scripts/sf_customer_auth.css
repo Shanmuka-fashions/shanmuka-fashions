@@ -673,3 +673,144 @@
   padding-top: 6px;
 }
 
+/* ── Google OAuth Sign-In Button ── */
+.sf-btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid #D8C3A5;
+  border-radius: 4px;
+  padding: 12px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3B2B25;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.sf-btn-google:hover {
+  background: #FAF6F0;
+  border-color: #A77950;
+  box-shadow: 0 2px 6px rgba(59, 43, 37, 0.12);
+}
+
+.sf-auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0 22px 0;
+  color: #7A695E;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sf-auth-divider::before,
+.sf-auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #E5D7C5;
+}
+
+.sf-auth-divider span {
+  padding: 0 14px;
+}
+
+/* ── Profile Completion Stepper & Badges ── */
+.sf-step-badge {
+  background: #EFE4D6;
+  color: #672D46;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+}
+
+.sf-filter-pill {
+  background: #FFFFFF;
+  border: 1px solid #D8C3A5;
+  color: #3B2B25;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sf-filter-pill:hover {
+  background: #F5EBDD;
+  border-color: #A77950;
+}
+
+.sf-filter-pill.active {
+  background: #3B2B25;
+  border-color: #3B2B25;
+  color: #F5EBDD;
+}
+
+/* ── Order Status Tracking Stepper ── */
+.sf-order-stepper {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sf-order-stepper::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: #E5D7C5;
+  z-index: 0;
+}
+
+.sf-stepper-step {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  flex: 1;
+}
+
+.sf-stepper-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 2px solid #D8C3A5;
+  color: #7A695E;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 6px auto;
+  transition: all 0.2s ease;
+}
+
+.sf-stepper-step.completed .sf-stepper-dot {
+  background: #2E7D32;
+  border-color: #2E7D32;
+  color: #FFFFFF;
+}
+
+.sf-stepper-label {
+  font-size: 11.5px;
+  color: #7A695E;
+  font-weight: 500;
+}
+
+.sf-stepper-step.completed .sf-stepper-label {
+  color: #3B2B25;
+  font-weight: 700;
+}
+

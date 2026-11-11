@@ -126,6 +126,8 @@
     inventory_ledger: [],
     orders: [],
     customers: [],
+    customer_addresses: [],
+    customer_notes: [],
     suppliers: [],
     purchases: [],
     expenses: [],
@@ -1009,42 +1011,374 @@
       return order;
     }
 
-    // ── CUSTOMERS ──
+    // ── CUSTOMERS & PATRON MANAGEMENT ──
     getCustomers() {
-      return this.state.customers || [];
+      const customers = this.state.customers || [];
+      // Calculate live order metrics for each customer from real orders
+      return customers.map(c => {
+        const summary = this.getCustomerSummary(c.id);
+        return {
+          ...c,
+          name: c.name || c.full_name || 'Valued Patron',
+          full_name: c.full_name || c.name || 'Valued Patron',
+          phone: c.phone || c.mobile_number || '',
+          mobile_number: c.mobile_number || c.phone || '',
+          account_status: c.account_status || 'Active',
+          profile_completed: c.profile_completed !== false,
+          total_orders: summary ? summary.total_orders : (c.total_orders || 0),
+          total_spent: summary ? summary.completed_spend : (c.total_spent || 0),
+          last_order_date: summary ? summary.last_order_date : (c.last_order_date || null)
+        };
+      });
     }
 
     getCustomer(id) {
-      return this.getCustomers().find(c => c.id === id || c.phone === id);
+      if (!id) return null;
+      const strId = String(id).toLowerCase().trim();
+      const customers = this.state.customers || [];
+      return customers.find(c => {
+        if (!c) return false;
+        if (String(c.id).toLowerCase() === strId) return true;
+        if (c.auth_user_id && String(c.auth_user_id).toLowerCase() === strId) return true;
+        if (c.email && c.email.toLowerCase().trim() === strId) return true;
+        if (c.phone && c.phone.replace(/[^0-9]/g, '') === strId.replace(/[^0-9]/g, '')) return true;
+        if (c.mobile_number && c.mobile_number.replace(/[^0-9]/g, '') === strId.replace(/[^0-9]/g, '')) return true;
+        return false;
+      }) || null;
+    }
+
+    getCustomerSummary(id) {
+      const cust = (this.state.customers || []).find(c => {
+        if (!c) return false;
+        const strId = String(id).toLowerCase().trim();
+        return (
+          String(c.id).toLowerCase() === strId ||
+          (c.auth_user_id && String(c.auth_user_id).toLowerCase() === strId) ||
+          (c.email && c.email.toLowerCase().trim() === strId)
+        );
+      });
+      if (!cust) return null;
+
+      const custEmail = (cust.email || '').toLowerCase().trim();
+      const custPhone = (cust.phone || cust.mobile_number || '').replace(/[^0-9]/g, '');
+      const custId = String(cust.id);
+      const authUserId = cust.auth_user_id ? String(cust.auth_user_id) : null;
+
+      const allOrders = this.getOrders();
+      const customerOrders = allOrders.filter(o => {
+        const orderEmail = (o.customer_email || (o.customer && o.customer.email) || '').toLowerCase().trim();
+        const orderPhone = (o.customer_phone || (o.customer && o.customer.phone) || '').replace(/[^0-9]/g, '');
+        const orderCustId = o.customer_id ? String(o.customer_id) : null;
+
+        return (
+          (orderCustId && (orderCustId === custId || orderCustId === authUserId)) ||
+          (custEmail && orderEmail === custEmail) ||
+          (custPhone && orderPhone && (orderPhone.endsWith(custPhone) || custPhone.endsWith(orderPhone)))
+        );
+      });
+
+      // Sort newest first
+      customerOrders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      let totalOrders = customerOrders.length;
+      let deliveredOrders = 0;
+      let completedSpend = 0;
+      let pendingOrders = 0;
+      let processingOrders = 0;
+      let shippedOrders = 0;
+      let cancelledOrders = 0;
+      let returnedOrders = 0;
+      let returnRequestedOrders = 0;
+      let refundedOrders = 0;
+
+      customerOrders.forEach(o => {
+        const st = (o.order_status || 'Pending').toLowerCase();
+        const paySt = (o.payment_status || 'Completed').toLowerCase();
+        const amt = Number(o.total || o.total_amount) || 0;
+
+        if (st === 'delivered') {
+          deliveredOrders++;
+          if (paySt !== 'failed') completedSpend += amt;
+        } else if (['shipped', 'dispatched', 'out for delivery'].includes(st)) {
+          shippedOrders++;
+          if (paySt !== 'failed') completedSpend += amt;
+        } else if (['processing', 'confirmed', 'packed'].includes(st)) {
+          processingOrders++;
+          if (paySt !== 'failed') completedSpend += amt;
+        } else if (st === 'pending') {
+          pendingOrders++;
+        } else if (st === 'cancelled') {
+          cancelledOrders++;
+          // A cancelled order must NOT be counted as a successful purchase!
+        } else if (st === 'returned') {
+          returnedOrders++;
+          // A returned order must NOT be treated as an ordinary completed sale!
+        } else if (st === 'return requested') {
+          returnRequestedOrders++;
+        } else if (st.includes('refund')) {
+          refundedOrders++;
+        }
+      });
+
+      return {
+        customer: cust,
+        total_orders: totalOrders,
+        delivered_orders: deliveredOrders,
+        completed_spend: completedSpend,
+        pending_orders: pendingOrders,
+        processing_orders: processingOrders,
+        shipped_orders: shippedOrders,
+        cancelled_orders: cancelledOrders,
+        returned_orders: returnedOrders,
+        return_requested_orders: returnRequestedOrders,
+        refunded_orders: refundedOrders,
+        orders: customerOrders,
+        last_order_date: customerOrders[0]?.created_at || null,
+        first_order_date: customerOrders[customerOrders.length - 1]?.created_at || null
+      };
     }
 
     saveCustomer(custData) {
-      if (!custData.name || !custData.phone) throw new Error('Customer name and phone are required');
-      const customers = this.state.customers;
-      const idx = customers.findIndex(c => c.id === custData.id || c.phone === custData.phone);
+      if (!custData) throw new Error('Customer data is required');
+      const name = (custData.full_name || custData.name || '').trim();
+      const phone = (custData.mobile_number || custData.phone || '').trim();
+      const email = (custData.email || '').trim().toLowerCase();
+
+      if (!name) throw new Error('Customer name is required');
+      if (!phone && !email) throw new Error('Customer phone or email is required');
+
+      const customers = this.state.customers = this.state.customers || [];
+      const idx = customers.findIndex(c => {
+        if (!c) return false;
+        if (custData.id && c.id === custData.id) return true;
+        if (custData.auth_user_id && c.auth_user_id === custData.auth_user_id) return true;
+        if (email && c.email && c.email.toLowerCase() === email) return true;
+        if (phone && (c.phone === phone || c.mobile_number === phone)) return true;
+        return false;
+      });
+
+      const now = new Date().toISOString();
+
       if (idx !== -1) {
-        customers[idx] = { ...customers[idx], ...custData };
+        customers[idx] = {
+          ...customers[idx],
+          ...custData,
+          name: name,
+          full_name: name,
+          phone: phone || customers[idx].phone,
+          mobile_number: phone || customers[idx].mobile_number,
+          email: email || customers[idx].email,
+          updated_at: now
+        };
         this.commit();
+
+        // Push update to cloud in background
+        if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerToCloud === 'function') {
+          SFSupabase.saveCustomerToCloud(customers[idx]).catch(e => console.warn('Customer cloud save:', e));
+        }
         return customers[idx];
       } else {
         const newCust = {
-          id: 'CUST-' + Date.now().toString(36),
-          name: custData.name.trim(),
-          phone: custData.phone.trim(),
-          email: custData.email || '',
+          id: custData.id || ('CUST-' + Math.floor(100000 + Math.random() * 900000)),
+          auth_user_id: custData.auth_user_id || null,
+          name: name,
+          full_name: name,
+          phone: phone,
+          mobile_number: phone,
+          alternate_mobile: custData.alternate_mobile || null,
+          email: email,
+          date_of_birth: custData.date_of_birth || null,
+          gender: custData.gender || null,
+          profile_completed: custData.profile_completed !== false,
+          account_status: custData.account_status || 'Active',
+          preferred_contact: custData.preferred_contact || 'WhatsApp',
+          whatsapp_opt_in: custData.whatsapp_opt_in !== false,
+          marketing_consent: !!custData.marketing_consent,
           street: custData.street || '',
           city: custData.city || '',
+          district: custData.district || '',
           state: custData.state || '',
           pincode: custData.pincode || '',
+          country: custData.country || 'India',
           total_orders: 0,
           total_spent: 0,
           notes: custData.notes || '',
-          created_at: new Date().toISOString()
+          avatar_url: custData.avatar_url || null,
+          created_at: now,
+          updated_at: now
         };
         customers.unshift(newCust);
         this.commit();
+
+        // Push new customer to cloud
+        if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerToCloud === 'function') {
+          SFSupabase.saveCustomerToCloud(newCust).catch(e => console.warn('Customer cloud save:', e));
+        }
         return newCust;
       }
+    }
+
+    updateCustomerStatus(customerId, status, adminUser = 'Bhanu Prakash Reddy') {
+      const cust = (this.state.customers || []).find(c => c.id === customerId);
+      if (!cust) return null;
+      const oldStatus = cust.account_status || 'Active';
+      cust.account_status = status;
+      cust.updated_at = new Date().toISOString();
+      this.commit();
+
+      this.logAudit(adminUser, 'CUSTOMER_STATUS_UPDATE', 'customers', customerId, {
+        previous_status: oldStatus,
+        new_status: status
+      });
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerToCloud === 'function') {
+        SFSupabase.saveCustomerToCloud(cust).catch(e => console.warn('Cloud status sync:', e));
+      }
+      return cust;
+    }
+
+    // ── CUSTOMER ADDRESSES ──
+    getCustomerAddresses(customerId) {
+      if (!customerId) return [];
+      const addresses = this.state.customer_addresses || [];
+      return addresses.filter(a => a.customer_id === customerId || a.auth_user_id === customerId);
+    }
+
+    saveCustomerAddress(customerId, addressData) {
+      if (!customerId || !addressData) return null;
+      this.state.customer_addresses = this.state.customer_addresses || [];
+      const list = this.state.customer_addresses;
+
+      let savedId = addressData.id;
+      const now = new Date().toISOString();
+
+      if (savedId) {
+        const idx = list.findIndex(a => a.id === savedId);
+        if (idx !== -1) {
+          list[idx] = { ...list[idx], ...addressData, updated_at: now };
+          this.commit();
+          if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerAddress === 'function') {
+            SFSupabase.saveCustomerAddress(list[idx]).catch(e => {});
+          }
+          return list[idx];
+        }
+      }
+
+      savedId = 'addr_' + Date.now();
+      const existing = list.filter(a => a.customer_id === customerId);
+      const isDefault = addressData.is_default || existing.length === 0;
+
+      if (isDefault) {
+        existing.forEach(a => { a.is_default = false; });
+      }
+
+      const newAddr = {
+        id: savedId,
+        customer_id: customerId,
+        auth_user_id: addressData.auth_user_id || null,
+        address_type: addressData.address_type || 'Home',
+        full_name: addressData.full_name || '',
+        phone: addressData.phone || '',
+        house_number: addressData.house_number || '',
+        street: addressData.street || '',
+        landmark: addressData.landmark || '',
+        city: addressData.city || '',
+        district: addressData.district || '',
+        state: addressData.state || '',
+        pincode: addressData.pincode || '',
+        country: addressData.country || 'India',
+        is_default: isDefault,
+        created_at: now,
+        updated_at: now
+      };
+
+      list.unshift(newAddr);
+      this.commit();
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.saveCustomerAddress === 'function') {
+        SFSupabase.saveCustomerAddress(newAddr).catch(e => {});
+      }
+      return newAddr;
+    }
+
+    deleteCustomerAddress(customerId, addressId) {
+      this.state.customer_addresses = this.state.customer_addresses || [];
+      const list = this.state.customer_addresses;
+      const idx = list.findIndex(a => a.id === addressId && (a.customer_id === customerId || a.auth_user_id === customerId));
+      if (idx !== -1) {
+        list.splice(idx, 1);
+        this.commit();
+        if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.deleteCustomerAddress === 'function') {
+          SFSupabase.deleteCustomerAddress(addressId).catch(e => {});
+        }
+        return true;
+      }
+      return false;
+    }
+
+    setDefaultCustomerAddress(customerId, addressId) {
+      this.state.customer_addresses = this.state.customer_addresses || [];
+      const list = this.state.customer_addresses;
+      list.forEach(a => {
+        if (a.customer_id === customerId || a.auth_user_id === customerId) {
+          a.is_default = (a.id === addressId);
+        }
+      });
+      this.commit();
+      return true;
+    }
+
+    // ── CUSTOMER INTERNAL NOTES ──
+    getCustomerNotes(customerId) {
+      if (!customerId) return [];
+      const notes = this.state.customer_notes || [];
+      return notes.filter(n => n.customer_id === customerId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    addCustomerNote(customerId, noteText, adminUser = 'Bhanu Prakash Reddy') {
+      if (!customerId || !noteText) return null;
+      this.state.customer_notes = this.state.customer_notes || [];
+      const newNote = {
+        id: 'note_' + Date.now(),
+        customer_id: customerId,
+        admin_user: adminUser,
+        note: noteText.trim(),
+        created_at: new Date().toISOString()
+      };
+      this.state.customer_notes.unshift(newNote);
+      this.commit();
+
+      this.logAudit(adminUser, 'CUSTOMER_NOTE_ADDED', 'customers', customerId, { note: noteText });
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.addCustomerNote === 'function') {
+        SFSupabase.addCustomerNote(newNote).catch(e => {});
+      }
+      return newNote;
+    }
+
+    // ── AUDIT LOGS ──
+    logAudit(actor, action, entity, entityId, details = {}) {
+      this.state.audit_logs = this.state.audit_logs || [];
+      const log = {
+        id: 'aud_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        actor: actor || 'Admin',
+        action: action,
+        entity: entity,
+        entity_id: String(entityId),
+        details: details,
+        created_at: new Date().toISOString()
+      };
+      this.state.audit_logs.unshift(log);
+      this.commit();
+
+      if (typeof SFSupabase !== 'undefined' && typeof SFSupabase.logAudit === 'function') {
+        SFSupabase.logAudit(actor, action, entity, entityId, details).catch(e => {});
+      }
+      return log;
+    }
+
+    getAuditLogs() {
+      return this.state.audit_logs || [];
     }
 
     // ── SUPPLIERS & PURCHASES ──
@@ -1630,6 +1964,21 @@
         const cloudOrderIds = new Set(cloudOrders.map(o => String(o.order_number || o.id)));
         const localOrdersPending = (this.state.orders || []).filter(o => !cloudOrderIds.has(String(o.order_number || o.id)));
         this.state.orders = [...cloudOrders, ...localOrdersPending];
+
+        // Sync Customers from cloud
+        if (typeof sb.fetchCustomers === 'function') {
+          try {
+            const rawCustomers = await sb.fetchCustomers();
+            const cloudCusts = Array.isArray(rawCustomers) ? rawCustomers : [];
+            if (cloudCusts.length) {
+              const cloudCustIds = new Set(cloudCusts.map(c => String(c.id)));
+              const localPendingCusts = (this.state.customers || []).filter(c => !cloudCustIds.has(String(c.id)));
+              this.state.customers = [...cloudCusts, ...localPendingCusts];
+            }
+          } catch (custErr) {
+            console.warn('Customer cloud fetch notice:', custErr);
+          }
+        }
 
         // Sync CMS content & video history from cloud
         if (typeof sb.fetchCMSFromCloud === 'function') {

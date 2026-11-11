@@ -19,8 +19,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="scripts/sf_admin.css?v=20261111_v11">
-  <link rel="stylesheet" href="scripts/sf_customer_auth.css?v=20261111_v11">
+  <link rel="stylesheet" href="scripts/sf_admin.css?v=20261111_v12">
+  <link rel="stylesheet" href="scripts/sf_customer_auth.css?v=20261111_v12">
 
   <style>
     :root {
@@ -3737,12 +3737,12 @@
 
   <!-- Shanmuka Fashions Central Engine & Retail Admin Suite -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="scripts/sf_barcode.js?v=20261111_v11"></script>
-  <script src="scripts/sf_database.js?v=20261111_v11"></script>
-  <script src="scripts/sf_supabase.js?v=20261111_v11"></script>
-  <script src="scripts/sf_customer_auth.js?v=20261111_v11"></script>
-  <script src="scripts/sf_customer_views.js?v=20261111_v11"></script>
-  <script src="scripts/sf_admin.js?v=20261111_v11"></script>
+  <script src="scripts/sf_barcode.js?v=20261111_v12"></script>
+  <script src="scripts/sf_database.js?v=20261111_v12"></script>
+  <script src="scripts/sf_supabase.js?v=20261111_v12"></script>
+  <script src="scripts/sf_customer_auth.js?v=20261111_v12"></script>
+  <script src="scripts/sf_customer_views.js?v=20261111_v12"></script>
+  <script src="scripts/sf_admin.js?v=20261111_v12"></script>
 
   <script>
     // ── PROACTIVE PURGE OF LEGACY MOCK DATA FROM BROWSER STORAGE ──
@@ -3961,10 +3961,19 @@
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderForgotPassword('appRoot');
       } else if (hash.startsWith('#/reset-password')) {
         if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderResetPassword('appRoot');
+      } else if (hash.startsWith('#/complete-profile')) {
+        if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderCompleteProfile('appRoot');
+      } else if (hash.startsWith('#/auth-callback')) {
+        if (typeof SFCustomerAuth !== 'undefined') SFCustomerAuth.handleOAuthCallback();
       } else if (hash.startsWith('#/account')) {
-        const subMatch = hash.match(/#\/account\/([a-z0-9_-]+)/i);
-        const subtab = subMatch ? subMatch[1] : 'profile';
-        if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderAccountPortal(subtab, 'appRoot');
+        const orderDetailMatch = hash.match(/#\/account\/orders\/([a-z0-9_-]+)/i);
+        if (orderDetailMatch) {
+          if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderOrderDetail(orderDetailMatch[1], 'appRoot');
+        } else {
+          const subMatch = hash.match(/#\/account\/([a-z0-9_-]+)/i);
+          const subtab = subMatch ? subMatch[1] : 'profile';
+          if (typeof SFCustomerViews !== 'undefined') SFCustomerViews.renderAccountPortal(subtab, 'appRoot');
+        }
       } else if (hash.startsWith('#/admin')) {
         const tabMatch = hash.match(/#\/admin\/([a-z0-9_-]+)/i);
         const initialTab = tabMatch ? tabMatch[1] : null;
@@ -5208,6 +5217,12 @@
       // Auto-fill logged-in customer credentials
       if (typeof SFCustomerAuth !== 'undefined' && SFCustomerAuth.isAuthenticated()) {
         const cust = SFCustomerAuth.getCurrentCustomer();
+        if (cust && cust.profile_completed === false) {
+          alert('Welcome! Please complete your delivery address and patron profile before proceeding to checkout.');
+          closeCartDrawer();
+          window.location.hash = '#/complete-profile';
+          return;
+        }
         if ($('coName') && !$('coName').value) $('coName').value = cust.full_name || '';
         if ($('coEmail') && !$('coEmail').value) $('coEmail').value = cust.email || '';
         if ($('coPhone') && !$('coPhone').value) $('coPhone').value = (cust.phone || '').replace(/[^0-9]/g, '').slice(-10);

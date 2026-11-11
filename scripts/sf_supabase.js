@@ -509,7 +509,192 @@
       }
     },
 
-    // ── 4. REAL-TIME SUBSCRIPTION ENGINE ──
+    // ── 4. CUSTOMER MANAGEMENT & GOOGLE AUTH ──
+    signInWithGoogle: async function () {
+      const sb = this.getClient();
+      if (!sb || !sb.auth) {
+        return { success: false, error: 'Supabase authentication is not initialized' };
+      }
+      try {
+        const redirectUrl = window.location.origin + window.location.pathname + '#/auth-callback';
+        const { data, error } = await sb.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        });
+        if (error) return { success: false, error: error.message };
+        return { success: true, data };
+      } catch (err) {
+        return { success: false, error: err.message || err };
+      }
+    },
+
+    fetchCustomers: async function () {
+      const sb = this.getClient();
+      if (!sb) return [];
+      try {
+        const { data, error } = await sb.from('customers').select('*').order('created_at', { ascending: false });
+        if (error) {
+          console.warn('fetchCustomers note:', error.message);
+          return [];
+        }
+        return data || [];
+      } catch (e) {
+        console.warn('fetchCustomers exception:', e);
+        return [];
+      }
+    },
+
+    saveCustomerToCloud: async function (cust) {
+      const sb = this.getClient();
+      if (!sb) return null;
+      try {
+        const payload = {
+          id: String(cust.id),
+          auth_user_id: cust.auth_user_id || null,
+          name: cust.name || cust.full_name,
+          full_name: cust.full_name || cust.name,
+          email: cust.email,
+          phone: cust.phone || cust.mobile_number || '',
+          mobile_number: cust.mobile_number || cust.phone || '',
+          alternate_mobile: cust.alternate_mobile || null,
+          date_of_birth: cust.date_of_birth || null,
+          gender: cust.gender || null,
+          profile_completed: cust.profile_completed !== false,
+          account_status: cust.account_status || 'Active',
+          preferred_contact: cust.preferred_contact || 'WhatsApp',
+          whatsapp_opt_in: cust.whatsapp_opt_in !== false,
+          marketing_consent: !!cust.marketing_consent,
+          street: cust.street || '',
+          city: cust.city || '',
+          district: cust.district || '',
+          state: cust.state || '',
+          pincode: cust.pincode || '',
+          country: cust.country || 'India',
+          notes: cust.notes || '',
+          avatar_url: cust.avatar_url || null,
+          last_login_at: cust.last_login_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('customers').upsert(payload, { onConflict: 'id' });
+        if (error) console.warn('saveCustomerToCloud error:', error.message);
+        return data;
+      } catch (e) {
+        console.warn('saveCustomerToCloud exception:', e);
+        return null;
+      }
+    },
+
+    fetchCustomerAddresses: async function (customerId) {
+      const sb = this.getClient();
+      if (!sb || !customerId) return [];
+      try {
+        const { data, error } = await sb.from('customer_addresses').select('*').eq('customer_id', customerId).order('is_default', { ascending: false });
+        if (error) return [];
+        return data || [];
+      } catch (e) {
+        return [];
+      }
+    },
+
+    saveCustomerAddress: async function (addr) {
+      const sb = this.getClient();
+      if (!sb) return null;
+      try {
+        const payload = {
+          id: String(addr.id),
+          customer_id: String(addr.customer_id),
+          auth_user_id: addr.auth_user_id || null,
+          address_type: addr.address_type || 'Home',
+          full_name: addr.full_name,
+          phone: addr.phone,
+          house_number: addr.house_number || '',
+          street: addr.street,
+          landmark: addr.landmark || '',
+          city: addr.city,
+          district: addr.district || '',
+          state: addr.state,
+          pincode: addr.pincode,
+          country: addr.country || 'India',
+          is_default: !!addr.is_default,
+          updated_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('customer_addresses').upsert(payload, { onConflict: 'id' });
+        if (error) console.warn('saveCustomerAddress error:', error.message);
+        return data;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    deleteCustomerAddress: async function (addressId) {
+      const sb = this.getClient();
+      if (!sb || !addressId) return false;
+      try {
+        const { error } = await sb.from('customer_addresses').delete().eq('id', addressId);
+        return !error;
+      } catch (e) {
+        return false;
+      }
+    },
+
+    fetchCustomerNotes: async function (customerId) {
+      const sb = this.getClient();
+      if (!sb || !customerId) return [];
+      try {
+        const { data, error } = await sb.from('customer_notes').select('*').eq('customer_id', customerId).order('created_at', { ascending: false });
+        if (error) return [];
+        return data || [];
+      } catch (e) {
+        return [];
+      }
+    },
+
+    addCustomerNote: async function (noteData) {
+      const sb = this.getClient();
+      if (!sb) return null;
+      try {
+        const payload = {
+          id: 'note_' + Date.now(),
+          customer_id: String(noteData.customer_id),
+          admin_user: noteData.admin_user || 'Bhanu Prakash Reddy',
+          note: noteData.note,
+          created_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('customer_notes').insert(payload);
+        if (error) console.warn('addCustomerNote error:', error.message);
+        return data;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    logAudit: async function (actor, action, entity, entityId, details = {}) {
+      const sb = this.getClient();
+      if (!sb) return null;
+      try {
+        const payload = {
+          id: 'aud_' + Date.now(),
+          actor: actor || 'Admin',
+          action: action,
+          entity: entity,
+          entity_id: String(entityId),
+          details: details,
+          created_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('audit_logs').insert(payload);
+        return data;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    // ── 5. REAL-TIME SUBSCRIPTION ENGINE ──
     subscribeToRealtimeChanges: function (onTableChange) {
       const sb = this.getClient();
       if (!sb || typeof sb.channel !== 'function') return;
@@ -535,6 +720,11 @@
             console.log('⚡ Realtime: Inventory ledger entry in database:', payload);
             if (typeof onTableChange === 'function') onTableChange('inventory_ledger', payload);
             listeners.forEach(fn => fn('inventory_ledger', payload));
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, (payload) => {
+            console.log('⚡ Realtime: Customer mutated in database:', payload);
+            if (typeof onTableChange === 'function') onTableChange('customers', payload);
+            listeners.forEach(fn => fn('customers', payload));
           })
           .subscribe((status) => {
             console.log('📡 Supabase Realtime channel status:', status);

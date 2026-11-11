@@ -20,3 +20,4 @@ CREATE POLICY "Public full access cms_content"
     TO public
     USING (true)
     WITH CHECK (true);
+
