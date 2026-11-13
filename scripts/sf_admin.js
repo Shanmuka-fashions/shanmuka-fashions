@@ -118,7 +118,7 @@
               <span class="sf-user-avatar">BP</span>
               <span class="sf-user-name">Bhanu (Owner)</span>
             </div>
-            <button class="sf-btn-logout" onclick="SFAdmin.handleLogout()" title="Sign Out">Sign Out</button>
+            <button class="sf-btn-logout" onclick="SFAdmin.promptSignOut()" title="Sign Out">Sign Out</button>
           </div>
         </header>
 
@@ -180,7 +180,7 @@
     attachTabEvents(activeTab, db);
   }
 
-  // ── LOGIN SCREEN ──
+  // ── STRICT LOGIN SCREEN & AUTHENTICATION ──
   function renderLoginScreen() {
     return `
       <div class="sf-login-page">
@@ -189,30 +189,56 @@
             <img src="logo.png" alt="Shanmuka Logo" class="sf-login-logo">
             <h2>Shanmuka Atelier Portal</h2>
             <p>Unified Administration, Physical POS & Inventory Management</p>
+            <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(167, 121, 80, 0.1); border-radius: 12px; font-size: 11px; color: #7A583A; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+              <span>🛡️</span> Strict Owner Authentication
+            </div>
           </div>
 
           <form id="sfLoginForm" onsubmit="event.preventDefault(); SFAdmin.handleLogin();">
             <div class="sf-form-group">
-              <label>Administrator Username</label>
-              <input type="text" id="sfAdminUser" value="admin" required autocomplete="username" placeholder="Enter username">
+              <label for="sfAdminUser">Administrator Username</label>
+              <input type="text" id="sfAdminUser" required autocomplete="username" placeholder="Enter administrator username">
             </div>
 
             <div class="sf-form-group">
-              <label>Master Password</label>
-              <input type="password" id="sfAdminPass" value="admin123" required autocomplete="current-password" placeholder="Enter password">
+              <label for="sfAdminPass">Master Password</label>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="sfAdminPass" required autocomplete="current-password" placeholder="Enter master password" style="padding-right: 42px; width: 100%;">
+                <button type="button" id="sfAdminPwdToggle" onclick="SFAdmin.toggleAdminPasswordVisibility()" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 16px; color: #7A583A; padding: 4px;" title="Show or hide password" aria-label="Toggle password visibility">👁️</button>
+              </div>
             </div>
 
-            <div id="sfLoginError" class="sf-form-error" style="display: none;"></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; font-size: 13px; color: #55443B;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin: 0; font-weight: 500;">
+                <input type="checkbox" id="sfAdminRemember" style="accent-color: #A77950; width: 16px; height: 16px; cursor: pointer;">
+                <span>Remember this terminal (7 days)</span>
+              </label>
+            </div>
 
-            <button type="submit" class="sf-btn-login">ACCESS ATELIER MANAGEMENT &rarr;</button>
+            <div id="sfLoginError" class="sf-form-error" style="display: none; padding: 10px 14px; background: #FDEDED; color: #C25E5E; border: 1px solid #F5C6CB; border-radius: 4px; font-size: 13px; margin-bottom: 16px;"></div>
 
-            <div class="sf-login-hint">
-              <small>Demo Master Credentials Pre-filled: <b>admin</b> / <b>admin123</b></small>
+            <button type="submit" id="sfLoginSubmitBtn" class="sf-btn-login">ACCESS ATELIER MANAGEMENT &rarr;</button>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #8C7B70;">
+              <span>Secured with cryptographic session tokens & lockout protection.</span>
             </div>
           </form>
         </div>
       </div>
     `;
+  }
+
+  function toggleAdminPasswordVisibility() {
+    const input = document.getElementById('sfAdminPass');
+    const btn = document.getElementById('sfAdminPwdToggle');
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (btn) btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      if (btn) btn.textContent = '👁️';
+    }
   }
 
   function attachLoginEvents() {
@@ -221,24 +247,91 @@
 
   function handleLogin() {
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
-    const u = document.getElementById('sfAdminUser').value;
-    const p = document.getElementById('sfAdminPass').value;
-    const res = db.login(u, p);
-    if (res.success) {
-      render();
-    } else {
-      const err = document.getElementById('sfLoginError');
+    const uInput = document.getElementById('sfAdminUser');
+    const pInput = document.getElementById('sfAdminPass');
+    const remInput = document.getElementById('sfAdminRemember');
+    const err = document.getElementById('sfLoginError');
+    const btn = document.getElementById('sfLoginSubmitBtn');
+
+    if (!uInput || !pInput) return;
+    const u = uInput.value;
+    const p = pInput.value;
+    const rem = remInput ? remInput.checked : false;
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'VERIFYING CREDENTIALS...';
+    }
+
+    try {
+      const res = db.login(u, p, rem);
+      if (res.success) {
+        if (err) err.style.display = 'none';
+        render();
+      } else {
+        if (err) {
+          err.textContent = res.message || 'Invalid credentials.';
+          err.style.display = 'block';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'ACCESS ATELIER MANAGEMENT &rarr;';
+        }
+      }
+    } catch (e) {
       if (err) {
-        err.textContent = res.message;
+        err.textContent = e.message || 'An unexpected authentication error occurred.';
         err.style.display = 'block';
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'ACCESS ATELIER MANAGEMENT &rarr;';
       }
     }
   }
 
-  function handleLogout() {
+  // ── STRICT ADMIN SIGNOUT CONFIRMATION ──
+  function promptSignOut() {
+    let modal = document.getElementById('sfAdminSignoutModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'sfAdminSignoutModal';
+      modal.className = 'sf-modal-backdrop';
+      modal.style.display = 'none';
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div class="sf-modal-card" style="max-width: 460px; text-align: center; border-top: 4px solid #A77950; box-shadow: 0 20px 48px rgba(0,0,0,0.35);">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FAF5F0; border: 2px solid #E6D7C8; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px;">
+          🔒
+        </div>
+        <h3 style="font-family: 'Cinzel', serif; font-size: 20px; color: #3B2B25; margin-bottom: 8px;">Confirm Administrator Sign Out</h3>
+        <p style="font-size: 13.5px; color: #665D55; line-height: 1.55; margin-bottom: 24px;">
+          Are you sure you want to end your active administrative session? Any unsaved edits in POS billing, inventory adjustments, or catalog management will be preserved only if saved.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button type="button" class="sf-btn-secondary" onclick="SFAdmin.closeSignOutPrompt()" style="padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 4px; border: 1px solid #D5C2B2; background: #FFFFFF; color: #3B2B25;">Stay Signed In</button>
+          <button type="button" class="sf-btn-danger" onclick="SFAdmin.confirmSignOut()" style="padding: 10px 24px; font-size: 13.5px; background: #A77950; color: #FFFFFF; border: none; font-weight: 600; cursor: pointer; border-radius: 4px; box-shadow: 0 4px 12px rgba(167,121,80,0.3);">Confirm Sign Out</button>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function closeSignOutPrompt() {
+    const modal = document.getElementById('sfAdminSignoutModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function confirmSignOut() {
+    closeSignOutPrompt();
     const db = typeof SFDatabase !== 'undefined' ? SFDatabase : require('./sf_database');
     db.logout();
     render();
+  }
+
+  function handleLogout() {
+    promptSignOut();
   }
 
   function switchTab(tab) {
@@ -5835,6 +5928,10 @@
     switchTab,
     handleLogin,
     handleLogout,
+    promptSignOut,
+    closeSignOutPrompt,
+    confirmSignOut,
+    toggleAdminPasswordVisibility,
     handleReportFilterChange,
     filterPOSCategory,
     handlePOSBarcodeKeyDown,

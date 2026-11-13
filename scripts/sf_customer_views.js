@@ -1779,9 +1779,13 @@
     },
 
     handleLogoutClick: async function () {
-      await SFCustomerAuth.logout();
-      window.location.hash = '#/';
-      if (typeof updateHeaderAuthUI === 'function') updateHeaderAuthUI();
+      if (typeof promptCustomerSignOut === 'function') {
+        promptCustomerSignOut();
+      } else {
+        await SFCustomerAuth.logout();
+        window.location.hash = '#/';
+        if (typeof updateHeaderAuthUI === 'function') updateHeaderAuthUI();
+      }
     },
 
     togglePasswordVisibility: function (inputId, btn) {

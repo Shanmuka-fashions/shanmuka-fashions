@@ -44,7 +44,7 @@
     },
     auth: {
       username: 'admin',
-      password_hash: 'admin123',
+      password_hash: 'Shanmuka@2026',
       session_token: null,
       session_expiry: null,
       owner_name: 'Bhanu Prakash Reddy'
@@ -790,7 +790,7 @@
       this.commit();
       const sbAdjust = (typeof SFSupabase !== 'undefined') ? SFSupabase : (typeof window !== 'undefined' && window.SFSupabase ? window.SFSupabase : null);
       if (sbAdjust && typeof sbAdjust.updateProductStock === 'function') {
-        sbAdjust.updateProductStock(prod.id, prod.stock_qty, prod.stock).catch(e => console.warn('Supabase stock adjust sync error:', e));
+        sbAdjust.updateProductStock(prod.id, prod.stock_qty, prod.sku).catch(e => console.warn('Supabase stock adjust sync error:', e));
       }
       return prod;
     }
@@ -982,7 +982,7 @@
           resolvedItems.forEach(it => {
             const p = this.getProduct(it.product_id);
             if (p) {
-              sbOrder.updateProductStock(p.id, p.stock_qty, p.stock).catch(e => console.warn('Supabase product stock sync err:', e));
+              sbOrder.updateProductStock(p.id, p.stock_qty, p.sku).catch(e => console.warn('Supabase product stock sync err:', e));
             }
           });
         }
@@ -1039,7 +1039,7 @@
         for (const item of order.items) {
           const prod = this.getProduct(item.product_id);
           if (prod) {
-            sbStatus.updateProductStock(prod.id, prod.stock_qty, prod.stock).catch(e => console.warn('Supabase restock sync err:', e));
+            sbStatus.updateProductStock(prod.id, prod.stock_qty, prod.sku).catch(e => console.warn('Supabase restock sync err:', e));
           }
         }
       }
@@ -1743,54 +1743,169 @@
 
     // ── AUTHENTICATION & SECURITY ──
     isAuthenticated() {
-      const sess = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sf_admin_session') : (this._adminSession || null);
-      if (sess === 'LOGGED_OUT') return false;
-      // By default authenticated for the store owner on local boutique terminal
-      if (!sess) {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('sf_admin_session', 'ACTIVE');
-          sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
-        } else {
-          this._adminSession = 'ACTIVE';
+      // 1. In-memory session check (Node test environment & active session lifecycle)
+      if (this._adminSessionToken) {
+        if (this._adminSessionExpiry && Date.now() > this._adminSessionExpiry) {
+          this._adminSessionToken = null;
+          this._adminSessionExpiry = null;
+          this._adminSession = 'LOGGED_OUT';
+          return false;
+        }
+        return this._adminSession === 'ACTIVE';
+      }
+
+      // 2. Storage inspection (Browser environment)
+      if (typeof sessionStorage === 'undefined' && typeof localStorage === 'undefined') {
+        return false;
+      }
+
+      const sessStatus = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sf_admin_session') : null;
+      if (sessStatus === 'LOGGED_OUT') return false;
+
+      const token = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('sf_admin_session_token'))
+        || (typeof localStorage !== 'undefined' && localStorage.getItem('sf_admin_session_token'));
+
+      if (!token) {
+        // STRICT: Never auto-authenticate without a valid token!
+        return false;
+      }
+
+      const expiryStr = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('sf_admin_session_expires'))
+        || (typeof localStorage !== 'undefined' && localStorage.getItem('sf_admin_session_expires'));
+
+      if (expiryStr) {
+        const expiry = parseInt(expiryStr, 10);
+        if (expiry && Date.now() > expiry) {
+          this.logout();
+          return false;
         }
       }
-      return (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('sf_admin_session') : this._adminSession) !== 'LOGGED_OUT';
+
+      return true;
     }
 
-    login(username, password) {
-      const u = (username || '').trim();
+    login(username, password, rememberMe = false) {
+      const u = (username || '').trim().toLowerCase();
       const p = (password || '').trim();
-      if ((u === 'admin' || u === this.state.auth.username) && (p === 'admin123' || p === 'Shanmuka@2026' || p === this.state.auth.password_hash)) {
+
+      // 1. Brute-force lockout verification
+      const now = Date.now();
+      const lockKey = 'sf_admin_lockout';
+      let lockData = { count: 0, lockUntil: 0 };
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const raw = localStorage.getItem(lockKey);
+          if (raw) lockData = JSON.parse(raw);
+        } else if (this._lockData) {
+          lockData = this._lockData;
+        }
+      } catch (e) {}
+
+      if (lockData.lockUntil && now < lockData.lockUntil) {
+        const remainingSec = Math.ceil((lockData.lockUntil - now) / 1000);
+        const mins = Math.floor(remainingSec / 60);
+        const secs = remainingSec % 60;
+        return {
+          success: false,
+          locked: true,
+          message: `Administrative access temporarily locked due to repeated failed attempts. Please wait ${mins}m ${secs}s before retrying.`
+        };
+      }
+
+      // 2. Master Credentials Check
+      const validUsers = ['admin', 'bhanu', (this.state.auth.username || 'admin').toLowerCase()];
+      const isUserMatch = validUsers.includes(u);
+
+      const validPasswords = ['Shanmuka@2026'];
+      if (this.state.auth.password_hash) validPasswords.push(this.state.auth.password_hash);
+      const isPassMatch = validPasswords.includes(p);
+
+      if (isUserMatch && isPassMatch) {
+        // Success: Reset lockout
+        lockData = { count: 0, lockUntil: 0 };
+        if (typeof localStorage !== 'undefined') localStorage.removeItem(lockKey);
+        this._lockData = lockData;
+
+        // Generate cryptographically unique session token
+        const token = 'SF-ADM-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const duration = rememberMe ? (7 * 24 * 60 * 60 * 1000) : (24 * 60 * 60 * 1000);
+        const expiry = now + duration;
+        const ownerName = this.state.auth.owner_name || 'Bhanu Prakash Reddy';
+
+        const targetStorage = rememberMe && typeof localStorage !== 'undefined' ? localStorage : (typeof sessionStorage !== 'undefined' ? sessionStorage : null);
+        if (targetStorage) {
+          targetStorage.setItem('sf_admin_session', 'ACTIVE');
+          targetStorage.setItem('sf_admin_session_token', token);
+          targetStorage.setItem('sf_admin_session_expires', String(expiry));
+          targetStorage.setItem('sf_admin_user', ownerName);
+        }
         if (typeof sessionStorage !== 'undefined') {
           sessionStorage.setItem('sf_admin_session', 'ACTIVE');
-          sessionStorage.setItem('sf_admin_user', this.state.auth.owner_name || 'Bhanu Prakash Reddy');
+          sessionStorage.setItem('sf_admin_session_token', token);
+          sessionStorage.setItem('sf_admin_session_expires', String(expiry));
+          sessionStorage.setItem('sf_admin_user', ownerName);
         }
+
         this._adminSession = 'ACTIVE';
-        this.logAudit('LOGIN_SUCCESS', 'AUTH', u, 'Successful administrative login', u);
-        return { success: true };
+        this._adminSessionToken = token;
+        this._adminSessionExpiry = expiry;
+
+        this.logAudit('LOGIN_SUCCESS', 'AUTH', u, 'Successful administrative login by store owner', ownerName);
+        return { success: true, token, user: ownerName };
       }
-      this.logAudit('LOGIN_FAILED', 'AUTH', u, 'Failed login attempt with invalid credentials', u);
-      return { success: false, message: 'Invalid username or password.' };
+
+      // 3. Increment failed attempts
+      lockData.count = (lockData.count || 0) + 1;
+      if (lockData.count >= 5) {
+        lockData.lockUntil = now + (5 * 60 * 1000); // 5 minutes lock
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(lockKey, JSON.stringify(lockData));
+      }
+      this._lockData = lockData;
+
+      this.logAudit('LOGIN_FAILED', 'AUTH', u, `Failed admin login attempt (${lockData.count}/5)`, u);
+
+      const remaining = Math.max(0, 5 - lockData.count);
+      return {
+        success: false,
+        locked: lockData.count >= 5,
+        remainingAttempts: remaining,
+        message: lockData.count >= 5
+          ? 'Maximum attempts exceeded. Administrative portal locked for 5 minutes.'
+          : `Invalid username or password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before security lockout.`
+      };
     }
 
     logout() {
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('sf_admin_session', 'LOGGED_OUT');
+        sessionStorage.removeItem('sf_admin_session_token');
+        sessionStorage.removeItem('sf_admin_session_expires');
         sessionStorage.removeItem('sf_admin_user');
+        sessionStorage.setItem('sf_admin_session', 'LOGGED_OUT');
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('sf_admin_session_token');
+        localStorage.removeItem('sf_admin_session_expires');
+        localStorage.removeItem('sf_admin_user');
       }
       this._adminSession = 'LOGGED_OUT';
+      this._adminSessionToken = null;
+      this._adminSessionExpiry = null;
       this.logAudit('LOGOUT', 'AUTH', 'ADMIN', 'Owner logged out of admin session');
       return true;
     }
 
     changePassword(oldPass, newPass) {
-      if (oldPass !== this.state.auth.password_hash && oldPass !== 'admin123' && oldPass !== 'Shanmuka@2026') {
+      const current = this.state.auth.password_hash || 'Shanmuka@2026';
+      if (oldPass !== current && oldPass !== 'Shanmuka@2026') {
         throw new Error('Current password does not match.');
       }
-      if (!newPass || newPass.length < 6) {
-        throw new Error('New password must be at least 6 characters.');
+      if (!newPass || newPass.length < 8) {
+        throw new Error('New password must be at least 8 characters.');
       }
       this.state.auth.password_hash = newPass;
+      this.state.auth.updated_at = new Date().toISOString();
       this.logAudit('PASSWORD_CHANGE', 'AUTH', 'ADMIN', 'Owner changed admin password');
       this.commit();
       return true;

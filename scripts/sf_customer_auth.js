@@ -392,6 +392,25 @@
         return { success: false, message: 'Please enter your password.' };
       }
 
+      // Check brute-force lockout for customer account
+      const lockKey = 'sf_cust_lock_' + cleanEmail;
+      let lockData = { count: 0, lockUntil: 0 };
+      try {
+        const raw = getStorageItem(lockKey);
+        if (raw) lockData = JSON.parse(raw);
+      } catch (e) {}
+
+      if (lockData.lockUntil && Date.now() < lockData.lockUntil) {
+        const remainingSec = Math.ceil((lockData.lockUntil - Date.now()) / 1000);
+        const mins = Math.floor(remainingSec / 60);
+        const secs = remainingSec % 60;
+        return {
+          success: false,
+          locked: true,
+          message: `Too many failed login attempts. Account access is temporarily paused. Please wait ${mins}m ${secs}s before retrying.`
+        };
+      }
+
       let authSuccess = false;
       let authenticatedUser = null;
 
@@ -415,7 +434,20 @@
                 };
               }
               if (error.message && (error.message.toLowerCase().includes('invalid login credentials') || error.message.toLowerCase().includes('invalid credentials'))) {
-                return { success: false, message: 'Incorrect email address or password. Please recheck your credentials.' };
+                // Register failed attempt
+                lockData.count = (lockData.count || 0) + 1;
+                if (lockData.count >= 5) {
+                  lockData.lockUntil = Date.now() + (5 * 60 * 1000);
+                }
+                setStorageItem(lockKey, JSON.stringify(lockData));
+                const remaining = Math.max(0, 5 - lockData.count);
+                return {
+                  success: false,
+                  remainingAttempts: remaining,
+                  message: lockData.count >= 5
+                    ? 'Maximum attempts reached. Account temporarily locked for 5 minutes.'
+                    : `Incorrect email address or password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before security lockout.`
+                };
               }
               console.warn('Supabase signInWithPassword note:', error.message);
             } else if (data && data.user) {
@@ -434,7 +466,19 @@
 
       if (!authSuccess && localProfile) {
         if (localProfile.password_hash && localProfile.password_hash !== hashPassword(p)) {
-          return { success: false, message: 'Incorrect email address or password. Please recheck your credentials.' };
+          lockData.count = (lockData.count || 0) + 1;
+          if (lockData.count >= 5) {
+            lockData.lockUntil = Date.now() + (5 * 60 * 1000);
+          }
+          setStorageItem(lockKey, JSON.stringify(lockData));
+          const remaining = Math.max(0, 5 - lockData.count);
+          return {
+            success: false,
+            remainingAttempts: remaining,
+            message: lockData.count >= 5
+              ? 'Maximum attempts reached. Account temporarily locked for 5 minutes.'
+              : `Incorrect email address or password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before security lockout.`
+          };
         }
         if (p.length >= 8) {
           authSuccess = true;
@@ -450,7 +494,39 @@
       }
 
       if (!authSuccess) {
-        return { success: false, message: 'Incorrect email address or password. Please recheck your credentials.' };
+        lockData.count = (lockData.count || 0) + 1;
+        if (lockData.count >= 5) {
+          lockData.lockUntil = Date.now() + (5 * 60 * 1000);
+        }
+        setStorageItem(lockKey, JSON.stringify(lockData));
+        const remaining = Math.max(0, 5 - lockData.count);
+        return {
+          success: false,
+          remainingAttempts: remaining,
+          message: lockData.count >= 5
+            ? 'Maximum attempts reached. Account temporarily locked for 5 minutes.'
+            : `Incorrect email address or password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before security lockout.`
+        };
+      }
+
+      // Successful credentials verification: reset lockout
+      removeStorageItem(lockKey);
+
+      // Strict check: account status active
+      if (localProfile && (localProfile.account_status === 'Disabled' || localProfile.account_status === 'Suspended')) {
+        return {
+          success: false,
+          message: 'Your patron account is currently disabled. Please contact concierge@shanmukafashions.com for assistance.'
+        };
+      }
+
+      // Update last_login_at in Supabase and local cache
+      const nowIso = new Date().toISOString();
+      if (typeof SFSupabase !== 'undefined') {
+        const sb = SFSupabase.getClient();
+        if (sb) {
+          sb.from('customers').update({ last_login_at: nowIso }).eq('email', cleanEmail).then(() => {}).catch(() => {});
+        }
       }
 
       // Build customer object
@@ -460,10 +536,12 @@
         full_name: localProfile?.full_name || authenticatedUser.user_metadata?.full_name || cleanEmail.split('@')[0],
         phone: localProfile?.phone || authenticatedUser.user_metadata?.phone || '',
         avatar_url: localProfile?.avatar_url || null,
+        account_status: localProfile?.account_status || 'Active',
         addresses: localProfile?.addresses || [],
         default_address_id: localProfile?.default_address_id || null,
-        created_at: localProfile?.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        created_at: localProfile?.created_at || nowIso,
+        updated_at: nowIso,
+        last_login_at: nowIso
       };
 
       currentCustomer = customer;
@@ -1126,7 +1204,11 @@
         const orderCustId = o.customer_id;
         return (orderEmail && orderEmail === email) || (orderCustId && orderCustId === custId);
       });
-    }
+    },
+
+    // Internal profile helpers
+    _getLocalProfiles: getLocalProfiles,
+    _saveLocalProfile: saveLocalProfile
   };
 
   // Auto-init

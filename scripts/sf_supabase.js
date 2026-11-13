@@ -449,18 +449,42 @@
       }
     },
 
-    updateProductStock: async function (productId, newQty, stockStatus) {
+    updateProductStock: async function (productId, newQty, skuOrOptions) {
       const sb = this.getClient();
       if (!sb) return { success: false, error: 'Database disconnected' };
       try {
         const qtyNum = Math.max(0, parseInt(newQty, 10) || 0);
-        const statusStr = stockStatus || (qtyNum <= 0 ? 'Sold Out' : (qtyNum <= 2 ? 'Low Stock' : 'In Stock'));
+        // Supabase products table stores stock_qty and updated_at (no 'stock' text column)
         const payload = {
           stock_qty: qtyNum,
-          stock: statusStr,
           updated_at: new Date().toISOString()
         };
-        const { data, error } = await sb.from('products').update(payload).eq('id', String(productId)).select();
+
+        let data = null;
+        let error = null;
+
+        // 1. Primary match: Match by product ID
+        if (productId) {
+          const res = await sb.from('products').update(payload).eq('id', String(productId)).select();
+          data = res.data;
+          error = res.error;
+        }
+
+        // 2. Secondary fallback: If 0 rows matched or ID was not found, match by SKU
+        const targetSku = (typeof skuOrOptions === 'string' && skuOrOptions.trim().length > 0 && !['In Stock', 'Low Stock', 'Sold Out'].includes(skuOrOptions))
+          ? skuOrOptions.trim()
+          : (skuOrOptions && skuOrOptions.sku ? skuOrOptions.sku : null);
+
+        if ((!data || data.length === 0) && targetSku) {
+          const res = await sb.from('products').update(payload).eq('sku', String(targetSku).toUpperCase()).select();
+          if (res.data && res.data.length > 0) {
+            data = res.data;
+            error = null;
+          } else if (res.error && !error) {
+            error = res.error;
+          }
+        }
+
         if (error) {
           console.warn('Supabase product stock update note:', error.message);
           return { success: false, error: error.message };

@@ -4228,6 +4228,24 @@
     </div>
   </div>
 
+  <!-- ── Customer Strict Sign-Out Confirmation Modal ── -->
+  <div class="modal-overlay" id="sfCustomerSignoutModal">
+    <div class="modal-box" style="max-width: 440px; text-align: center; border-top: 4px solid var(--champagne-gold);">
+      <button class="modal-close" onclick="closeCustomerSignoutModal()" aria-label="Close modal">✕</button>
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: #FAF5F0; border: 2px solid #E6D7C8; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+        👋
+      </div>
+      <h3 style="font-family: 'Cinzel', serif; font-size: 20px; color: var(--espresso-dark); margin-bottom: 8px;">Sign Out of Shanmuka Fashions?</h3>
+      <p style="font-size: 13.5px; color: var(--muted); line-height: 1.55; margin-bottom: 24px;">
+        You will be signed out of your patron account. You will need to sign in again to access your bespoke orders, curated wishlist, and saved delivery addresses.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn-secondary" onclick="closeCustomerSignoutModal()" style="padding: 10px 22px; font-weight: 600; cursor: pointer; border-radius: 4px;">Stay Signed In</button>
+        <button type="button" class="btn-primary" onclick="handleSignOutClickConfirmed()" style="padding: 10px 24px; font-weight: 600; cursor: pointer; border-radius: 4px; background: var(--espresso-dark); color: var(--ivory);">Yes, Sign Out</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Floating WhatsApp Concierge ── -->
   <a href="https://wa.me/919542156929?text=Hello%20Shanmuka%20Fashions!%20I%20would%20like%20to%20know%20more%20about%20your%20saree%20collections."
     target="_blank" rel="noopener noreferrer" class="floating-wa-concierge" aria-label="WhatsApp Concierge">
@@ -5980,14 +5998,34 @@
       }
     });
 
-    async function handleSignOutClick() {
+    function promptCustomerSignOut() {
       closeAccountDropdown();
+      const modal = $('sfCustomerSignoutModal');
+      if (modal) {
+        modal.classList.add('active');
+      } else {
+        handleSignOutClickConfirmed();
+      }
+    }
+
+    function closeCustomerSignoutModal() {
+      const modal = $('sfCustomerSignoutModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function handleSignOutClickConfirmed() {
+      closeCustomerSignoutModal();
       if (typeof SFCustomerAuth !== 'undefined') {
         await SFCustomerAuth.logout();
-        toast('You have successfully signed out of your account.');
+        toast('You have safely signed out of your patron account.');
         window.location.hash = '#/';
         updateHeaderAuthUI();
+        if (typeof renderCurrentView === 'function') renderCurrentView();
       }
+    }
+
+    function handleSignOutClick() {
+      promptCustomerSignOut();
     }
 
     function updateHeaderAuthUI() {
